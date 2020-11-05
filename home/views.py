@@ -15,6 +15,7 @@ def home(request):
         {
             'title':'Home Page',
             'year':datetime.now().year,
+            'application': 'Meal Planner',
         }
     )
 

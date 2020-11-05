@@ -1,0 +1,16 @@
+﻿{% extends 'base.html' %}
+
+{% block title %}Cookbooks{% endblock %}
+
+{% block content %}
+    <h1>Cookbooks</h1>
+    <ul>
+        {% for cookbook in cookbooks %}
+        <li>
+            <a href="{% url 'detail' cookbook.id %}">
+                <i>{{cookbook.title}}</i> by {{cookbook.author}}
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+{% endblock %}
