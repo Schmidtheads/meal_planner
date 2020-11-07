@@ -1,16 +1,29 @@
-﻿{% extends 'base.html' %}
+﻿{% extends 'base_table.html' %}
 
 {% block title %}Cookbooks{% endblock %}
 
 {% block content %}
     <h1>Cookbooks</h1>
-    <ul>
+    <table id="{{table_name}}">
+        <tr>
+            <th onclick="sortTable(0)">Title</th>
+            <th onclick="sortTable(1)">Author</th>
+            <th>Description</th>
+            <th>Publish Date</th>
+            <th>Edition</th>
+        </tr>
         {% for cookbook in cookbooks %}
-        <li>
-            <a href="{% url 'detail' cookbook.id %}">
-                <i>{{cookbook.title}}</i> by {{cookbook.author}}
-            </a>
-        </li>
+        <tr>
+            <td>
+                <a href="{% url 'detail' cookbook.id %}">
+                <i>{{cookbook.title}}</i>
+                </a>
+            </td>
+            <td>{{cookbook.author.last_name_first}}</td>
+            <td>{{cookbook.description}}</td>
+            <td>{{cookbook.publish_date}}</td>
+            <td>{{cookbook.edition}}</td>
+        </tr>
         {% endfor %}
-    </ul>
+    </table>
 {% endblock %}

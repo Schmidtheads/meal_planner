@@ -9,5 +9,6 @@ def detail(request, id):
 
 def cookbooks(request):
     return render(request, "cookbook/list.html",
-                  {"cookbooks": Cookbook.objects.all()})
+                  {"cookbooks": Cookbook.objects.all(),
+                   "table_name": "cookbooks"})
 
