@@ -3,14 +3,19 @@
 {% block title %}Title: {{cookbook.title}}{% endblock %}
 
 {% block content %}
-    <h1><i>{{cookbook.title}}</i></h1>
+    <form method="post">
+    <table>
+        {{ form }}
+    </table>
+    {% csrf_token %}
+    <button type="submit">Update</button>
+    </form>
     <p>
-        <h3>{{cookbook.description}}</h3>
-        
-        <b>Author:</b> {{cookbook.author}}
-    </p>
-
+    <a href="{% url 'cookbooks' %}">
+        Back to Cookbook list
+    </a>&nbsp;
     <a href="{% url 'home' %}">
         Back to Main page
     </a>
+    </p>
 {% endblock %}

@@ -15,7 +15,7 @@
         {% for cookbook in cookbooks %}
         <tr>
             <td>
-                <a href="{% url 'detail' cookbook.id %}">
+                <a href="{% url 'cookbook_detail' cookbook.id %}">
                 <i>{{cookbook.title}}</i>
                 </a>
             </td>
