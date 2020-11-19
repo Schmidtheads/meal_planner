@@ -1,0 +1,21 @@
+﻿{% extends 'base.html' %}
+
+{% block title %}Title: {{recipe.title}}{% endblock %}
+
+{% block content %}
+    <form method="post">
+    <table>
+        {{ form }}
+    </table>
+    {% csrf_token %}
+    <button type="submit">Update</button>
+    </form>
+    <p>
+    <a href="{% url 'home' %}">
+        Back to Recipe list
+    </a>&nbsp;
+    <a href="{% url 'home' %}">
+        Back to Main page
+    </a>
+    </p>
+{% endblock %}

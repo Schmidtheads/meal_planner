@@ -1,0 +1,28 @@
+﻿{% extends 'base_table.html' %}
+
+{% block title %}Recipes{% endblock %}
+
+{% block content %}
+    <h1>Recipes</h1>
+    <table id="{{table_name}}">
+        <tr>
+            <th onclick="sortTable(0)">Name</th>
+            <th onclick="sortTable(1)">Cookbook</th>
+            <th onclick="sortTable(2)">Page Number</th>
+            <th>Notes</th>
+        </tr>
+        {% for recipe in recipes %}
+        <tr>
+            <td>
+                <a href="{% url 'recipe_detail' recipe.id %}">
+                <i>{{recipe.title}}</i>
+                </a>
+            </td>
+            <td>{{recipe.name}}</td>
+            <td>{{recipe.cook_book}}</td>
+            <td>{{recipe.page_number}}</td>
+            <td>{{recipe.notes}}</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock %}
