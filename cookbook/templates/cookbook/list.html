@@ -1,29 +1,33 @@
-﻿{% extends 'base_table.html' %}
+﻿{% extends 'home/layout.html' %}
 
 {% block title %}Cookbooks{% endblock %}
 
 {% block content %}
     <h1>Cookbooks</h1>
-    <table id="{{table_name}}">
+    <table id="{{table_name}}" class="viewTable">
         <tr>
-            <th onclick="sortTable(0)">Title</th>
-            <th onclick="sortTable(1)">Author</th>
-            <th>Description</th>
-            <th>Publish Date</th>
-            <th>Edition</th>
+            <th class="viewCell sortableHeader titleCell" onclick="sortTable(0)">Title</th>
+            <th class="viewCell sortableHeader authorCell" onclick="sortTable(1)">Author</th>
+            <th class="viewCell">Description</th>
+            <th class="viewCell">Publish Date</th>
+            <th class="viewCell">Edition</th>
         </tr>
         {% for cookbook in cookbooks %}
         <tr>
-            <td>
+            <td class="viewCell">
                 <a href="{% url 'cookbook_detail' cookbook.id %}">
                 <i>{{cookbook.title}}</i>
                 </a>
             </td>
-            <td>{{cookbook.author.last_name_first}}</td>
-            <td>{{cookbook.description}}</td>
-            <td>{{cookbook.publish_date}}</td>
-            <td>{{cookbook.edition}}</td>
+            <td class="viewCell">{{cookbook.author.last_name_first}}</td>
+            <td class="viewCell">{{cookbook.description}}</td>
+            <td class="viewCell">{{cookbook.publish_date}}</td>
+            <td class="viewCell">{{cookbook.edition}}</td>
         </tr>
         {% endfor %}
     </table>
+{% endblock %}
+
+{% block scripts %}
+    {% include 'script_table.html' %}
 {% endblock %}
