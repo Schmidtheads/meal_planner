@@ -14,7 +14,8 @@ def home(request):
         'home/index.html',
         {
             'title':'Home Page',
-            'year':datetime.now().year,
+            'year': datetime.now().year,
+            'company': 'Schmidtheads',
             'application': 'Meal Planner',
         }
     )

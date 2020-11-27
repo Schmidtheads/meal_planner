@@ -40,3 +40,63 @@ input[type="checkbox"].input-validation-error {
 .validation-summary-valid {
     display: none;
 }
+
+/* styles for tables used for input */
+.inputTable {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.inputRow {
+    height: 40px;
+}
+
+/* styles for tables used for read-only */
+.viewTable {
+    table-layout: fixed;
+}
+
+.viewCell {
+    padding: 15px;
+}
+
+/* misc styles */
+
+.sortableHeader {
+    cursor: pointer;
+}
+
+.buttonContainer {
+    text-align:center;
+    margin: 15px;
+}
+
+/* styles for Cookbook pages*/
+
+.titleCell {
+    min-width: 14pc;
+}
+
+.authorCell {
+    min-width: 10pc;
+}
+
+#id_title {
+    max-width: none;
+    width: 300px;
+}
+
+#id_description {
+    max-width: none;
+    width: 500px;
+}
+
+#id_author {
+    max-width: none;
+    width: 150px;
+}
+
+#id_publish_date {
+    max-width: none;
+    width: 75px;
+}
