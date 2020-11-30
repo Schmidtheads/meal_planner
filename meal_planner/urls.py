@@ -29,4 +29,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('cookbook/', include('cookbook.urls')),
     path('recipe/', include('recipe.urls')),
+    path('meal/', include('meal.urls')),
 ]
