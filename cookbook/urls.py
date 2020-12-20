@@ -8,3 +8,5 @@ urlpatterns = [
     path('list', views.cookbooks, name='cookbooks'),
 ]
 
+
+

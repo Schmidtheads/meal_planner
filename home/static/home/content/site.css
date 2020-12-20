@@ -76,12 +76,40 @@ input[type="checkbox"].input-validation-error {
 
 /* styles for Cookbook pages*/
 
+.columnleft {
+    width: 15%;
+    padding: 5px;
+}
+
+.columnright {
+    width: 66.66%;
+    padding: 5px;
+}
+
+.row::after {
+    content: "";
+    clear: both;
+    display: table;
+}
+
 .titleCell {
     min-width: 14pc;
 }
 
 .authorCell {
     min-width: 10pc;
+}
+
+.detailImage {
+    width: 150px;
+    height: 225px;
+    margin: auto;
+}
+
+.listImage {
+    width: 25px;
+    height: 37px;
+    margin: auto;
 }
 
 #id_title {
@@ -102,6 +130,11 @@ input[type="checkbox"].input-validation-error {
 #id_publish_date {
     max-width: none;
     width: 75px;
+}
+
+#id_url {
+    max-width: none;
+    width: 500px;
 }
 
 /* styles for meal calendar */
