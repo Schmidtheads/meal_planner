@@ -1,0 +1,33 @@
+{% extends "home/layout.html" %}
+
+{% block content %}
+
+<div class="jumbotron">
+    <h1>{{application}}</h1>
+    <p class="lead">An application to assist in managing meal plans.</p>
+    <p><a href="https://www.djangoproject.com/" class="btn btn-primary btn-large">Learn more &raquo;</a></p>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <h2>Meals</h2>
+        <p>
+            For viewing and planning meals in a calendar layout.
+        </p>
+        <p><a class="btn btn-default" href="{% url 'meals' %}">Meal Planning &raquo;</a></p>
+    </div>
+    <div class="col-md-4">
+        <h2>Get more libraries</h2>
+        <p>The Python Package Index is a repository of software for the Python programming language.</p>
+        <p><a class="btn btn-default" href="https://pypi.org/">Learn more &raquo;</a></p>
+    </div>
+    <div class="col-md-4">
+        <h2>Cookbooks</h2>
+        <p>
+            For viewing a list of cookbooks currently on file.
+        </p>
+        <p><a class="btn btn-default" href="{% url 'cookbooks' %}">Cookbook list &raquo;</a></p>
+    </div>
+</div>
+
+{% endblock %}

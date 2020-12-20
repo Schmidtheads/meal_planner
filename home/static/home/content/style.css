@@ -1,0 +1,59 @@
+body
+{
+    font-family: sans-serif;
+    color: cornflowerblue;
+    background-color: floralwhite;
+}
+
+table {
+    border-spacing: 0;
+    width: 100%;
+    border: 1px solid #ddd;
+}
+
+th {
+    cursor: pointer;
+}
+
+th, td {
+    text-align: left;
+    padding: 16px;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2
+}
+
+.inputHeader {
+    width: auto;
+    cursor: default;
+}
+
+.inputField {
+    width: auto;
+}
+
+.inputTable {
+    width: auto;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* styles for Cookbook pages*/
+
+#id_title {
+    width: 300px
+}
+
+#id_description {
+    width: 500px
+}
+
+#id_author {
+    width: 150px
+}
+
+#id_publish_date {
+    width: 75px
+}
+
