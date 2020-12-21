@@ -79,8 +79,8 @@ function showCalendar(month, year, meals) {
             else {
                 let cell = document.createElement("td");
 
-                let recipe = meals.month_meals[date - 1];
-                let day_element = createDayElement(date, recipe, month, year);
+                let meal = meals.month_meals[date - 1];
+                let day_element = createDayElement(date, meal, month, year);
                 cell.appendChild(day_element);
                 row.appendChild(cell);
                 date++;
@@ -95,18 +95,19 @@ function showCalendar(month, year, meals) {
 }
 
 
-function createDayElement(date, recipe, month, year) {
+function createDayElement(date, meal, month, year) {
     // Get the recipe for the current day (meals indexed from zero, so need to subtract 1 from day)
-    let recipe_name = recipe.recipe_name;
-    let cookbook_abbr = recipe.abbr;
-    let page_number = recipe.page;
+    let recipe_name = meal.recipe_name;
+    let cookbook_abbr = meal.abbr;
+    let page_number = meal.page;
+    let meal_id = meal.meal_id;
 
     let dayDiv = document.createElement('div');
 
     let daySpan = document.createElement('span');
     daySpan.classList.add('date', 'right');
-    let dayText = document.createTextNode(date);
-    daySpan.appendChild(dayText);
+    //let dayText = document.createTextNode(date);
+    //daySpan.appendChild(dayText);
     dayDiv.appendChild(daySpan);
 
     if (date === today.getDate() && year === today.getFullYear() && month === today.getMonth()) {
@@ -115,14 +116,22 @@ function createDayElement(date, recipe, month, year) {
 
     // If recipe_name is non-zero length, then there was a meal planned for the day
     if (recipe_name.length > 0) {
- 
+
+        // Create a link from the date to the meal details
+        let dayMealLink = document.createElement('a');
+        let dayText = document.createTextNode(date);
+        dayMealLink.append(dayText);
+        dayMealLink.title = 'Edit meal for ' + date + ' of month';
+        dayMealLink.href = '/meal/' + meal_id;
+        daySpan.appendChild(dayMealLink);
+
         // Create span to hold recipe name so we can control font size
         let recipeSpan = document.createElement('span');
         recipeSpan.classList.add('recipe_text');
         let recipeText = document.createTextNode(recipe_name);
         recipeSpan.appendChild(recipeText);
 
-         // Create span to hold cookbook abbreviation and page number
+        // Create span to hold cookbook abbreviation and page number
         let cookbookSpan = document.createElement('span');
         cookbookSpan.classList.add('recipe_text', 'left');
         let cookbookText = document.createTextNode(cookbook_abbr);
@@ -139,6 +148,18 @@ function createDayElement(date, recipe, month, year) {
         dayDiv.appendChild(document.createElement('br')); // create line break
         dayDiv.append(cookbookSpan);
         dayDiv.appendChild(pageSpan);
+    }
+    else {
+        // For days with no recipe, the clicking on the date will link to a 
+        // new meal form.
+
+        // Create a link from the date to the new meal page
+        let dayMealLink = document.createElement('a');
+        let dayText = document.createTextNode(date);
+        dayMealLink.append(dayText);
+        dayMealLink.title = 'Set meal for ' + date  + ' of month';
+        dayMealLink.href = '/meal/new?date=' + year + '-' + (month+1) + '-' + date;
+        daySpan.appendChild(dayMealLink);
     }
 
     return dayDiv;
