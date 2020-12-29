@@ -9,10 +9,13 @@ body {
     padding-right: 15px;
 }
 
+/* Keep the horizontal ruler below divs */
+hr {
+    clear: both;
+}
+
 /* Set width on the form input elements since they're 100% wide by default */
-input,
-select,
-textarea {
+input, select, textarea {
     max-width: 280px;
 }
 
@@ -31,6 +34,10 @@ input.input-validation-error {
 
 input[type="checkbox"].input-validation-error {
     border: 0 none;
+}
+
+input:read-only {
+    background-color: lightgray;
 }
 
 .validation-summary-errors {
@@ -73,12 +80,40 @@ input[type="checkbox"].input-validation-error {
 
 /* styles for Cookbook pages*/
 
+.columnleft {
+    width: 15%;
+    padding: 5px;
+}
+
+.columnright {
+    width: 66.66%;
+    padding: 5px;
+}
+
+.row::after {
+    content: "";
+    clear: both;
+    display: table;
+}
+
 .titleCell {
     min-width: 14pc;
 }
 
 .authorCell {
     min-width: 10pc;
+}
+
+.detailImage {
+    width: 150px;
+    height: 225px;
+    margin: auto;
+}
+
+.listImage {
+    width: 25px;
+    height: 37px;
+    margin: auto;
 }
 
 #id_title {
@@ -99,4 +134,153 @@ input[type="checkbox"].input-validation-error {
 #id_publish_date {
     max-width: none;
     width: 75px;
+}
+
+#id_url {
+    max-width: none;
+    width: 500px;
+}
+
+/* styles for meal calendar */
+
+#calendar {
+    padding-bottom: 20px;
+}
+
+/* Set the colour of the current day*/
+
+.date {
+    font-size: 10px;
+    font-family: "Lucida Console", "Courier New", monospace;
+}
+
+.today-cell {
+    color: darkred;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+/* styes used to left or right justify text*/
+
+.left {
+    float: left;
+}
+
+.right {
+    float: right;
+}
+
+.month {
+    padding: 70px 25px;
+    width: 100%;
+    background: #1abc9c;
+    text-align: center;
+}
+
+    .month ul {
+        margin: 0;
+        padding: 0;
+    }
+
+        .month ul li {
+            color: white;
+            font-size: 20px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+    .month .prev {
+        float: left;
+        padding-top: 10px;
+    }
+
+    .month .next {
+        float: right;
+        padding-top: 10px;
+    }
+
+.weekdays {
+    margin: 0;
+    padding: 10px 0;
+    background-color: #ddd;
+}
+
+    .weekdays li {
+        display: inline-block;
+        width: 13.6%;
+        color: #666;
+        text-align: center;
+    }
+
+.days {
+    padding: 10px 0;
+    background: #eee;
+    margin: 0;
+}
+
+    .days li {
+        list-style-type: none;
+        display: inline-block;
+        width: 13.6%;
+        text-align: center;
+        margin-bottom: 5px;
+        font-size: 12px;
+        color: #777;
+    }
+
+        .days li .active {
+            padding: 5px;
+            background: #1abc9c;
+            color: white !important
+        }
+
+.week_column {
+    width: 100px;
+}
+
+.recipe_text {
+    font-size: 12px;
+    color: #92a8d1;
+    font-style: italic;
+    font-weight: bold;
+}
+
+.cookbook_text {
+    font-size: 12px;
+    color: #92a8d1;
+}
+
+/* Styles for meal details */
+
+#id_scheduled_date {
+    max-width: none;
+    width: 100px;
+}
+
+#id_note {
+    max-width: none;
+    width: 500px;
+}
+
+/* Add media queries for smaller screens */
+@media screen and (max-width:720px) {
+    .weekdays li, .days li {
+        width: 13.1%;
+    }
+}
+
+@media screen and (max-width: 420px) {
+    .weekdays li, .days li {
+        width: 12.5%;
+    }
+
+        .days li .active {
+            padding: 2px;
+        }
+}
+
+@media screen and (max-width: 290px) {
+    .weekdays li, .days li {
+        width: 12.2%;
+    }
 }

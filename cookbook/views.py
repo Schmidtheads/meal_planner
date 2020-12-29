@@ -11,7 +11,7 @@ def detail(request, id):
     cookbook = get_object_or_404(Cookbook, pk=id)
 
     if request.method == "POST":
-        form = CookbookForm(request.POST, instance=cookbook)
+        form = CookbookForm(request.POST, request.FILES, instance=cookbook)
         if form.is_valid():
             form.save()
             return redirect("cookbooks")
@@ -22,7 +22,8 @@ def detail(request, id):
                  {"title": "Meal Planner",
                   "year": datetime.now().year,
                   "company": "Schmidtheads Inc.",
-                  "form": form})
+                  "form": form,
+                  "cookbook": cookbook})
 
 
 def cookbooks(request):
