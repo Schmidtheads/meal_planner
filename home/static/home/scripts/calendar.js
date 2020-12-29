@@ -1,21 +1,21 @@
 /*
  * Calendar functions
  * 
- * Functions in this file will allow for dynamica upudate of a calendar on an html page
+ * Functions in this file will allow for dynamic update of a calendar on an html page
  */
 
-//import { get } from "jquery";
-
 let today = new Date();
-let currentMonth = today.getMonth();
-let currentYear = today.getFullYear();
 let selectYear = document.getElementById("year");
 let selectMonth = document.getElementById("month");
 
 let months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 let monthAndYear = document.getElementById("monthAndYear");
-get_meals_by_month(currentMonth, currentYear);
+
+// initialize current month and year (will be adjusted in fetch_calendar)
+let currentMonth = today.getMonth;
+let currentYear = today.getFullYear;
+fetch_calendar();
 
 
 function next() {
@@ -133,12 +133,12 @@ function createDayElement(date, meal, month, year) {
 
         // Create span to hold cookbook abbreviation and page number
         let cookbookSpan = document.createElement('span');
-        cookbookSpan.classList.add('recipe_text', 'left');
+        cookbookSpan.classList.add('cookbook_text', 'left');
         let cookbookText = document.createTextNode(cookbook_abbr);
         cookbookSpan.appendChild(cookbookText);
 
         let pageSpan = document.createElement('span');
-        pageSpan.classList.add('recipe_text', 'right');
+        pageSpan.classList.add('cookbook_text', 'right');
         let pageText = document.createTextNode('p' + page_number);
         pageSpan.appendChild(pageText);
 
@@ -181,4 +181,59 @@ function get_meals_by_month(month, year) {
         }
     });
 
+    setCookie("yearmonth", year.toString() + "-" + month.toString(), 8);
+
+}
+
+
+function fetch_calendar() {
+    /*
+     * Determines which month and year will be used to display the calendar.
+     * Will try to read stored cookie, or if not found use current month and year.
+     * 
+     * Note: month number is zero based; January = 0, December = 11
+    */
+
+    var yearmonth = getCookie("yearmonth");  // formmat of year month in YYYY-MM e.g. 2020-11
+    if (yearmonth != "") {
+        // parse out the year and month
+        let elements = yearmonth.split("-");
+        currentYear = parseInt(elements[0], 10);
+        currentMonth = parseInt(elements[1], 10);
+    } else {
+        currentMonth = today.getMonth();
+        currentYear = today.getFullYear();
+    }
+
+    get_meals_by_month(currentMonth, currentYear);
+}
+
+function setCookie(cname, cvalue, exhours) {
+    /*
+     * Helper function to set a cookie
+     * 
+     * @param cname: name of cookie
+     * @param cvalue: value of cookie
+     * @param exhours: number of hours in which cookie will expire
+    */
+
+    var d = new Date();
+    d.setTime(d.getTime() + (exhours * 60 * 60 * 1000));
+    var expires = "expires=" + d.toUTCString();
+    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+}
+
+function getCookie(cname) {
+    var name = cname + "=";
+    var ca = document.cookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
 }
