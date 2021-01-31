@@ -21,25 +21,25 @@ fetch_calendar();
 function next() {
     currentYear = (currentMonth === 11) ? currentYear + 1 : currentYear;
     currentMonth = (currentMonth + 1) % 12;
-    get_meals_by_month(currentMonth, currentYear);
+    get_meals_for_month(currentMonth, currentYear);
 }
 
 function jumpToToday() {
     currentYear = today.getFullYear();
     currentMonth = today.getMonth();
-    get_meals_by_month(currentMonth, currentYear);
+    get_meals_for_month(currentMonth, currentYear);
 }
 
 function previous() {
     currentYear = (currentMonth === 0) ? currentYear - 1 : currentYear;
     currentMonth = (currentMonth === 0) ? 11 : currentMonth - 1;
-    get_meals_by_month(currentMonth, currentYear);
+    get_meals_for_month(currentMonth, currentYear);
 }
 
 function jump() {
     currentYear = parseInt(selectYear.value);
     currentMonth = parseInt(selectMonth.value);
-    get_meals_by_month(currentMonth, currentYear);
+    get_meals_for_month(currentMonth, currentYear);
 
 }
 
@@ -101,6 +101,9 @@ function createDayElement(date, meal, month, year) {
     let cookbook_abbr = meal.abbr;
     let page_number = meal.page;
     let meal_id = meal.meal_id;
+    let cookbook_id = meal.cookbook_id;
+    let cookbook_title = meal.cookbook;
+    let cookbook_author = meal.author;
 
     let dayDiv = document.createElement('div');
 
@@ -131,11 +134,29 @@ function createDayElement(date, meal, month, year) {
         let recipeText = document.createTextNode(recipe_name);
         recipeSpan.appendChild(recipeText);
 
-        // Create span to hold cookbook abbreviation and page number
-        let cookbookSpan = document.createElement('span');
-        cookbookSpan.classList.add('cookbook_text', 'left');
+        // Create div to hold cookbook abbreviation and page number
+        let cookbookDiv = document.createElement('div');
+        cookbookDiv.classList.add('cookbook_text', 'left', 'calendartooltip');
         let cookbookText = document.createTextNode(cookbook_abbr);
-        cookbookSpan.appendChild(cookbookText);
+        cookbookDiv.appendChild(cookbookText);
+
+        // Create tooltip for cookbook
+        // to show title of cookbook, author
+        // title is a hyperlink to cookbook detail page
+        let cookbookTooltip = document.createElement('span');
+        cookbookTooltip.classList.add('tooltiptext');
+        let cookbookTitleLink = document.createElement('a');
+        let cookbookTooltipText1 = document.createTextNode(cookbook_title);
+        cookbookTitleLink.title = 'Cookbook details';
+        cookbookTitleLink.href = '/cookbook/' + cookbook_id;
+        cookbookTitleLink.append(cookbookTooltipText1);
+
+        let tooltipBreak = document.createElement('br');
+        let cookbookTooltipText2 = document.createTextNode('by: ' + cookbook_author);
+        cookbookTooltip.append(cookbookTitleLink);
+        cookbookTooltip.append(tooltipBreak);
+        cookbookTooltip.append(cookbookTooltipText2);
+        cookbookDiv.appendChild(cookbookTooltip);
 
         let pageSpan = document.createElement('span');
         pageSpan.classList.add('cookbook_text', 'right');
@@ -146,7 +167,7 @@ function createDayElement(date, meal, month, year) {
         dayDiv.appendChild(document.createElement('br'));
         dayDiv.appendChild(recipeSpan);
         dayDiv.appendChild(document.createElement('br')); // create line break
-        dayDiv.append(cookbookSpan);
+        dayDiv.append(cookbookDiv);
         dayDiv.appendChild(pageSpan);
     }
     else {
@@ -166,7 +187,7 @@ function createDayElement(date, meal, month, year) {
 }
 
 
-function get_meals_by_month(month, year) {
+function get_meals_for_month(month, year) {
     // When submitting the month, add one because for some
     // stupid reason, JavaScript has January = 0,.. December = 11
     $.ajax({
@@ -205,7 +226,7 @@ function fetch_calendar() {
         currentYear = today.getFullYear();
     }
 
-    get_meals_by_month(currentMonth, currentYear);
+    get_meals_for_month(currentMonth, currentYear);
 }
 
 function setCookie(cname, cvalue, exhours) {
