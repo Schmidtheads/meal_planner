@@ -96,7 +96,7 @@ def meals(request):
                    'company': 'Schmidtheads Inc.'})
 
 
-def meals_for_month(request):
+def get_meals_for_month(request):
     
     meal_year = int(request.GET.get('year', datetime.datetime.now().year))
     meal_month = int(request.GET.get('month', datetime.datetime.now().month)) 
@@ -140,8 +140,10 @@ def _get_recipe_info_for_meal(meal):
         page = getattr(recipe, 'page_number')
         cookbook = getattr(recipe, 'cook_book')
 
-        # Get the cookbook name
+        # Get cookbook name and author
         cookbook_title = getattr(cookbook, 'title')
+        cookbook_author = str(getattr(cookbook, 'author'))
+        cookbook_id = cookbook.id
 
         # Create cookbook name abbreviation
         words = cookbook_title.split(' ')
@@ -150,7 +152,7 @@ def _get_recipe_info_for_meal(meal):
         else:
             cookbook_abbr = ''.join([w[0] for w in words])
 
-        recipe_info = {'meal_id': meal_id, 'recipe_name': name, 'page': page, 'cookbook': cookbook_title, 'abbr': cookbook_abbr}
+        recipe_info = {'meal_id': meal_id, 'recipe_name': name, 'page': page, 'cookbook_id': cookbook_id, 'cookbook': cookbook_title, 'author': cookbook_author, 'abbr': cookbook_abbr}
     else:
         recipe_info = {'recipe_name': ''}
 

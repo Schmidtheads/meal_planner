@@ -141,13 +141,15 @@ input:read-only {
     width: 500px;
 }
 
-/* styles for meal calendar */
+/*
+ *  styles for meal calendar 
+ */
 
 #calendar {
     padding-bottom: 20px;
 }
 
-/* Set the colour of the current day*/
+/* Set the colour of the current day */
 
 .date {
     font-size: 10px;
@@ -160,7 +162,7 @@ input:read-only {
     font-size: 14px;
 }
 
-/* styes used to left or right justify text*/
+/* styes used to left or right justify text */
 
 .left {
     float: left;
@@ -250,7 +252,45 @@ input:read-only {
     color: #92a8d1;
 }
 
-/* Styles for meal details */
+/* Tooltip container */
+.calendartooltip {
+    position: relative;
+    display: inline-block;
+}
+
+    .calendartooltip .tooltiptext {
+        visibility: hidden;
+        width: 120px;
+        background-color: #efefef;
+        color: black;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px 0;
+        position: absolute;
+        z-index: 1;
+        top: 150%;
+        left: 50%;
+        margin-left: -60px;
+    }
+
+.calendartooltip .tooltiptext::after {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent #efefef transparent;
+}
+
+.calendartooltip:hover .tooltiptext {
+    visibility: visible;
+}
+
+/* 
+ *  Styles for meal details 
+ */
 
 #id_scheduled_date {
     max-width: none;
