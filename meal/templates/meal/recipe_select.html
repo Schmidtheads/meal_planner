@@ -1,17 +1,14 @@
 ﻿<div class="row align-items-end">
-    <div class="form-group col-5 col-md-3 ">
+    <div class="form-group col-md-7">
         <input type="text" class="form-control"
-               id="test-input"
+               id="id_recipe_name_display"
                 name="{{ widget.name }}"
                 {% if widget.value != None %}
                 value="{{ widget.recipe_name }}"
-                {% endif %} />
+                {% endif %} readonly/>
     </div>
-    <div class="form-group col-6">
-        <!--
-        <button class="btn btn-default" type="button" onclick="document.getElementById('id-{{ widget.name }}').value=document.getElementById('test-input').value">Query</button>
-        -->
-        <button class="btn btn-default" type="button" data-toggle="modal" data-target="#queryBuilder">
+    <div class="form-group col-md-1">
+      <button class="btn btn-default" type="button" data-toggle="modal" data-target="#queryBuilder">
             Search
         </button>
     </div>
@@ -35,13 +32,24 @@
             </button>
           </div>
           <div class="modal-body">
-              <table id="where_clauses">
-                  <tr>
-                      <td>
-                        <input id="queryValue" type="text" />
-                      </td>
-                  </tr>
-              </table>
+            <table id="id_recipe_search">
+              <tr>
+                  <td>
+                    <input id="id_recipe_search_keys" class="form-control" style="width:100%" type="text" />
+                  </td>
+                  <td style="width:15%">
+                    <button type="button" class="btn btn-primary" style="margin:auto; display:block">Search</button>
+                  </td>
+              </tr>
+              <tr>
+                <td>
+                  <table>
+                    <tr>
+                    </tr>
+                  </table>
+              </td>
+              </tr>
+            </table>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>

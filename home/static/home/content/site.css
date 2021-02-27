@@ -15,7 +15,7 @@ hr {
 }
 
 /* Set width on the form input elements since they're 100% wide by default */
-input, select, textarea {
+select, textarea {
     max-width: 280px;
 }
 
@@ -34,10 +34,6 @@ input.input-validation-error {
 
 input[type="checkbox"].input-validation-error {
     border: 0 none;
-}
-
-input:read-only {
-    background-color: lightgray;
 }
 
 .validation-summary-errors {
@@ -300,6 +296,23 @@ input:read-only {
 #id_note {
     max-width: none;
     width: 500px;
+}
+
+/*
+ * Custom recipe selector widget
+ *
+
+#id_recipe_name_display {
+    width: 300px;
+}
+*/
+
+/*
+ * Make the table for the recipe custom selector 100% so search field
+   fills width of modal dialog
+ */
+#id_recipe_search {
+    width: 100%;
 }
 
 /* Add media queries for smaller screens */

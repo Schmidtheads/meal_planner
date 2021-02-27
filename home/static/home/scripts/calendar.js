@@ -1,7 +1,21 @@
 /*
- * Calendar functions
+ * Name:        calendar.js
+ * Description: Calendar functions - Functions in this file will allow for
+ *              dynamic update of a calendar on an html page
+ * Author:      M. Schmidt
+ * Date:        1-Dec-2020
  * 
- * Functions in this file will allow for dynamic update of a calendar on an html page
+ * Notes:
+ *  Large portions of this script related to the generation of the actual
+ *  calendar are based on the code found here:
+ *  https://medium.com/@nitinpatel_20236/challenge-of-building-a-calendar-with-pure-javascript-a86f1303267d
+ * 
+ *  This link was useful with making AJAX request with Django:
+ *  https://simpleisbetterthancomplex.com/tutorial/2016/08/29/how-to-work-with-ajax-request-with-django.html
+ * 
+ *  And for implementing cookies to maintain the calendar month when switching 
+ *  between pages in the app:
+ *  https://www.w3schools.com/js/js_cookies.asp
  */
 
 let today = new Date();
@@ -43,6 +57,14 @@ function jump() {
 
 }
 
+/**
+ * Creates HTML for a calendar month, given the month, year and meals
+ * for that month.
+ * 
+ * @param {*} month 
+ * @param {*} year 
+ * @param {*} meals 
+ */
 function showCalendar(month, year, meals) {
 
     let firstDay = (new Date(year, month)).getDay();
@@ -94,7 +116,15 @@ function showCalendar(month, year, meals) {
 
 }
 
-
+/**
+ * Creates the html for a calendar day, populating with Meal information
+ * if there is any.
+ * 
+ * @param {*} date 
+ * @param {*} meal 
+ * @param {*} month 
+ * @param {*} year 
+ */
 function createDayElement(date, meal, month, year) {
     // Get the recipe for the current day (meals indexed from zero, so need to subtract 1 from day)
     let recipe_name = meal.recipe_name;
@@ -187,6 +217,12 @@ function createDayElement(date, meal, month, year) {
 }
 
 
+/**
+ * Performs AJAX query to retrieve recipes for a month given the month and year.
+ * 
+ * @param {int} month 
+ * @param {int} year 
+ */
 function get_meals_for_month(month, year) {
     // When submitting the month, add one because for some
     // stupid reason, JavaScript has January = 0,.. December = 11
@@ -207,6 +243,10 @@ function get_meals_for_month(month, year) {
 }
 
 
+/**
+ * Restores calendar display based on stored cookies holding
+ * year and month.
+ */
 function fetch_calendar() {
     /*
      * Determines which month and year will be used to display the calendar.

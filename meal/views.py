@@ -33,7 +33,10 @@ def detail(request, id):
         # Create form for new or update entry - scheduled_date is uneditable
         #form = MealForm(instance=meal)
         form = mealForm2(instance=meal)
-        form.fields['scheduled_date'].widget.attrs['readonly'] = True
+        scheduled_date_widget = form.fields['scheduled_date'].widget
+        scheduled_date_widget.attrs['readonly'] = True
+        # For consistent styling purposes assign form-control class to date widget to match readonly custom widget
+        scheduled_date_widget.attrs.update({'class': 'form-control'})
 
     return render(request, "meal/detail.html",
                  {"title": "Meal Planner",
@@ -77,8 +80,10 @@ def new(request):
             form = MealForm() # create form without pre-populated date
         else:
             form = MealForm(initial={'scheduled_date': date_obj})
-            form.fields['scheduled_date'].widget.attrs['readonly'] = True
-            #form.fields['scheduled_date'].disabled = True
+            scheduled_date_widget = form.fields['scheduled_date'].widget
+            scheduled_date_widget.attrs['readonly'] = True
+            # For consistent styling purposes assign form-control class to date widget to match readonly custom widget
+            scheduled_date_widget.attrs.update({'class': 'form-control'})
 
     return render(request, "meal/detail.html",
                  {"title": "Meal Planner",
