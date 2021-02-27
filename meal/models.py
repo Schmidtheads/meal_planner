@@ -7,7 +7,7 @@ import datetime
 class Meal(models.Model):
     scheduled_date = models.DateField()
     was_made = models.BooleanField(default=False)
-    note = models.CharField(max_length=250, blank=True)  # optional field
+    note = models.TextField(max_length=250, blank=True)  # optional field
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
 
 

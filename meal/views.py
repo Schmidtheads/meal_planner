@@ -7,6 +7,7 @@ import calendar
 import json
 
 from .models import Meal
+from .forms import MealForm as mealForm2
 from recipe.models import Recipe
 from cookbook.models import Cookbook
 
@@ -22,14 +23,16 @@ def detail(request, id):
     meal = get_object_or_404(Meal, pk=id)
 
     if request.method == "POST":
-        form = MealForm(request.POST, instance=meal)
+        #form = MealForm(request.POST, instance=meal)
+        form = mealForm2(request.POST, instance=meal)
         if form.is_valid():
             form.save()
             return redirect("meals")
     else:
         
         # Create form for new or update entry - scheduled_date is uneditable
-        form = MealForm(instance=meal)
+        #form = MealForm(instance=meal)
+        form = mealForm2(instance=meal)
         form.fields['scheduled_date'].widget.attrs['readonly'] = True
 
     return render(request, "meal/detail.html",
@@ -75,6 +78,7 @@ def new(request):
         else:
             form = MealForm(initial={'scheduled_date': date_obj})
             form.fields['scheduled_date'].widget.attrs['readonly'] = True
+            #form.fields['scheduled_date'].disabled = True
 
     return render(request, "meal/detail.html",
                  {"title": "Meal Planner",

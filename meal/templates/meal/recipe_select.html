@@ -1,0 +1,52 @@
+﻿<div class="row align-items-end">
+    <div class="form-group col-5 col-md-3 ">
+        <input type="text" class="form-control"
+               id="test-input"
+                name="{{ widget.name }}"
+                {% if widget.value != None %}
+                value="{{ widget.recipe_name }}"
+                {% endif %} />
+    </div>
+    <div class="form-group col-6">
+        <!--
+        <button class="btn btn-default" type="button" onclick="document.getElementById('id-{{ widget.name }}').value=document.getElementById('test-input').value">Query</button>
+        -->
+        <button class="btn btn-default" type="button" data-toggle="modal" data-target="#queryBuilder">
+            Search
+        </button>
+    </div>
+    <div hidden>
+        <input type="text"
+            id="id-{{ widget.name }}"
+            name="{{ widget.name }}"
+            {% if widget.value != None %}
+            value="{{ widget.value }}"
+            {% endif %} />
+    </div>
+</div>
+    <!-- Modal -->
+    <div class="modal fade" id="queryBuilder" tabindex="-1" data-backdrop="static" role="dialog" aria-labelledby="queryBuilderTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="queryBuilderLongTitle">Recipe Search</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+              <table id="where_clauses">
+                  <tr>
+                      <td>
+                        <input id="queryValue" type="text" />
+                      </td>
+                  </tr>
+              </table>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary">OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
