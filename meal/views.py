@@ -97,16 +97,23 @@ def meals(request):
     This view is used to show the calendar view of meals.
     '''
 
-    meals = serializers.serialize('json', Meal.objects.all())
+    # Don't need to pass any meal information in as when the meal calendar
+    # loads, it will send an Ajax request to retrieve the meals
     return render(request, 'meal/meals.html',
                   {'title': 'Meal Planner',
-                   'meals': meals,
                    'year': datetime.datetime.now().year,
                    'company': 'Schmidtheads Inc.'})
 
 
 def get_meals_for_month(request):
-    
+    '''
+    Handle query request from web application to get meals for a given month
+
+    @param request: json representing the query; consists of year as 4 digit year
+                    and month as 2 digit month
+    @return json response string
+    '''
+
     meal_year = int(request.GET.get('year', datetime.datetime.now().year))
     meal_month = int(request.GET.get('month', datetime.datetime.now().month)) 
 
@@ -119,7 +126,32 @@ def get_meals_for_month(request):
     return JsonResponse(data)
 
 
+def search_for_recipes(request):
+    '''
+    Handle query request from web application to get recipes base on search criteria
+
+    @param request: json representing the query; list of search tags
+    '''
+    
+    search_keys = str(request.GET.get('keys'))
+    results = _search_for_recipes(search_keys)
+    
+    data = {
+        'recipes': results
+    }
+
+    return JsonResponse(data)
+
+
 def _get_meals_for_month(year, month):
+    '''
+    Helper function that gathers meal information for a month from database
+
+    @param year: 4 digit year
+    @param month: 2 digit month
+    @return Python List of meals for month; each item in list
+            is a Python dictionary of meal information
+    '''
 
     meals_for_month = Meal.objects.filter(
         scheduled_date__year=year,
@@ -140,6 +172,12 @@ def _get_meals_for_month(year, month):
 
 
 def _get_recipe_info_for_meal(meal):
+    '''
+    Helper function to get recipe information for a given meal
+
+    @param meal: a Meal object
+    @return Python dictionary of reciped information (name, page, cookbook, author)
+    '''
 
     if not meal is None:
         meal_id = meal.id
@@ -179,3 +217,28 @@ def _get_meal_id_by_date(date):
     return meal
 
 
+def _search_for_recipes(search_keys):
+
+    # Return fixed result until search fully coded
+    if search_keys == "0":
+        result = []
+    else:
+        result = [ \
+            { \
+                'name': 'Tex Mex Casserole',  \
+                'cookbook': 'Oh She Glows Everyday', \
+                'author': 'Lindon' \
+            }, \
+            { \
+                'name': 'The Way We Stir', \
+                'cookbook': 'Loony Spoons', \
+                'author': 'Colonel Saunders' \
+            }, \
+            { \
+                'name': 'Flaky Pastry Pesto Chicken', \
+                'cookbook': '5 Ingredients', \
+                'author': 'Jamie Oliver' \
+            } \
+        ]
+   
+    return result

@@ -1,3 +1,7 @@
+/*
+This is the place to add custome site css styles
+*/
+
 body {
     padding-top: 50px;
     padding-bottom: 20px;
@@ -300,12 +304,13 @@ input[type="checkbox"].input-validation-error {
 
 /*
  * Custom recipe selector widget
- *
+ */
 
-#id_recipe_name_display {
-    width: 300px;
+/* position the Recipe search button */
+#id_recipe_search_button {
+    margin: auto;
+    display: block;
 }
-*/
 
 /*
  * Make the table for the recipe custom selector 100% so search field
@@ -313,6 +318,15 @@ input[type="checkbox"].input-validation-error {
  */
 #id_recipe_search {
     width: 100%;
+}
+
+ tbody tr:hover tr.select-row {
+    background-color: #007bff;
+ }
+
+ .tableRowHover tbody tr:not(.select-row):hover td {
+    background-color: #dcdcdc;
+    transition: all 0.01s ease-in-out;
 }
 
 /* Add media queries for smaller screens */

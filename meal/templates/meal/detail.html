@@ -3,6 +3,7 @@
 {% block title %}Title: {{form.title}}{% endblock %}
 
 {% block content %}
+{% load static %}
     <div class="row">
         <div class="columnleft left">
         </div>
@@ -33,4 +34,8 @@
         </div>
     </div>
     <p><a class="btn btn-default" href="{% url 'meals' %}">Back to Meals Calendar &raquo;</a></p>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'home/scripts/recipequery.js' %}"></script>
 {% endblock %}

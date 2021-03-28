@@ -1,4 +1,7 @@
-﻿<div class="row align-items-end">
+﻿<!--
+  Custom Recipe Search Widget
+-->
+<div class="row align-items-end">
     <div class="form-group col-md-7">
         <input type="text" class="form-control"
                id="id_recipe_name_display"
@@ -10,7 +13,7 @@
     <div class="form-group col-md-1">
       <button class="btn btn-default" type="button" data-toggle="modal" data-target="#queryBuilder">
             Search
-        </button>
+      </button>
     </div>
     <div hidden>
         <input type="text"
@@ -35,17 +38,17 @@
             <table id="id_recipe_search">
               <tr>
                   <td>
-                    <input id="id_recipe_search_keys" class="form-control" style="width:100%" type="text" />
+                    <input id="id_recipe_search_keys" class="form-control" onkeyup="stoppedTyping()" type="text" />
                   </td>
                   <td style="width:15%">
-                    <button type="button" class="btn btn-primary" style="margin:auto; display:block">Search</button>
+                    <button id="id_recipe_search_button" type="button" class="btn btn-primary" onclick="recipeSearch()">Search</button>
                   </td>
               </tr>
               <tr>
-                <td>
-                  <table>
-                    <tr>
-                    </tr>
+                <td style="padding: 15px" colspan="2">
+                  <table id="id_recipe_search_results" class="table tableRowHover" style="width: 100%">
+                    <thead></thead>
+                    <tbody></tbody>
                   </table>
               </td>
               </tr>
