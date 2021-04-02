@@ -225,16 +225,25 @@ def _search_for_recipes(search_keys):
     else:
         result = [ \
             { \
+                'id': 3, \
                 'name': 'Tex Mex Casserole',  \
                 'cookbook': 'Oh She Glows Everyday', \
                 'author': 'Lindon' \
             }, \
             { \
+                'id': 5, \
                 'name': 'The Way We Stir', \
                 'cookbook': 'Loony Spoons', \
                 'author': 'Colonel Saunders' \
             }, \
             { \
+                'id': 11, \
+                'name': 'Beef Dip', \
+                'cookbook': 'Eat food or die', \
+                'author': 'G. Eihm Hungry' \
+            }, \
+            { \
+                'id': 8, \
                 'name': 'Flaky Pastry Pesto Chicken', \
                 'cookbook': '5 Ingredients', \
                 'author': 'Jamie Oliver' \

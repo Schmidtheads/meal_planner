@@ -37,20 +37,22 @@
           <div class="modal-body">
             <table id="id_recipe_search">
               <tr>
-                  <td>
-                    <input id="id_recipe_search_keys" class="form-control" onkeyup="stoppedTyping()" type="text" />
-                  </td>
-                  <td style="width:15%">
-                    <button id="id_recipe_search_button" type="button" class="btn btn-primary" onclick="recipeSearch()">Search</button>
-                  </td>
+                <td id="id_recipe_search_container">
+                  <input id="id_recipe_search_keys" class="form-control" onkeyup="stoppedTyping()" type="text" />
+                </td>
+                <td id="id_recipe_search_container">
+                  <button id="id_recipe_search_button" type="button" class="btn btn-primary" onclick="recipeSearch()">Search</button>                  
+                </td>
               </tr>
               <tr>
-                <td style="padding: 15px" colspan="2">
-                  <table id="id_recipe_search_results" class="table tableRowHover" style="width: 100%">
-                    <thead></thead>
-                    <tbody></tbody>
-                  </table>
-              </td>
+                <td colspan="2">
+                  <div id="id_table_scroll">
+                    <table id="id_recipe_search_results" class="table tableRowHover">
+                      <thead></thead>
+                      <tbody></tbody>
+                    </table>
+                  </div>
+                </td>
               </tr>
             </table>
           </div>

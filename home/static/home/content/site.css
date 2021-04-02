@@ -302,7 +302,7 @@ input[type="checkbox"].input-validation-error {
     width: 500px;
 }
 
-/*
+/* ----------------------------------------
  * Custom recipe selector widget
  */
 
@@ -312,8 +312,20 @@ input[type="checkbox"].input-validation-error {
     display: block;
 }
 
-/*
- * Make the table for the recipe custom selector 100% so search field
+#id_recipe_search_results {
+    width: 100%;
+}
+
+#id_recipe_search_container {
+    padding-bottom: 15px;
+}
+
+#id_table_scroll {
+    height:200px;
+    overflow:auto;
+}
+
+/* Make the table for the recipe custom selector 100% so search field
    fills width of modal dialog
  */
 #id_recipe_search {
@@ -328,6 +340,8 @@ input[type="checkbox"].input-validation-error {
     background-color: #dcdcdc;
     transition: all 0.01s ease-in-out;
 }
+
+/* ---------------------------------------- */
 
 /* Add media queries for smaller screens */
 @media screen and (max-width:720px) {
