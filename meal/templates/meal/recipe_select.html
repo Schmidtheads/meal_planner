@@ -4,7 +4,7 @@
 <div class="row align-items-end">
     <div class="form-group col-md-7">
         <input type="text" class="form-control"
-               id="id_recipe_name_display"
+                id="id_recipe_name_display"
                 name="{{ widget.name }}"
                 {% if widget.value != None %}
                 value="{{ widget.recipe_name }}"
@@ -58,8 +58,12 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-primary">OK</button>
+            <button type="button" class="btn btn-primary" onclick="selectRecipe()">OK</button>
           </div>
         </div>
       </div>
     </div>
+<script>
+  // Set global variable to Django widget name for use in imported .js files
+  var widgetName = "{{ widget.name }}";
+</script>

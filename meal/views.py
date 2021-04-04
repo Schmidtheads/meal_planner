@@ -225,28 +225,28 @@ def _search_for_recipes(search_keys):
     else:
         result = [ \
             { \
-                'id': 3, \
-                'name': 'Tex Mex Casserole',  \
-                'cookbook': 'Oh She Glows Everyday', \
-                'author': 'Lindon' \
+                'id': 16, \
+                'name': 'Spinach Rice Casserole',  \
+                'cookbook': 'Moosewood Cookbook', \
+                'author': 'Jane Doe' \
             }, \
             { \
                 'id': 5, \
-                'name': 'The Way We Stir', \
-                'cookbook': 'Loony Spoons', \
-                'author': 'Colonel Saunders' \
+                'name': 'Cajun Sweet Potatoes', \
+                'cookbook': 'Vegeterian', \
+                'author': 'Jamie Oliver' \
             }, \
             { \
                 'id': 11, \
-                'name': 'Beef Dip', \
-                'cookbook': 'Eat food or die', \
-                'author': 'G. Eihm Hungry' \
+                'name': 'Thai it!', \
+                'cookbook': 'Loony Spoons', \
+                'author': 'Barabara Smith' \
             }, \
             { \
                 'id': 8, \
-                'name': 'Flaky Pastry Pesto Chicken', \
-                'cookbook': '5 Ingredients', \
-                'author': 'Jamie Oliver' \
+                'name': 'Penne with Roasted Summer Vegetables', \
+                'cookbook': 'Internet', \
+                'author': 'Unknown' \
             } \
         ]
    
