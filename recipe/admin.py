@@ -6,3 +6,6 @@ from .models import Recipe, RecipeType
 
 admin.site.register(Recipe)
 admin.site.register(RecipeType)
+#admin.site.register(RecipetoType)
+#admin.site.register(RecipeRating)
+#admin.site.register(Diner)
