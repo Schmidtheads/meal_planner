@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.forms import modelform_factory
+from datetime import datetime
 
 from .models import Recipe, RecipeType
 
@@ -20,3 +21,11 @@ def detail(request, id):
 
     return render(request, "recipe/detail.html",
                  {"form": form})
+
+def recipes(request):
+
+    return render(request, "recipe/list.html",
+                 {"recipes": Recipe.objects.all(),
+                  "year": datetime.now().year,
+                  "company": "Schmidtheads Inc.",
+                  "table_name": "recipes"})
