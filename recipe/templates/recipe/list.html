@@ -1,28 +1,31 @@
-﻿{% extends 'base_table.html' %}
+﻿{% extends 'home/layout.html' %}
 
 {% block title %}Recipes{% endblock %}
 
 {% block content %}
     <h1>Recipes</h1>
-    <table id="{{table_name}}">
+    <table id="{{table_name}}" class="viewTable">
         <tr>
-            <th onclick="sortTable(0)">Name</th>
-            <th onclick="sortTable(1)">Cookbook</th>
-            <th onclick="sortTable(2)">Page Number</th>
-            <th>Notes</th>
+            <th class="viewCell sortableHeader titleCell" onclick="sortTable(0)">Name</th>
+            <th class="viewCell">Cookbook</th>
+            <th class="viewCell">Page Number</th>
+            <th class="viewCell">Notes</th>
         </tr>
         {% for recipe in recipes %}
         <tr>
-            <td>
+            <td  class="viewCell">
                 <a href="{% url 'recipe_detail' recipe.id %}">
-                <i>{{recipe.title}}</i>
+                <i>{{recipe.name}}</i>
                 </a>
             </td>
-            <td>{{recipe.name}}</td>
-            <td>{{recipe.cook_book}}</td>
-            <td>{{recipe.page_number}}</td>
-            <td>{{recipe.notes}}</td>
+            <td  class="viewCell">{{recipe.cook_book}}</td>
+            <td  class="viewCell">{{recipe.page_number}}</td>
+            <td  class="viewCell">{{recipe.notes}}</td>
         </tr>
         {% endfor %}
     </table>
+{% endblock %}
+
+{% block scripts %}
+    {% include 'script_table.html' %}
 {% endblock %}
