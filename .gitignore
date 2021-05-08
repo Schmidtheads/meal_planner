@@ -127,7 +127,13 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Visual Studio and Visual Code
 .vs/
 *.pyproj
 *.user
 *.sln
+*.code-workspace
+rs.bat
+.vscode/
+__.vscode/

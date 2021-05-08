@@ -1,3 +1,7 @@
+/*
+This is the place to add custome site css styles
+*/
+
 body {
     padding-top: 50px;
     padding-bottom: 20px;
@@ -15,7 +19,7 @@ hr {
 }
 
 /* Set width on the form input elements since they're 100% wide by default */
-input, select, textarea {
+select, textarea {
     max-width: 280px;
 }
 
@@ -34,10 +38,6 @@ input.input-validation-error {
 
 input[type="checkbox"].input-validation-error {
     border: 0 none;
-}
-
-input:read-only {
-    background-color: lightgray;
 }
 
 .validation-summary-errors {
@@ -301,6 +301,47 @@ input:read-only {
     max-width: none;
     width: 500px;
 }
+
+/* ----------------------------------------
+ * Custom recipe selector widget
+ */
+
+/* position the Recipe search button */
+#id_recipe_search_button {
+    margin: auto;
+    display: block;
+}
+
+#id_recipe_search_results {
+    width: 100%;
+}
+
+#id_recipe_search_container {
+    padding-bottom: 15px;
+}
+
+#id_table_scroll {
+    height:200px;
+    overflow:auto;
+}
+
+/* Make the table for the recipe custom selector 100% so search field
+   fills width of modal dialog
+ */
+#id_recipe_search {
+    width: 100%;
+}
+
+ tbody tr:hover tr.select-row {
+    background-color: #007bff;
+ }
+
+ .tableRowHover tbody tr:not(.select-row):hover td {
+    background-color: #dcdcdc;
+    transition: all 0.01s ease-in-out;
+}
+
+/* ---------------------------------------- */
 
 /* Add media queries for smaller screens */
 @media screen and (max-width:720px) {
