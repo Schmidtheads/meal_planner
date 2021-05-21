@@ -3,10 +3,11 @@
 {% block title %}Recipes{% endblock %}
 
 {% block content %}
+{% load static %}
     <h1>Recipes</h1>
     <table id="{{table_name}}" class="viewTable">
         <tr>
-            <th class="viewCell sortableHeader titleCell" onclick="sortTable(0)">Name</th>
+            <th class="viewCell sortableHeader titleCell" onclick="sortTable('{{table_name}}', 0)">Name</th>
             <th class="viewCell">Cookbook</th>
             <th class="viewCell">Page Number</th>
             <th class="viewCell">Notes</th>
@@ -27,5 +28,5 @@
 {% endblock %}
 
 {% block scripts %}
-    {% include 'script_table.html' %}
+<script src="{% static 'home/scripts/table.js' %}"></script>
 {% endblock %}
