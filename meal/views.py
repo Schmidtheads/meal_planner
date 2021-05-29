@@ -7,12 +7,9 @@ import calendar
 import json
 
 from .models import Meal
-from .forms import MealForm as mealForm2
+from .forms import MealForm
 from recipe.models import Recipe
 from cookbook.models import Cookbook
-
-
-MealForm = modelform_factory(Meal, exclude=[])
 
 
 def detail(request, id):
@@ -23,20 +20,19 @@ def detail(request, id):
     meal = get_object_or_404(Meal, pk=id)
 
     if request.method == "POST":
-        #form = MealForm(request.POST, instance=meal)
-        form = mealForm2(request.POST, instance=meal)
+        form = MealForm(request.POST, instance=meal)
         if form.is_valid():
             form.save()
             return redirect("meals")
     else:
         
         # Create form for new or update entry - scheduled_date is uneditable
-        #form = MealForm(instance=meal)
-        form = mealForm2(instance=meal)
-        scheduled_date_widget = form.fields['scheduled_date'].widget
-        scheduled_date_widget.attrs['readonly'] = True
-        # For consistent styling purposes assign form-control class to date widget to match readonly custom widget
-        scheduled_date_widget.attrs.update({'class': 'form-control'})
+        form = MealForm(instance=meal)
+
+    scheduled_date_widget = form.fields['scheduled_date'].widget
+    scheduled_date_widget.attrs['readonly'] = True
+    # For consistent styling purposes assign form-control class to date widget to match readonly custom widget
+    scheduled_date_widget.attrs.update({'class': 'form-control'})
 
     return render(request, "meal/detail.html",
                  {"title": "Meal Planner",
@@ -56,6 +52,12 @@ def new(request):
         if form.is_valid():
             form.save()
             return redirect("meals")
+        else:
+            # If form is not valid make sure that date stays read only
+            scheduled_date_widget = form.fields['scheduled_date'].widget
+            scheduled_date_widget.attrs['readonly'] = True
+            # For consistent styling purposes assign form-control class to date widget to match readonly custom widget
+            scheduled_date_widget.attrs.update({'class': 'form-control'})
     else:
         # Retrieve scheduled_date from query string value (must be YYYY-MM-DD format e.g. 2020-12-23)
         scheduled_date = request.GET.get('date', None)  # should default be current date?
