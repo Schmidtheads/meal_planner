@@ -4,6 +4,7 @@ from datetime import datetime
 
 from .models import Recipe, RecipeType
 
+
 RecipeForm = modelform_factory(Recipe, exclude=[])
 
 # Create your views here.
@@ -29,3 +30,7 @@ def recipes(request):
                   "year": datetime.now().year,
                   "company": "Schmidtheads Inc.",
                   "table_name": "recipes"})
+
+
+
+

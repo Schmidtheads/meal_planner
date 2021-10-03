@@ -3,7 +3,6 @@ from cookbook.models import Cookbook
 
 # Create your models here.
 
-
 class RecipeType(models.Model):
     name = models.CharField(max_length=20)
 

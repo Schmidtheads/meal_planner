@@ -41,7 +41,10 @@ class MealForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(MealForm, self).__init__(*args, **kwargs)
         the_meal = kwargs.get('instance')
-        self.recipe_name = the_meal.recipe.name
-        self.fields['recipe'].widget.recipe_name = self.recipe_name
+        
+        # Set properties, if a meal for the date was found
+        if not the_meal is None:
+            self.recipe_name = the_meal.recipe.name
+            self.fields['recipe'].widget.recipe_name = self.recipe_name
         
 

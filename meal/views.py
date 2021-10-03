@@ -10,6 +10,7 @@ from .models import Meal
 from .forms import MealForm
 from recipe.models import Recipe
 from cookbook.models import Cookbook
+from recipe.search import Search
 
 
 def detail(request, id):
@@ -221,35 +222,20 @@ def _get_meal_id_by_date(date):
 
 def _search_for_recipes(search_keys):
 
-    # Return fixed result until search fully coded
-    if search_keys == "0":
-        result = []
-    else:
-        result = [ \
-            { \
-                'id': 16, \
-                'name': 'Spinach Rice Casserole',  \
-                'cookbook': 'Moosewood Cookbook', \
-                'author': 'Jane Doe' \
-            }, \
-            { \
-                'id': 5, \
-                'name': 'Cajun Sweet Potatoes', \
-                'cookbook': 'Vegeterian', \
-                'author': 'Jamie Oliver' \
-            }, \
-            { \
-                'id': 11, \
-                'name': 'Thai it!', \
-                'cookbook': 'Loony Spoons', \
-                'author': 'Barabara Smith' \
-            }, \
-            { \
-                'id': 8, \
-                'name': 'Penne with Roasted Summer Vegetables', \
-                'cookbook': 'Internet', \
-                'author': 'Unknown' \
-            } \
-        ]
-   
-    return result
+    # Call serach object
+    # TEST SEARCH
+    srch = Search(search_keys)
+    recipe_result = srch.find()
+
+    result_list = []
+    for recipe in recipe_result:
+        cb = recipe.cook_book
+        candidate = {
+            'id': recipe.id,
+            'name': recipe.name,
+            'cookbook': cb.title,
+            'author': f'{cb.author.first_name} {cb.author.last_name}'
+        }
+        result_list.append(candidate)
+    
+    return result_list
