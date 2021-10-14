@@ -1,10 +1,12 @@
-﻿<!DOCTYPE html>
+﻿<!-- Use this for main application pages -->
+<!DOCTYPE html>
 <html>
 <head>
+    {% load static %}
+    <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}" />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title }}</title>
-    {% load static %}
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="{% static 'home/content/site.css' %}" />
 <body>
