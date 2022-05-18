@@ -4,10 +4,9 @@
 
 {% block content %}
 {% load static %}
-    <h1>Cookbooks</h1>
-    <div style="display: inline-block; text-align: left;">
-        <button class="btn btn-outline-primary" id="new" onclick="window.location.href='new'">New
-            Cookbook</button>
+<h1>Cookbooks</h1>
+<div style="display: inline-block; text-align: left;">
+    <button class="btn btn-default" id="new" onclick="window.location.href='new'">New Cookbook</button>
     <table id="{{table_name}}" class="viewTable">
         <tr>
             <th class="viewCell">Cover</th>
@@ -40,7 +39,7 @@
         </tr>
         {% endfor %}
     </table>
-    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}

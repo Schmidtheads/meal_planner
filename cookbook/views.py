@@ -23,7 +23,7 @@ def detail(request, id):
         form = CookbookForm(instance=cookbook)
 
     return render(request, "cookbook/detail.html",
-                 {"title": "Meal Planner",
+                 {"title": "Cookbook",
                   "year": datetime.now().year,
                   "company": "Schmidtheads Inc.",
                   "form": form,
@@ -40,7 +40,7 @@ def new(request):
         form = CookbookForm()
 
     return render(request, "cookbook/detail.html", 
-                 {"title": "Meal Planer",
+                 {"title": "New Cookbook",
                   "year": datetime.now().year,
                   "company": "Schmidtheads Inc.",
                   "form": form})
@@ -49,7 +49,8 @@ def new(request):
 def cookbooks(request):
 
     return render(request, "cookbook/list.html",
-                  {"cookbooks": Cookbook.objects.all(),
+                  {"title": "Cookbooks",
+                   "cookbooks": Cookbook.objects.all(),
                    "year": datetime.now().year,
                    "company": "Schmidtheads Inc.",
                    "table_name": "cookbooks"})
