@@ -13,7 +13,7 @@ def home(request):
         request,
         'home/index.html',
         {
-            'title':'Home Page',
+            'title':'Meal Planner',
             'year': datetime.now().year,
             'company': 'Schmidtheads',
             'application': 'Meal Planner',
