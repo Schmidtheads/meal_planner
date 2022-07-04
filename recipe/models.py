@@ -9,6 +9,10 @@ class RecipeType(models.Model):
     def __str__(self):
         return f"{self.name}"
 
+    class Meta:
+        # Order the output by the Recipe Type name
+        ordering = ['name']
+
 
 class Recipe(models.Model):
     name = models.CharField(max_length=50)

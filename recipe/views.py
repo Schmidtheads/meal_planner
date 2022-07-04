@@ -23,7 +23,26 @@ def detail(request, id):
     return render(request, "recipe/detail.html",
                  {"form": form,
                   "year": datetime.now().year,
-                  "company": "Schmidtheads Inc."})
+                  "company": "Schmidtheads Inc.",
+                  "button_label": "Update"})
+
+
+def new(request):
+    if request.method == "POST":
+        form = RecipeForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect("recipes")
+    else:
+        form = RecipeForm()
+
+    return render(request, "recipe/detail.html", 
+                 {"title": "New Recipe",
+                  "year": datetime.now().year,
+                  "company": "Schmidtheads Inc.",
+                  "form": form,
+                  "button_label": "Create"})
+
 
 def recipes(request):
 
