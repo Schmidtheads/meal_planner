@@ -4,7 +4,10 @@
 
 {% block content %}
 {% load static %}
-    <h1>Recipes</h1>
+<h1>Recipes</h1>
+<div style="display: inline-block; text-align: left;">
+    <button class="btn btn-default" id="new" onclick="window.location.href='new'">New Recipe</button>
+    
     <table id="{{table_name}}" class="viewTable">
         <tr>
             <th class="viewCell sortableHeader titleCell" onclick="sortTable('{{table_name}}', 0)">Name</th>
@@ -25,6 +28,7 @@
         </tr>
         {% endfor %}
     </table>
+</div>
 {% endblock %}
 
 {% block scripts %}
