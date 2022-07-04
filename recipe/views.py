@@ -21,7 +21,9 @@ def detail(request, id):
         form = RecipeForm(instance=recipe)
 
     return render(request, "recipe/detail.html",
-                 {"form": form})
+                 {"form": form,
+                  "year": datetime.now().year,
+                  "company": "Schmidtheads Inc."})
 
 def recipes(request):
 
