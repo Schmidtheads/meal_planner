@@ -1,6 +1,17 @@
 from django import forms
-from .models import RecipeType
+from .models import Recipe, RecipeType
 
+
+class RecipeForm(forms.ModelForm):
+    recipe_types = forms.ModelMultipleChoiceField(
+        queryset=RecipeType.objects.all(), 
+        required=False, 
+        widget=forms.CheckboxSelectMultiple)
+
+    class Meta:
+        model = Recipe
+        fields = '__all__'
+        
 
 class RecipeTypeForm(forms.ModelForm):
     class Meta:

@@ -25,12 +25,16 @@
                     </tr>
                     <tr class="inputRow"><th><label for="id_recipe_types">Recipe Tags:</label></th>
                         <td>
-                            <div>
+                            <div id="id_recipe_type_list">
                                 {{ form.recipe_types }}
+                            </div>
+                        </td>
+                        <td class="padded_table_cell">
+                            <div>
                                 <a href="{% url 'recipe_type_create' %}" id="add_recipe_type" style="cursor: pointer; cursor: hand;"
-                                    onclick="return showAddPopup(this);">
-                                    <img src="{% static 'home/images/plus24.png' %}"></a>
-                            </div>     
+                                onclick="return showAddPopup(this);">
+                                <img src="{% static 'home/images/plus24.png' %}" title="Add new Recipe Tag"></a>
+                            </div>    
                         </td>
                     </tr>
                 </table>

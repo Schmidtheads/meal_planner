@@ -5,9 +5,8 @@ from django.forms import modelform_factory
 from datetime import datetime
 
 from .models import Recipe, RecipeType
-from .forms import RecipeTypeForm
+from .forms import RecipeForm, RecipeTypeForm
 
-RecipeForm = modelform_factory(Recipe, exclude=[])
 
 # Create your views here.
 
@@ -63,9 +62,9 @@ def RecipeTypeCreatePopup(request):
 	if form.is_valid():
 		instance = form.save()
 
-		## Change the value of the "#id_recipe_type". This is the element id in the form
+		## Change the value of the "#id_recipe_types". This is the element id in the form
 
-		return HttpResponse('<script>opener.closePopup(window, "%s", "%s", "#id_recipe_type");</script>' % (instance.pk, instance))
+		return HttpResponse('<script>opener.closePopup(window, "%s", "%s", "#id_recipe_types");</script>' % (instance.pk, instance))
 
 	return render(request, "recipe/recipe_type.html",
                   {"form": form,
