@@ -1,7 +1,5 @@
-import json
 from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.forms import modelform_factory
 from datetime import datetime
