@@ -25,4 +25,4 @@ class RecipeTypeForm(forms.ModelForm):
             if str(instance.name).lower() == str(name).lower():
                 raise forms.ValidationError(f'There is already a Recipe Tag of "{name}"')
 
-        return name
+        return str(name).lower()

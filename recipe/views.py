@@ -62,9 +62,9 @@ def RecipeTypeCreatePopup(request):
 	if form.is_valid():
 		instance = form.save()
 
-		## Change the value of the "#id_recipe_types". This is the element id in the form
+		## Add the new value to "#id_recipe_types". This is the element id in the form
 
-		return HttpResponse('<script>opener.closePopup(window, "%s", "%s", "#id_recipe_types");</script>' % (instance.pk, instance))
+		return HttpResponse('<script>opener.closePopup(window, "%s", "%s", "#id_recipe_types", "checkbox");</script>' % (instance.pk, instance))
 
 	return render(request, "recipe/recipe_type.html",
                   {"form": form,
