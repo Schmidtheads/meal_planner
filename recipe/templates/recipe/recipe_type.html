@@ -1,0 +1,14 @@
+{% extends 'home/layout_light.html' %}
+
+{% block title %}Recipe Tag{% endblock %}
+
+{% block content %}
+{% load static %}
+<div class="container">
+    <h1>Recipe Tag</h1>
+    <form method='POST' action='' enctype="multipart/form-data" novalidate id="recipe_type">{% csrf_token %}
+        {{form.as_p}}
+        <input type="submit" value="Submit" />
+    </form>
+</div>
+{% endblock %}

@@ -1,5 +1,5 @@
 /*
-This is the place to add custome site css styles
+This is the place to add custom site css styles
 */
 
 body {
@@ -300,6 +300,21 @@ input[type="checkbox"].input-validation-error {
 #id_note {
     max-width: none;
     width: 500px;
+}
+
+.padded_table_cell {
+    padding: 10px;
+}
+
+/* ----------------------------------------
+   Recipe styles
+*/
+
+/* Recipe Type multi-select in scrollable checkbox  */
+
+#id_recipe_type_list {
+    overflow: auto; 
+    height: 100px;
 }
 
 /* ----------------------------------------

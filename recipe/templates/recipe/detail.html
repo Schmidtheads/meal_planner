@@ -24,7 +24,18 @@
                         <td>{{ form.notes }}</td>
                     </tr>
                     <tr class="inputRow"><th><label for="id_recipe_types">Recipe Tags:</label></th>
-                        <td>{{ form.recipe_types }}</td>
+                        <td>
+                            <div id="id_recipe_type_list">
+                                {{ form.recipe_types }}
+                            </div>
+                        </td>
+                        <td class="padded_table_cell">
+                            <div>
+                                <a href="{% url 'recipe_type_create' %}" id="add_recipe_type" style="cursor: pointer; cursor: hand;"
+                                onclick="return showAddPopup(this);">
+                                <img src="{% static 'home/images/plus24.png' %}" title="Add new Recipe Tag"></a>
+                            </div>    
+                        </td>
                     </tr>
                 </table>
                 <p class="buttonContainer">
@@ -38,4 +49,5 @@
 <p><a class="btn btn-default" href="{% url 'recipes' %}">Back to Recipe list &raquo;</a></p>
 {% endblock %}
 {% block scripts %}
+<script src="{% static 'home/scripts/popup.js' %}"></script>
 {% endblock %}

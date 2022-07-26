@@ -1,11 +1,12 @@
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.forms import modelform_factory
 from datetime import datetime
 
 from .models import Recipe, RecipeType
+from .forms import RecipeForm, RecipeTypeForm
 
-
-RecipeForm = modelform_factory(Recipe, exclude=[])
 
 # Create your views here.
 
@@ -53,5 +54,22 @@ def recipes(request):
                   "table_name": "recipes"})
 
 
+# Creating Recipe Types for a Recipe implemented using guidance
+# from this page: https://tinyurl.com/4b5yt3rw
+
+def RecipeTypeCreatePopup(request):
+	form = RecipeTypeForm(request.POST or None)
+	if form.is_valid():
+		instance = form.save()
+
+		## Add the new value to "#id_recipe_types". This is the element id in the form
+
+		return HttpResponse('<script>opener.closePopup(window, "%s", "%s", "#id_recipe_types", "checkbox");</script>' % (instance.pk, instance))
+
+	return render(request, "recipe/recipe_type.html",
+                  {"form": form,
+                   "year": datetime.now().year,
+                   "company": "Schmidtheads Inc.",
+                   "table_name": "recipe_type"})
 
 
