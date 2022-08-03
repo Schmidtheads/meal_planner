@@ -1,5 +1,5 @@
 from django import forms
-from .models import Recipe, RecipeType
+from .models import Recipe, RecipeRating, RecipeType, Diner
 
 
 class RecipeForm(forms.ModelForm):
@@ -26,3 +26,16 @@ class RecipeTypeForm(forms.ModelForm):
                 raise forms.ValidationError(f'There is already a Recipe Tag of "{name}"')
 
         return str(name).lower()
+
+
+class DinerForm(forms.ModelForm):
+    class Meta:
+        model = Diner
+        fields = '__all__'
+
+
+class RatingForm(forms.ModelForm):
+    class Meta:
+        model = RecipeRating
+        fields = '__all__'
+        

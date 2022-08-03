@@ -1,0 +1,36 @@
+﻿{% extends 'home/layout.html' %}
+
+{% block title %}Title: {{form.title}}{% endblock %}
+
+{% block content %}
+{% load static %}
+<link rel="shortcut icon" type="image/png" href="{% static 'home/images/favicon.ico' %}" />
+<div class="row">
+    <div class="columnright left">
+        <form method="post" enctype="multipart/form-data">
+            <fieldset>
+                <legend>Recipe Rating</legend>
+                <table class="inputTable">
+                    <tr class="inputRow"><th><label for="id_recipe">Recipe:</label></th>
+                        <td>{{ form.recipe }}</td>
+                    </tr>
+                    <tr class="inputRow"><th><label for="id_rating">Rating:</label></th>
+                        <td> {{ form.rating }}</td>
+                    </tr>
+                    <tr class="inputRow"><th><label for="id_diner">Diner:</label></th>
+                        <td> {{ form.diner }}</td>
+                    </tr>
+                </table>
+                <p class="buttonContainer">
+                    {% csrf_token %}
+                    <button class="btn btn-default" type="submit">{{button_label}}</button>
+                </p>
+            </fieldset>
+        </form>
+    </div>
+</div>
+<p><a class="btn btn-default" href="{% url 'recipes' %}">Back to Recipe list &raquo;</a></p>
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'home/scripts/popup.js' %}"></script>
+{% endblock %}

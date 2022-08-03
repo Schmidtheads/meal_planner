@@ -1,0 +1,26 @@
+﻿{% extends 'home/layout.html' %}
+
+{% block title %}Recipes Ratings{% endblock %}
+
+{% block content %}
+{% load static %}
+<h1>Recipes</h1>
+<div style="display: inline-block; text-align: left;">
+    <table id="{{table_name}}" class="viewTable">
+        <tr>
+            <th class="viewCell">Rating</th>
+            <th class="viewCell">Diner</th>
+        </tr>
+        {% for rating in ratings %}
+        <tr>
+            <td  class="viewCell">{{rating.rating}}</td>
+            <td  class="viewCell">{{rating.diner}}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'home/scripts/table.js' %}"></script>
+{% endblock %}
