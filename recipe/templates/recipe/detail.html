@@ -39,7 +39,7 @@
                     </tr>
                     <tr><th><label for="id_rating">Rating:</label></th>
                         <td>{{ recipe_rating }}
-                            <a href="{% url 'recipe_ratings_list' recipe.id %}" style="padding-left: 20px" id="recipe_ratings_list">Ratings</a>
+                            <a href="{% url 'recipe_rating_list' recipe_id %}" style="padding-left: 20px" id="recipe_rating_list">Ratings</a>
                         </td>
                     </tr>
                 </table>

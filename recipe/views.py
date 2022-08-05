@@ -25,6 +25,7 @@ def detail(request, id):
 
     return render(request, "recipe/detail.html",
                  {"form": form,
+                 "recipe_id": id,
                  "recipe_rating": recipe_rating,
                   "year": datetime.now().year,
                   "company": "Schmidtheads Inc.",
@@ -87,7 +88,7 @@ def rating_detail(request, id):
 
 def ratings_list(request, recipe_id):
     recipe = Recipe.objects.get(id=recipe_id)
-    recipe_ratings = recipe.reciperatings_set.all()
+    recipe_ratings = recipe.reciperating_set.all()
 
     return render(request, "recipe/rating_list.html",
                   {"recipe_ratings": recipe_ratings,
