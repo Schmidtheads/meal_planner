@@ -8,5 +8,6 @@ urlpatterns = [
     path('list', views.recipes, name='recipes'),
     path('new', views.new, name='recipe_new'),
     path('recipe_type/create', views.RecipeTypeCreatePopup, name='recipe_type_create'),
-    path('recipe_ratings/<int:recipe_id>', views.ratings_list, name='recipe_rating_list'),
+    path('<int:recipe_id>/recipe_ratings', views.ratings_list, name='recipe_rating_list'),
+    path('<int:recipe_id>/recipe_ratings/rating', views.new_rating, name='rating_new'),
 ]

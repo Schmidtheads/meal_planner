@@ -90,8 +90,13 @@ def ratings_list(request, recipe_id):
     recipe = Recipe.objects.get(id=recipe_id)
     recipe_ratings = recipe.reciperating_set.all()
 
+    recipe_rating = calculate_recipe_rating(recipe_id)
+
     return render(request, "recipe/rating_list.html",
                   {"recipe_ratings": recipe_ratings,
+                   "recipe_rating": recipe_rating,
+                   "recipe_name": recipe.name,
+                   "recipe_id": recipe_id,
                    "table_name": "Recipe Ratings",
                    "year": datetime.now().year,
                    "company": "Schmidtheads Inc.",})
@@ -101,9 +106,27 @@ def recipes(request):
 
     return render(request, "recipe/list.html",
                  {"recipes": Recipe.objects.all(),
+                  "table_name": "recipes",
+                  "year": datetime.now().year,
+                  "company": "Schmidtheads Inc.",})
+
+
+def new_rating(request, recipe_id):
+    if request.method == "POST":
+        form = RatingForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect(f"recipe/{recipe_id}")
+    else:
+        form = RatingForm()
+    return render(request, "recipe/rating_detail.html",
+                 {
+                  "form": form,
+                  "title": "New Rating",
+                  "button_label": "Create",
                   "year": datetime.now().year,
                   "company": "Schmidtheads Inc.",
-                  "table_name": "recipes"})
+                 })
 
 
 # Creating Recipe Types for a Recipe implemented using guidance
