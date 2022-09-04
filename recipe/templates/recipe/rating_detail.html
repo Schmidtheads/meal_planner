@@ -9,10 +9,10 @@
     <div class="columnright left">
         <form method="post" enctype="multipart/form-data">
             <fieldset>
-                <legend>Recipe Rating</legend>
+                <legend>Recipe Rating for {{ recipe_name }}</legend>
                 <table class="inputTable">
-                    <tr class="inputRow"><th><label for="id_recipe">Recipe:</label></th>
-                        <td>{{ form.recipe }}</td>
+                    <tr><th></th>
+                        <td>{{ form.recipe.as_hidden }}</td>
                     </tr>
                     <tr class="inputRow"><th><label for="id_rating">Rating:</label></th>
                         <td> {{ form.rating }}</td>

@@ -43,6 +43,8 @@ def new(request):
 
     return render(request, "recipe/detail.html", 
                  {"title": "New Recipe",
+                  "recipe_id": 0,
+                  "recipe_rating": 0,
                   "year": datetime.now().year,
                   "company": "Schmidtheads Inc.",
                   "form": form,
@@ -112,17 +114,28 @@ def recipes(request):
 
 
 def new_rating(request, recipe_id):
+    recipe = Recipe.objects.get(id=recipe_id)
+    recipe_name = recipe.name
+
     if request.method == "POST":
         form = RatingForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            return redirect(f"recipe/{recipe_id}")
+            # Go back to the associated recipe
+            return redirect('recipe_detail', recipe_id)
+        else:
+            # if from is invalid on submission, need to set recipe again
+            form.fields['recipe'].initial = recipe         
     else:
         form = RatingForm()
+        # Set recipe to read only
+        form.fields['recipe'].initial = recipe
+
     return render(request, "recipe/rating_detail.html",
                  {
                   "form": form,
                   "title": "New Rating",
+                  "recipe_name": recipe_name,
                   "button_label": "Create",
                   "year": datetime.now().year,
                   "company": "Schmidtheads Inc.",
