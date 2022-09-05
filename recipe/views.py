@@ -119,6 +119,8 @@ def new_rating(request, recipe_id):
 
     if request.method == "POST":
         form = RatingForm(request.POST, request.FILES)
+
+        #TODO: ensure a diner can't have more than one rating per recipe
         if form.is_valid():
             form.save()
             # Go back to the associated recipe

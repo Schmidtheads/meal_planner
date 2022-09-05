@@ -17,8 +17,16 @@
                     <tr class="inputRow"><th><label for="id_rating">Rating:</label></th>
                         <td> {{ form.rating }}</td>
                     </tr>
+                    <tr>
+                        <th></th>
+                        <td> {{ form.errors.rating }}</td>
+                    </tr>
                     <tr class="inputRow"><th><label for="id_diner">Diner:</label></th>
                         <td> {{ form.diner }}</td>
+                    </tr>
+                    <tr>
+                        <th></th>
+                        <td> {{ form.errors.diner }}</td>
                     </tr>
                 </table>
                 <p class="buttonContainer">
