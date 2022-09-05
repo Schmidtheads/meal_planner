@@ -1,0 +1,30 @@
+﻿{% extends 'home/layout.html' %}
+
+{% block title %}Recipes Ratings{% endblock %}
+
+{% block content %}
+{% load static %}
+<h1>Recipe Ratings for {{recipe_name}}</h1>
+<p>Overall rating {{recipe_rating}}</p>
+<div style="display: inline-block; text-align: left;">
+    <!-- redirect up one level to get path http://<host>/rating instead of http://<host>recipe_rating/rating -->
+    <button class="btn btn-default" id="new" onclick="window.location.href='../{{recipe_id}}/recipe_ratings/rating'">New Rating</button>
+    <table id="{{table_name}}" class="viewTable">
+        <tr>
+            <th class="viewCell">Rating</th>
+            <th class="viewCell">Diner</th>
+        </tr>
+        {% for rating in recipe_ratings %}
+        <tr>
+            <td class="viewCell">{{rating.rating}}</td>
+            <td class="viewCell">{{rating.diner}}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+<p><a class="btn btn-default" href="{% url 'recipe_detail' recipe_id %}">Back to Recipe &raquo;</a></p>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'home/scripts/table.js' %}"></script>
+{% endblock %}

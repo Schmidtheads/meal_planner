@@ -37,6 +37,17 @@
                             </div>    
                         </td>
                     </tr>
+                    <tr><th><label for="id_rating">Rating:</label></th>
+                        <td>{{ recipe_rating }}
+                            {% comment %}
+                            When creating a new recipe (recipe_id = 0), hide the Ratings link
+                            as we don't yet have a valid recipe_id so, the link will fail.
+                            {% endcomment %}
+                            {% if recipe_id != 0 %}   
+                            <a href="{% url 'recipe_rating_list' recipe_id %}" style="padding-left: 20px" id="recipe_rating_list">Ratings</a>
+                            {% endif %}
+                        </td>
+                    </tr>
                 </table>
                 <p class="buttonContainer">
                     {% csrf_token %}

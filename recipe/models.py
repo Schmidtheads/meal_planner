@@ -37,6 +37,7 @@ class Diner(models.Model):
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
 
+
 class RecipeRating(models.Model):
     rating = models.PositiveSmallIntegerField()
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
