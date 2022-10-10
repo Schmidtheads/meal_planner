@@ -18,7 +18,7 @@ class Recipe(models.Model):
     name = models.CharField(max_length=50)
     cook_book = models.ForeignKey(Cookbook, on_delete=models.CASCADE)
     page_number = models.PositiveSmallIntegerField()
-    notes = models.CharField(max_length=750)
+    notes = models.CharField(max_length=750, blank=True)
     recipe_types = models.ManyToManyField(RecipeType)
 
     def __str__(self):
