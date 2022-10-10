@@ -118,3 +118,7 @@ MEDIA_ROOT = posixpath.join(*(BASE_DIR.split(os.path.sep) + ['media']))
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 STATIC_URL = '/static/'
 STATIC_ROOT = posixpath.join(*(BASE_DIR.split(os.path.sep) + ['static']))
+
+# Use the most recent ID field type BigAutoField (as of Django 3.2
+# ) (instead of Integer)
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

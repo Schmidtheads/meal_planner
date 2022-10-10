@@ -1,0 +1,41 @@
+﻿{% extends 'home/layout.html' %}
+
+{% block title %}Title: {{form.title}}{% endblock %}
+
+{% block content %}
+{% load static %}
+    <div class="row">
+        <div class="columnleft left">
+        </div>
+        <div class="columnright left">
+            <form method="post">
+                <fieldset>
+                    <legend>Meal</legend>
+                    <table class="inputTable">
+                        <tr class="inputRow"><th><label for="id_scheduled_Date">Date:</label></th>
+                            <td>{{ form.scheduled_date }}</td>
+                        </tr>
+                        <tr class="inputRow"><th><label for="id_was_made">Was Made:</label></th>
+                            <td>{{ form.was_made }}</td>
+                        </tr>
+                        <tr class="inputRow"><th><label for="id_recipe">Recipe:</label></th>
+                            <td>{{ form.recipe }}{{ form.recipe.errors }}</td>
+                        </tr>
+                        <tr class="inputRow"><th><label for="id_note">Note:</label></th>
+                            <td>{{ form.note }}</td>
+                        </tr>
+                    </table>
+                    <p class="buttonContainer">
+                        {% csrf_token %}
+                        <button class="btn btn-default" type="submit">Update</button>
+                    </p>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+    <p><a class="btn btn-default" href="{% url 'meals' %}">Back to Meals Calendar &raquo;</a></p>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'home/scripts/recipequery.js' %}"></script>
+{% endblock %}

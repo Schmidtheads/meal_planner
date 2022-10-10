@@ -1,3 +1,7 @@
+/*
+This is the place to add custom site css styles
+*/
+
 body {
     padding-top: 50px;
     padding-bottom: 20px;
@@ -15,7 +19,7 @@ hr {
 }
 
 /* Set width on the form input elements since they're 100% wide by default */
-input, select, textarea {
+select, textarea {
     max-width: 280px;
 }
 
@@ -137,13 +141,15 @@ input[type="checkbox"].input-validation-error {
     width: 500px;
 }
 
-/* styles for meal calendar */
+/*
+ *  styles for meal calendar 
+ */
 
 #calendar {
     padding-bottom: 20px;
 }
 
-/* Set the colour of the current day*/
+/* Set the colour of the current day */
 
 .date {
     font-size: 10px;
@@ -156,7 +162,7 @@ input[type="checkbox"].input-validation-error {
     font-size: 14px;
 }
 
-/* styes used to left or right justify text*/
+/* styes used to left or right justify text */
 
 .left {
     float: left;
@@ -237,7 +243,120 @@ input[type="checkbox"].input-validation-error {
 .recipe_text {
     font-size: 12px;
     color: #92a8d1;
+    font-style: italic;
+    font-weight: bold;
 }
+
+.cookbook_text {
+    font-size: 12px;
+    color: #92a8d1;
+}
+
+/* Tooltip container */
+.calendartooltip {
+    position: relative;
+    display: inline-block;
+}
+
+    .calendartooltip .tooltiptext {
+        visibility: hidden;
+        width: 120px;
+        background-color: #efefef;
+        color: black;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px 0;
+        position: absolute;
+        z-index: 1;
+        top: 150%;
+        left: 50%;
+        margin-left: -60px;
+    }
+
+.calendartooltip .tooltiptext::after {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent #efefef transparent;
+}
+
+.calendartooltip:hover .tooltiptext {
+    visibility: visible;
+}
+
+/* 
+ *  Styles for meal details 
+ */
+
+#id_scheduled_date {
+    max-width: none;
+    width: 100px;
+}
+
+#id_note {
+    max-width: none;
+    width: 500px;
+}
+
+.padded_table_cell {
+    padding: 10px;
+}
+
+/* ----------------------------------------
+   Recipe styles
+*/
+
+/* Recipe Type multi-select in scrollable checkbox  */
+
+#id_recipe_type_list {
+    overflow: auto; 
+    height: 100px;
+}
+
+/* ----------------------------------------
+ * Custom recipe selector widget
+ */
+
+/* position the Recipe search button */
+#id_recipe_search_button {
+    margin: auto;
+    display: block;
+}
+
+#id_recipe_search_results {
+    width: 100%;
+}
+
+#id_recipe_search_container {
+    padding-bottom: 15px;
+}
+
+#id_table_scroll {
+    height:200px;
+    overflow:auto;
+}
+
+/* Make the table for the recipe custom selector 100% so search field
+   fills width of modal dialog
+ */
+#id_recipe_search {
+    width: 100%;
+}
+
+ tbody tr:hover tr.select-row {
+    background-color: #007bff;
+ }
+
+ .tableRowHover tbody tr:not(.select-row):hover td {
+    background-color: #dcdcdc;
+    transition: all 0.01s ease-in-out;
+}
+
+/* ---------------------------------------- */
 
 /* Add media queries for smaller screens */
 @media screen and (max-width:720px) {

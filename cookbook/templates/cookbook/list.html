@@ -3,12 +3,15 @@
 {% block title %}Cookbooks{% endblock %}
 
 {% block content %}
-    <h1>Cookbooks</h1>
+{% load static %}
+<h1>Cookbooks</h1>
+<div style="display: inline-block; text-align: left;">
+    <button class="btn btn-default" id="new" onclick="window.location.href='new'">New Cookbook</button>
     <table id="{{table_name}}" class="viewTable">
         <tr>
             <th class="viewCell">Cover</th>
-            <th class="viewCell sortableHeader titleCell" onclick="sortTable(0)">Title</th>
-            <th class="viewCell sortableHeader authorCell" onclick="sortTable(1)">Author</th>
+            <th class="viewCell sortableHeader titleCell" onclick="sortTable('{{table_name}}', 1)">Title</th>
+            <th class="viewCell sortableHeader authorCell" onclick="sortTable('{{table_name}}', 2)">Author</th>
             <th class="viewCell">Description</th>
             <th class="viewCell">Publish Date</th>
             <th class="viewCell">Edition</th>
@@ -36,8 +39,9 @@
         </tr>
         {% endfor %}
     </table>
+</div>
 {% endblock %}
 
 {% block scripts %}
-    {% include 'script_table.html' %}
+<script src="{% static 'home/scripts/table.js' %}"></script>
 {% endblock %}

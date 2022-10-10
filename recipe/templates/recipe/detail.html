@@ -1,21 +1,64 @@
-﻿{% extends 'base.html' %}
+﻿{% extends 'home/layout.html' %}
 
-{% block title %}Title: {{recipe.title}}{% endblock %}
+{% block title %}Title: {{form.title}}{% endblock %}
 
 {% block content %}
-    <form method="post">
-    <table>
-        {{ form }}
-    </table>
-    {% csrf_token %}
-    <button type="submit">Update</button>
-    </form>
-    <p>
-    <a href="{% url 'home' %}">
-        Back to Recipe list
-    </a>&nbsp;
-    <a href="{% url 'home' %}">
-        Back to Main page
-    </a>
-    </p>
+{% load static %}
+<link rel="shortcut icon" type="image/png" href="{% static 'home/images/favicon.ico' %}" />
+<div class="row">
+    <div class="columnright left">
+        <form method="post" enctype="multipart/form-data">
+            <fieldset>
+                <legend>Recipe</legend>
+                <table class="inputTable">
+                    <tr class="inputRow"><th><label for="id_name">Name:</label></th>
+                        <td>{{ form.name }}</td>
+                    </tr>
+                    <tr class="inputRow"><th><label for="id_cook_book">Cookbook:</label></th>
+                        <td> {{ form.cook_book }}</td>
+                    </tr>
+                    <tr class="inputRow"><th><label for="id_page_number">Page Number:</label></th>
+                        <td>{{ form.page_number }}</td>
+                    </tr>
+                    <tr class="inputRow"><th><label for="id_notes">Notes:</label></th>
+                        <td>{{ form.notes }}</td>
+                    </tr>
+                    <tr class="inputRow"><th><label for="id_recipe_types">Recipe Tags:</label></th>
+                        <td>
+                            <div id="id_recipe_type_list">
+                                {{ form.recipe_types }}
+                            </div>
+                        </td>
+                        <td class="padded_table_cell">
+                            <div>
+                                <a href="{% url 'recipe_type_create' %}" id="add_recipe_type" style="cursor: pointer; cursor: hand;"
+                                onclick="return showAddPopup(this);">
+                                <img src="{% static 'home/images/plus24.png' %}" title="Add new Recipe Tag"></a>
+                            </div>    
+                        </td>
+                    </tr>
+                    <tr><th><label for="id_rating">Rating:</label></th>
+                        <td>{{ recipe_rating }}
+                            {% comment %}
+                            When creating a new recipe (recipe_id = 0), hide the Ratings link
+                            as we don't yet have a valid recipe_id so, the link will fail.
+                            {% endcomment %}
+                            {% if recipe_id != 0 %}   
+                            <a href="{% url 'recipe_rating_list' recipe_id %}" style="padding-left: 20px" id="recipe_rating_list">Ratings</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+                <p class="buttonContainer">
+                    {% csrf_token %}
+                    <button class="btn btn-default" type="submit">{{button_label}}</button>
+                </p>
+            </fieldset>
+        </form>
+    </div>
+</div>
+<p><a class="btn btn-default" href="{% url 'recipes' %}">Back to Recipe list &raquo;</a></p>
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'home/scripts/popup.js' %}"></script>
 {% endblock %}
