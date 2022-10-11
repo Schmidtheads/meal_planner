@@ -10,6 +10,7 @@
     COOKBOOK: searches on title
     AUTHOR:   searches on firstname or lastname
     TYPE:     searches on Recipe Tags
+    RECIPE:   searches on Recipe Name
     RATING:   searches on Recipe rating
     BEFORE:   searches on Meal date before given date
     AFTER:    searches on Meal date after given date
@@ -42,14 +43,16 @@ from .models import Recipe
 KEYWORD_TOKENS = [
     'TYPE:',
     'COOKBOOK:',
-    'AUTHOR:'
-    ]
+    'AUTHOR:',
+    'RECIPE:',
+]
 
 TIME_KEYWORD_TOKENS = [
     'BEFORE:',
     'AFTER:',
-    'OLDER:'
+    'OLDER:',
 ]
+
 
 class Search:
 
@@ -59,21 +62,20 @@ class Search:
         # Keyword tokens: special tokens used to focus search on specific properties
 
         self._tokens = search_string.split(' ')
-        self._keywords = dict.fromkeys([k.upper() for k in self._tokens if k.upper() in KEYWORD_TOKENS])
-        self._time_keywords = dict.fromkeys([k.upper() for k in self._tokens if k.upper() in TIME_KEYWORD_TOKENS])
+        self._keywords = dict.fromkeys(
+            [k.upper() for k in self._tokens if k.upper() in KEYWORD_TOKENS])
+        self._time_keywords = dict.fromkeys(
+            [k.upper() for k in self._tokens if k.upper() in TIME_KEYWORD_TOKENS])
         self._freetokens = self._parse_keywords(self.tokens)
-
 
     @property
     def tokens(self):
         return [t.upper() for t in self._tokens]
 
-
     @property
     def free_tokens(self):
         return [t.upper() for t in self._freetokens]
 
-    
     @property
     def keywords(self):
         '''
@@ -81,7 +83,6 @@ class Search:
         '''
 
         return list(self._keywords.keys())
-
 
     @property
     def time_keywords(self):
@@ -91,13 +92,12 @@ class Search:
 
         return list(self._time_keywords.keys())
 
-
     @property
     def all_keywords(self):
         '''
         Return list of keyword tokens and time keycodes used in this search
         '''
-        
+
         return list(self._keywords.keys()) + list(self._time_keywords.keys())
 
 
@@ -108,7 +108,7 @@ class Search:
         @param keyword: keyword name for which to retreive search values
         @return: search value as either a list or datetime
         '''
-        
+
         all_keywords = {**self._keywords, **self._time_keywords}
 
         return all_keywords[keyword]
@@ -118,7 +118,6 @@ class Search:
 
         return self._time_keywords[keyword]
 
-
     def find(self):
         '''
         Execute the query based on the tokens provided
@@ -127,24 +126,51 @@ class Search:
         # Build query
         # For Recipe Types
 
-        recipe_result = None  #TODO Would it be better to initialize as an empty Django result set?
+        # Build query strings of search values
+        # - a search value is a token that is NOT a keyword
+        # - search values (tokens) that are associated with a keyword are only used to search
+        #   for that keyword's associated table
+        # - free tokens are assigned to all keywords
 
-        # Search keyword tokens first
-        for keyword in self.keywords:
-            search_values = self.keyword_search_values(keyword)
-        
-            # Add tokens that aren't associated with a keyword
-            search_values = search_values + self.free_tokens
+        # Create dictionaries for search values for all keywords with
+        # initial value of an empty list
+        keyword_searches = {key: [] for key in KEYWORD_TOKENS} 
 
-            for value in search_values:
+        # Go through all tokens
+        for token in self.tokens:
+            # if token is a keyword, then extract the search values
+            if token in self.keywords:
+                search_values = self.keyword_search_values(token)
+                keyword_searches[token] = search_values
+
+            # Else if token is a free token, add it to all keyword searches
+            else:
+                if token in self.free_tokens:
+                    for key in keyword_searches:
+                        keyword_searches[key].append(token)
+        # [end] for token
+
+        # Build queries and search for matches, based on
+        # contents of keyword_searches dictionary
+
+        # TODO Would it be better to initialize as an empty Django result set?
+        recipe_result = None
+
+        for keyword in keyword_searches:
+            for value in keyword_searches[keyword]:
                 if keyword == "TYPE:":
-                    recipe_qs = Recipe.objects.filter(recipe_types__name__iexact=value)
+                    recipe_qs = Recipe.objects.filter(
+                        recipe_types__name__iexact=value)
                 elif keyword == "COOKBOOK:":
-                    recipe_qs = Recipe.objects.filter(cook_book__name__icontains=value)
+                    recipe_qs = Recipe.objects.filter(
+                        cook_book__title__icontains=value)
                 elif keyword == "AUTHOR:":
                     recipe_qs = Recipe.objects.filter(
                         Q(cook_book__author__first_name__icontains=value) | Q(cook_book__author__last_name__icontains=value))
-                #end if keyword
+                elif keyword == "RECIPE:":
+                    recipe_qs = Recipe.objects.filter(
+                        name__icontains=value)
+                # [end] if keyword
 
                 # Combine individual recipe type querysets into one big queryset
                 if recipe_result is None:
@@ -152,23 +178,16 @@ class Search:
                 else:
                     recipe_result = recipe_result.union(recipe_qs)
                     #recipe_result = recipe_result | recipe_qs
-                    #recipe_result = recipe_result.distinct()  # remove duplicates
-            #end for value
-            
-        #end for keyword
-
-        #TODO: implement non-keyword searches
-        #  Maybe identify non-keyword terms and append to each keyword search above to
-        #  reduce number of queries carried out.
-        #  Perform query against all criteria (see file header above), skipping
-        #  any criteria already search in keyword search. 
+                    # recipe_result = recipe_result.distinct()  # remove duplicates
+            # [end] for value
+        # [end] for keyword            
 
         # Last search is to filter all results by the time filters
         for keyword in self.time_keywords:
             time_search_values = self.keyword_search_values(keyword)
-            
-            #TODO: implement time filters
-            
+
+            # TODO: implement time filters
+
         # test - loop through recipe type queryset to get recipes
         if not recipe_result is None:
             for r in recipe_result:
@@ -176,7 +195,6 @@ class Search:
 
         # Get recipe related information
         return recipe_result
-
 
     def _parse_keywords(self, tokens):
         '''
@@ -206,7 +224,7 @@ class Search:
                 if not next_token.upper() in self.keywords:
 
                     # only split by , if current keyword is not a time keyword
-                    if k not in self._time_keywords:    
+                    if k not in self._time_keywords:
                         # Split search values by comma and add values for
                         # keyword to class property
                         self._keywords[k] = next_token.split(',')
@@ -220,7 +238,6 @@ class Search:
                     tokens_not_processed.remove(next_token)
 
         return tokens_not_processed
-
 
     def _parse_time_keywords(self, tokens):
         '''
@@ -241,7 +258,6 @@ class Search:
             else:
                 self._time_keywords[k] = date
 
-
     def _parse_date(self, date_string):
         for fmt in ('%Y-%m-%d', '%d.%m.%Y', '%d/%m/%Y', '%d-%b-%Y'):
             try:
@@ -250,4 +266,3 @@ class Search:
             except ValueError:
                 pass
         return None
-
