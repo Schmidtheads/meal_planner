@@ -36,6 +36,7 @@ class Table():
         self._rows = rows
         for fk in foreign_keys:
             self._add_related_column(fk['column'], fk['related_table'])
+        self._fk_mapping = []
         self._is_loaded = False
 
 
@@ -50,7 +51,7 @@ class Table():
 
 
     @property 
-    def related_rows(self):
+    def related_columns(self):
         return self._related_columns
 
 
@@ -63,8 +64,19 @@ class Table():
     def pk_mapping(self):
         pk_mapping = None
         if self.is_loaded:
-            pk_mapping = PrimaryKeyMapping(self.rows)
+            pk_mapping = PrimaryKeyMapping(self, self.rows)
         return pk_mapping
+
+
+    def add_fk_mapping(self, fk_mapping):
+        self._fk_mapping.append(fk_mapping)
+
+
+    def get_fk_mapping(self, related_table, source_fk):
+        for fkm in self._fk_mapping:
+            if fkm.table_name.lower() == related_table.lower():
+                return fkm.find_django_id(source_fk)
+        return None
 
 
     def load(self):
@@ -74,10 +86,11 @@ class Table():
             # Check if Cookbook already in table
             q = self._query_row_exists(r)
 
-            self.get_related_objects()  #TODO: this may need to be changed
+            for rc in self.related_columns:
+                r[rc['column']] = self.get_fk_mapping(rc['table'], r[rc['column']])
 
             if not q:
-                t = self._create_table(r)
+                t = self._create_row(r)
                 t.save()
 
                 # Get Django generated unique id
@@ -94,7 +107,7 @@ class Table():
         return None
 
 
-    def _create_table(self, row):
+    def _create_row(self, row):
         return None
 
 
@@ -117,53 +130,10 @@ class Table():
             self._related_columns.append(related_column)
 
 
-    def get_related_objects(self):
-        '''
-        Replaces related columns id value with actual related object
-        '''
-
-        for rr in self.related_rows:
-            #  get the d_id of the related table
-            column = rr['column']
-            related_table = rr['table']  # this is a Django table object
-
-            # go through all the table rows and replace the related column with
-            # an actual related object
-            for r in self.rows:
-                related_id = r[column]
-                related_obj = related_table.objects.get(pk=related_id)
-                r[column] = related_obj
-
-
 class CookbookTable(Table):
 
     def __init__(self, name, rows, foreign_keys):
         super().__init__(name, rows, foreign_keys)
-
-
-    # def load(self):
-    #     # title, descr, author (fk), pdate, url=None, edition=None, image_path=None):
-
-    #     # Iterate rows
-    #     for r in self.rows:
-
-    #         # Check if Cookbook already in table
-    #         q = self._query_row_exists(r)
-
-    #         self.get_related_objects()
-
-    #         if not q:
-    #             c = self._create_table(r)
-    #             c.save()
-
-    #             # Get Django generated unique id
-    #             django_id = c.id
-    #             # Then add it to the data row being processed
-    #             r['d_id'] = django_id
-    #         else:
-    #             c = None
-
-    #     self._is_loaded = True
 
 
     def _query_row_exists(self, row):
@@ -172,17 +142,17 @@ class CookbookTable(Table):
         return q
 
 
-    def _create_table(self, row):
-        table_object = Cookbook(
-                    title=row['title'],
-                    description=row['description'],
-                    author=row['author'],
-                    published_date=row['published_date'],
-                    url=row['url'],
-                    edition=row['edition'],
-                    image=row['image']
-                )
-        return table_object
+    def _create_row(self, row):
+        t = Cookbook(
+            title=row['title'],
+            description=row['description'],
+            author=row['author'],
+            published_date=row['published_date'],
+            url=row['url'],
+            edition=row['edition'],
+            image=row['image']
+        )
+        return t
 
 
 class AuthorTable(Table):
@@ -191,33 +161,20 @@ class AuthorTable(Table):
         super().__init__(name, rows)
 
 
-    # def load(self):
-
-    #     # Iterate rows of table
-    #     for r in self.rows:
-
-    #         # Check if Author already in table
-    #         q = Author.objects.filter(first_name = r['first_name'], last_name = r['last_name'])
-
-    #         if not q:
-    #             a = Author(first_name = r['first_name'], last_name = r['last_name'])
-    #             a.save()
-
-    #             # Get Django generated unique id
-    #             django_id = a.id
-    #             # Then add it to the data row being processed
-    #             r['d_id'] = django_id
-    #         else:
-    #             a = None
-
-    #     return a
-
     def _query_row_exists(self, row):
         q = Author.objects.filter(first_name = row['first_name'], last_name = row['last_name'])
         return q
 
 
-    def _create_table(self, row):
+    def _query_row_by_django_id(self, django_id):
+        # only if table is loaded!
+        if self.is_loaded:
+            q = Author.objects.get(pk=django_id)
+            return q
+        return None
+
+
+    def _create_row(self, row):
         t = Author(first_name = row['first_name'], last_name = row['last_name'])
         return t
 
@@ -227,62 +184,37 @@ class DinerTable(Table):
     def __init__(self, name, rows):
         super().__init__(name, rows)
 
-    def load(self):
 
-        # Iterate rows of table
-        for r in self.rows:
+    def _query_row_exists(self, row):
+        q = Diner.objects.filter(first_name=row['first_name'], last_name=row['last_name'])
+        return q
 
-            # Check if Author already in table
-            q = Diner.objects.filter(
-                first_name=r['first_name'], last_name=r['last_name'])
 
-            if not q:
-                a = Author(first_name=r['first_name'],
-                           last_name=r['last_name'])
-                a.save()
-
-                # Get Django generated unique id
-                django_id = a.id
-                # Then add it to the data row being processed
-                r['d_id'] = django_id
-            else:
-                a = None
-
-        return a
+    def _create_row(self, row):
+        t = Diner(first_name = row['first_name'], last_name = row['last_name'])
+        return t
 
 
 class RecipeTable(Table):
-
+    # name, cook_book (fk), page_number, notes):
+    
     def __init__(self, name, rows, foreign_keys):
         super().__init__(name, rows, foreign_keys)
 
 
-    def load(self):
-        # name, cook_book (fk), page_number, notes):
+    def _query_row_exists(self, row):
+        q = Recipe.objects.filter(title=row['name'])
+        return q
 
-        # Iterate rows
-        for r in self.rows:
 
-            # Check if Recipe already in table
-            q = Recipe.objects.filter(title=r['name'])
-
-            self.get_related_objects()
-
-            if not q:
-                c = Recipe(
-                    name=r['name'],
-                    cook_book=r['cookbook'],
-                    page_number=r['page_number'],
-                    notes=r['notes']
-                )
-                c.save()
-
-                # Get Django generated unique id
-                django_id = c.id
-                # Then add it to the data row being processed
-                r['d_id'] = django_id
-            else:
-                c = None
+    def _create_row(self, row):
+        t = Recipe(
+            name=row['name'],
+            cook_book=row['cookbook'],
+            page_number=row['page_number'],
+            notes=row['notes']
+        )
+        return t
 
 
 class RecipeRatingTable(Table):
@@ -301,9 +233,7 @@ class RecipeRatingTable(Table):
             # Get Diner and Recipe Object
             diner_obj = 1 #TODO: get actual diner
             recipe_obj = 1 #TODO: get actual recipe
-            q = RecipeRating.objects.filter(recipe = recipe_obj).filter(diner = diner_obj)
-
-            self.get_related_objects()
+            q = RecipeRating.objects.filter(recipe = recipe_obj, diner = diner_obj)
 
             if not q:
                 c = Recipe(
@@ -320,7 +250,8 @@ class RecipeRatingTable(Table):
                 r['d_id'] = django_id
             else:
                 c = None        
-    
+
+
 class MealDatabase():
     '''
     Class that knows the Meal Planner data model and relationships between tables
@@ -383,36 +314,55 @@ class MealDatabase():
         '''
 
         # Iterate through tables
+        sorted_tables = []
+        for t in self._TABLES:
+            pass
         #   process tables so that tables with foreign key
         #   dependencies are loaded after tables they depend on
 
         # Iterate sorted table list
+        for t in sorted_tables:
+            pass
         #   Retrieve table data from source db
         #   Initialize table object with source data
         #   Check if table has foreign key dependencies
+            if len(t.related_columns) > 0:
         #     if it does, send updated foreign key values (mapping)
+                for rc in t.related_columns:
+                    t.add_fk_mapping(self._get_table_by_name().pk_mapping)
+
         #   Load the table into django database
 
 
 class PrimaryKeyMapping():
 
-    def __init__(self, table_name, rows):
-        self._table_name = table_name
+    def __init__(self, table):
+        #TODO: pass in the actual table class
+        self._table = table
         self._rows = []
-        for r in rows:
+        for r in self._table.rows:
             mapping = {
                 'source_pk': r['id'],
-                'dango_pk': r['d_id']    
+                'django_pk': r['d_id']    
             }
             self._rows.append(mapping)
+
 
     @property
     def rows(self):
         return self._rows
 
-    
+
+    @property
+    def table_name(self):
+        return self._table.name
+
+
+    @property
+    #TODO: have property that returns an instance of a row object from the django table
+
     def find_django_id(self, search_id):
         for r in self.rows:
-            if r['source_fk'] == search_id:
-                return r['d_id']
+            if r['source_pk'] == search_id:
+                return r['django_pk']
         return None
