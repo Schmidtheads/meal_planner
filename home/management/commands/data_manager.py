@@ -3,9 +3,8 @@ from django.core.management.base import BaseCommand
 import copy
 import sqlite3
 import sys
-from .dataload import TableFactory
+from .dataload import MealDatabase
 
-_tables = ['Author', 'Diner', 'Cookbook', 'Meal', 'Recipe', 'RecipeType']
 _meal_plan = []
 
 
@@ -24,19 +23,11 @@ class Command(BaseCommand):
         db_path = kwargs['db_path']
         conn = self.create_connection(db_path)
 
-        # Load the source data
-        for t in _tables:
-            try:
-                rows = self.query_table(conn, t)
+        mdb = MealDatabase(conn)
+        print('Loading...')
+        mdb.load()
 
-                table = TableFactory().createTable(t, rows)
-                _meal_plan.append(table)
-
-                # Load into Django database
-                print(f'Loading table {table.name}...')
-                table.load()
-            except Exception as ex:
-                print(f'***WARNING*** table {t} could not be loaded\n{ex}')
+        print('Done!')   
 
 
     def create_connection(self, database_path):
@@ -46,25 +37,7 @@ class Command(BaseCommand):
        return conn
 
 
-    def query_table(self, db_conn, table_name):
-
-        cursor = db_conn.cursor()
-        cursor.execute(f'select * from {table_name}')
-        records = cursor.fetchall()
-
-        columns = [column[0] for column in cursor.description]
-        result_set = []
-        for record in records:
-            row = {}
-
-            # Build the row    
-            for i, value in enumerate(record):
-                row[columns[i].lower()] = value
-
-            # Add row to result set   
-            result_set.append(row)
-
-        return result_set
+ 
 
 
 '''
