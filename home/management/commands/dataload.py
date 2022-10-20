@@ -31,34 +31,39 @@ class TableFactory():
         pass
 
 
-    def createTable(self, table_name, rows, foreign_keys):
+    def createTable(self, data_model, table_def):
         table_obj = None
+        table_name = table_def[_NM_KEY]
+        foreign_keys = table_def[_FK_KEY]
         if table_name.lower() == 'cookbook':
-            table_obj = CookbookTable(table_name, rows, foreign_keys)
+            table_obj = CookbookTable(data_model, table_name, foreign_keys)
         elif table_name.lower() == 'author':
-            table_obj = AuthorTable(table_name, rows)
+            table_obj = AuthorTable(data_model, table_name)
         elif table_name.lower() == 'diner':
-            table_obj = DinerTable(table_name, rows)
+            table_obj = DinerTable(data_model, table_name)
         elif table_name.lower() == 'recipe':
-            table_obj = RecipeTable(table_name, rows, foreign_keys)
+            table_obj = RecipeTable(data_model, table_name, foreign_keys)
         elif table_name.lower() == 'meal':
-            table_obj = MealTable(table_name, rows, foreign_keys)
+            table_obj = MealTable(data_model, table_name, foreign_keys)
         elif table_name.lower() == 'recipetype':
-            table_obj = RecipeTypeTable(table_name, rows, foreign_keys)
+            table_obj = RecipeTypeTable(data_model, table_name)
         elif table_name.lower() == 'reciperating':
-            table_obj = RecipeRatingTable(table_name, rows, foreign_keys)
+            table_obj = RecipeRatingTable(data_model, table_name, foreign_keys)
+        elif table_name.lower() == 'recipe2type':
+            table_obj = RecipeToTypeTable(data_model, table_name, foreign_keys)
 
         return table_obj
 
 
 class Table():
 
-    def __init__(self, name, rows, foreign_keys=[]):
+    def __init__(self, data_model, name, foreign_keys=[]):
+        self._datamodel = data_model
         self._name = name
-        self._rows = rows
+        self._rows = []
+        self._related_columns = []
         for fk in foreign_keys:
             self._add_related_column(fk[_CL_KEY], fk[_RT_KEY])
-        self._fk_mapping = []
         self._is_loaded = False
 
 
@@ -72,6 +77,11 @@ class Table():
         return self._rows
 
 
+    @rows.setter
+    def rows(self, rows):
+        self._rows = rows
+
+     
     @property 
     def related_columns(self):
         return self._related_columns
@@ -96,17 +106,6 @@ class Table():
         return None
 
 
-    def add_fk_mapping(self, fk_mapping):
-        self._fk_mapping.append(fk_mapping)
-
-
-    def get_fk_mapping(self, related_table, source_fk):
-        for fkm in self._fk_mapping:
-            if fkm.table_name.lower() == related_table.lower():
-                return fkm.find_django_id(source_fk)
-        return None
-
-
     def load(self):
         # Iterate rows
         for r in self.rows:
@@ -115,7 +114,10 @@ class Table():
             q = self._query_row_exists(r)
 
             for rc in self.related_columns:
-                r[rc[_CL_KEY]] = self.get_fk_mapping(rc[_RT_KEY], r[rc[_CL_KEY]])
+                # Use foreign key id to find actual object in django table
+                fk_table = self._datamodel.get_table_by_name(rc[_RT_KEY])
+                fk_mapping = fk_table.pk_mapping
+                r[rc[_CL_KEY]] = fk_mapping.find_django_row(r[rc[_CL_KEY]])
 
             if not q:
                 t = self._create_row(r)
@@ -161,8 +163,8 @@ class Table():
 
 class CookbookTable(Table):
 
-    def __init__(self, name, rows, foreign_keys):
-        super().__init__(name, rows, foreign_keys)
+    def __init__(self, data_model, name, foreign_keys):
+        super().__init__(data_model, name, foreign_keys)
 
 
     @property
@@ -191,8 +193,8 @@ class CookbookTable(Table):
 
 class AuthorTable(Table):
 
-    def __init__(self, name, rows):
-        super().__init__(name, rows)
+    def __init__(self, data_model, name):
+        super().__init__(data_model, name)
 
 
     @property
@@ -220,8 +222,8 @@ class AuthorTable(Table):
 
 class DinerTable(Table):
 
-    def __init__(self, name, rows):
-        super().__init__(name, rows)
+    def __init__(self, data_model, name):
+        super().__init__(data_model, name)
 
 
     @property
@@ -242,8 +244,8 @@ class DinerTable(Table):
 class RecipeTable(Table):
     # name, cook_book (fk), page_number, notes):
     
-    def __init__(self, name, rows, foreign_keys):
-        super().__init__(name, rows, foreign_keys)
+    def __init__(self, data_model, name, foreign_keys):
+        super().__init__(data_model, name, foreign_keys)
 
 
     @property
@@ -268,8 +270,8 @@ class RecipeTable(Table):
 
 class RecipeRatingTable(Table):
 
-    def __init__(self, name, rows, foreign_keys):
-        super().__init__(name, rows, foreign_keys)
+    def __init__(self, data_model, name, foreign_keys):
+        super().__init__(data_model, name, foreign_keys)
 
 
     @property
@@ -298,8 +300,8 @@ class RecipeRatingTable(Table):
 
 class RecipeTypeTable(Table):
 
-    def __init__(self, name, rows):
-        super().__init__(name, rows)
+    def __init__(self, data_model, name):
+        super().__init__(data_model, name)
 
 
     @property
@@ -308,19 +310,19 @@ class RecipeTypeTable(Table):
 
 
     def _query_row_exists(self, row):
-        q = RecipeType.objects.filter(recipetype = row['recipetype'])
+        q = RecipeType.objects.filter(name = row['name'])
         return q
 
 
     def _create_row(self, row):
-        r = RecipeType(recipetype = row['recipetype'])
+        r = RecipeType(name = row['name'])
         return r
 
 
 class MealTable(Table):
 
-    def __init__(self, name, rows):
-        super().__init__(name, rows)
+    def __init__(self, data_model, name, foreign_keys):
+        super().__init__(data_model, name, foreign_keys)
 
 
     @property 
@@ -342,11 +344,13 @@ class MealTable(Table):
         )
 
 
-class RecipeToType(Table):
+class RecipeToTypeTable(Table):
 
+    #TODO: refer to https://docs.djangoproject.com/en/dev/ref/models/relations/
+    # to figure out how to establish M2M relationship
 
-    def __init__(self, name, rows, foreign_keys):
-        super().__init__(name, rows, foreign_keys)
+    def __init__(self, data_model, name, foreign_keys):
+        super().__init__(data_model, name, foreign_keys)
 
 
     @property
@@ -362,6 +366,7 @@ class RecipeToType(Table):
    
     
     def _create_row(self, row):
+        #TODO: won't insert into table directly; see link above
         r = RecipeToType(recipeid = row['recipeid'], recipetypeid = row['recipetypeid'])
         return r
 
@@ -372,7 +377,7 @@ class MealDatabase():
     Class that knows the Meal Planner data model and relationships between tables
     '''
 
-    _TABLES = [
+    _TABLE_DEFS = [
         {
             _NM_KEY: _TABLE_AUTHOR,
             _FK_KEY : []
@@ -429,36 +434,48 @@ class MealDatabase():
 
     def __init__(self, database_connection):
         self._db_conn = database_connection
+        
+        # sort tables by foreign key dependencies
+        self._sort_tables()
 
-    
+        # Initialize (empty) table objects
+        self._tables = []
+        for t in self._TABLE_DEFS:
+            table = TableFactory().createTable(self, t)
+            self._tables.append(table)
+
+
     @property
     def database_connection(self):
         return self._db_conn
 
 
+    def get_table_by_name(self, table_name):
+        for t in self._tables:
+            if t.name.lower() == table_name.lower():
+                return t
+        raise Exception(f'Table "{table_name}" not found')
+
+
     def load(self):
         '''
-        Loads the database
+        Load the Django database
         '''
 
-        # sort tables by foreign key dependencies
-        print('Sorting tables...')
-        self._sort_tables()
-
         # Iterate sorted table list
-        for t in self._TABLES:
-            print(f'Processing {t[_NM_KEY]}...')
+        for t in self._tables:
+            print(f'Processing {t.name}...')
             #   Retrieve table data from source db
             print('Getting data from source...')
-            rows = self.query_table(t)
+            rows = self.read_table_from_source(t.name)
             #   Initialize table object with source data
-            table = TableFactory().createTable(t, rows)
+            t.rows = rows
             #   Load the table into django database
             print('Loading...')
-            table.load()
+            t.load()
 
 
-    def query_table(self, table_name):
+    def read_table_from_source(self, table_name):
 
         cursor = self.database_connection.cursor()
         cursor.execute(f'select * from {table_name}')
@@ -483,7 +500,20 @@ class MealDatabase():
         # Sort tables so those with foreign key dependencies are 
         # loaded after their dependencies
 
-        tl = self._TABLES
+        def _t1_dep_t2(t1, t2):
+            # check if table 1 (t1) is dependent on table 2 (t2)
+            fky = _FK_KEY
+
+            if len(t1[fky]) == 0:
+                return False
+            
+            for fk in t1[fky]:
+                if fk[_RT_KEY] == t2[_NM_KEY]:
+                    return True
+
+            return False
+
+        tl = self._TABLE_DEFS
         fky = _FK_KEY
         n = len(tl)
 
@@ -492,22 +522,10 @@ class MealDatabase():
             for j in range(0, n-i-1):
                 if len(tl[j][fky]) > len(tl[j+1][fky]):
                     tl[j], tl[j+1] = tl[j+1], tl[j]
-                elif self._t1_dep_t2(tl[j], tl[j+1]):
+                elif _t1_dep_t2(tl[j], tl[j+1]):
                     tl[j], tl[j+1] = tl[j+1], tl[j]
 
 
-    def _t1_dep_t2(self, t1, t2):
-        # check if table 1 (t1) is dependent on table 2 (t2)
-        fky = _FK_KEY
-
-        if len(t1[fky]) == 0:
-            return False
-        
-        for fk in t1[fky]:
-            if fk[_RT_KEY] == t2[_NM_KEY]:
-                return True
-
-        return False
 
                     
 
