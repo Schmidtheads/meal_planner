@@ -21,6 +21,7 @@ _FK_KEY = 'foreign_keys'
 _NM_KEY = 'name'
 _RT_KEY = 'related_table'
 _CL_KEY = 'column'
+_JT_KEY = 'is_junction'
 
 _DJANGO_ID_COL = 'd_id'
 
@@ -57,9 +58,14 @@ class TableFactory():
 
 class Table():
 
-    def __init__(self, data_model, name, foreign_keys=[]):
+    def __init__(self, data_model, table_definition):
+        name = table_definition[_NM_KEY]
+        foreign_keys = table_definition[_FK_KEY]
+        is_junction = True if _JT_KEY in table_definition and table_definition[_JT_KEY] else False
+        
         self._datamodel = data_model
         self._name = name
+        self._is_junction = is_junction
         self._rows = []
         self._related_columns = []
         for fk in foreign_keys:
@@ -85,6 +91,11 @@ class Table():
     @property 
     def related_columns(self):
         return self._related_columns
+
+
+    @property
+    def is_junction_table(self):
+        return self._is_junction
 
 
     @property
@@ -134,6 +145,18 @@ class Table():
         self._is_loaded = True
 
 
+    def get_row_by_id(self, id):
+        '''
+        Queries rows for a given id using id from source table
+        '''
+
+        for r in self.rows:
+            if r['id'] == id:
+                return r
+        
+        raise Exception(f'Row with id {id} not found')
+
+
     def _query_row_exists(self, row):
         return None
 
@@ -159,6 +182,18 @@ class Table():
         
         if not found_match:
             self._related_columns.append(related_column)
+
+
+    def _get_related_table_by_fk(self, fk_column):
+        '''
+        Get a reference to a foreign key's table name
+        '''
+
+        for rc in self.related_columns:
+            if fk_column.lower() == rc[_CL_KEY].lower():
+                return rc[_RT_KEY]
+        
+        raise Exception(f'Invalid foreign key column "{fk_column}"')
 
 
 class CookbookTable(Table):
@@ -355,19 +390,31 @@ class RecipeToTypeTable(Table):
 
     @property
     def django_table(self):
-        return RecipeToType
+        return None
 
 
     def _query_row_exists(self, row):
         #TODO: Get references to actual recipe and recipetype objects
         # (I think??? or at least django ids for both)
-        q = RecipeToType.objects.filter(recipeid = row['recipeid'], recipetypeid = row['recipetypeid'])
+
+        recipe_table = self._datamodel.get_table_by_name(self._get_related_table_by_fk('recipeid'))
+        recipe_row = recipe_table.get_row_by_id(row['recipeid'])
+        recipe_django_id = recipe_row[_DJANGO_ID_COL]
+
+        recipetype_table = self._datamodel.get_table_by_name(self._get_related_table_by_fk('recipetypeid'))
+        recipetype_row = recipetype_table.get_row_by_id(row['recipetypeid'])
+        recipetype_django_id = recipetype_row[_DJANGO_ID_COL]
+        recipetype_django_table = recipetype_table.django_table
+
+        recipetype_django_row = recipetype_django_table.objects.get(pk=recipetype_django_id)
+        q = recipetype_django_row.recipe_set.filter(pk=recipe_django_id).exists()
+        
         return q
    
     
     def _create_row(self, row):
         #TODO: won't insert into table directly; see link above
-        r = RecipeToType(recipeid = row['recipeid'], recipetypeid = row['recipetypeid'])
+        
         return r
 
 
@@ -410,6 +457,7 @@ class MealDatabase():
         },
         {
             _NM_KEY: _TABLE_RECIPE2TYPE,
+            _JT_KEY: True,
             _FK_KEY: [
                 {
                     _CL_KEY: 'recipeid',
@@ -525,9 +573,6 @@ class MealDatabase():
                 elif _t1_dep_t2(tl[j], tl[j+1]):
                     tl[j], tl[j+1] = tl[j+1], tl[j]
 
-
-
-                    
 
 class PrimaryKeyMapping():
 
