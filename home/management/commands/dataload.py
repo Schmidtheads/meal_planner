@@ -1,3 +1,4 @@
+import datetime
 import sys
 import os
 
@@ -24,6 +25,7 @@ _CL_KEY = 'column'
 _JT_KEY = 'is_junction'
 
 _DJANGO_ID_COL = 'd_id'
+_NV = 'NULL'  # NULL value
 
 
 class TableFactory():
@@ -50,8 +52,10 @@ class TableFactory():
             table_obj = RecipeTypeTable(data_model, table_def)
         elif table_name.lower() == 'reciperating':
             table_obj = RecipeRatingTable(data_model, table_def)
-        elif table_name.lower() == 'recipe2type':
+        elif table_name.lower() == 'recipetotype':
             table_obj = RecipeToTypeTable(data_model, table_def)
+        else:
+            raise Exception(f'Table with name {table_name} does not exist in data model')
 
         return table_obj
 
@@ -302,7 +306,7 @@ class RecipeTable(Table):
         t = Recipe(
             name=row['title'],
             cook_book=row['cookbook'],
-            page_number=row['page_number'],
+            page_number=0 if row['page_number'] is None or row['page_number'] == _NV else row['page_number'],
             notes=row['notes']
         )
         return t
@@ -371,17 +375,26 @@ class MealTable(Table):
 
     
     def _query_row_exists(self, row):
-        q = Meal.objects.filter(scheduled_date = row['scheduled_date'])
+        # format date to ensure in YYYY-MM-DD format
+        date_obj = datetime.datetime.strptime(row['scheduled_date'], '%Y-%m-%d %H:%M:%S')
+        scheduled_date = date_obj.strftime('%Y-%m-%d')
+        q = Meal.objects.filter(scheduled_date = scheduled_date)
         return q
 
 
     def _create_row(self, row):
+        # format date to ensure in YYYY-MM-DD format
+        date_obj = datetime.datetime.strptime(row['scheduled_date'], '%Y-%m-%d %H:%M:%S')
+        scheduled_date = date_obj.strftime('%Y-%m-%d')
+        
         r = Meal(
-            scheduled_date = row['scheduled_date'],
+            scheduled_date = scheduled_date,
             was_made = row['was_made'],
             recipe = row['recipe'],
-            notes = row['notes']
+            note = '' if row['notes'] is None or row['notes'] == _NV else row['notes']   #TODO: change 'note' to 'notes' in django db
         )
+
+        return r
 
 
 class RecipeToTypeTable(Table):
@@ -389,8 +402,8 @@ class RecipeToTypeTable(Table):
     # refer to https://docs.djangoproject.com/en/dev/ref/models/relations/
     # to figure out how to establish M2M relationship
 
-    def __init__(self, data_model, name, foreign_keys):
-        super().__init__(data_model, name, foreign_keys)
+    def __init__(self, data_model, table_definition):
+        super().__init__(data_model, table_definition)
 
 
     @property
@@ -410,10 +423,10 @@ class RecipeToTypeTable(Table):
     
     def _create_row(self, row):
 
-        recipetype_django_row = self._get_fk_table_django_row('recipetypeid', row)        
-        recipe_django_row = self._get_fk_table_django_row('recipeid', row)
+        recipetype_django_row = row['recipetypeid']
+        recipe_django_row = row['recipeid']
 
-        recipe_django_row.recipetype_set.add(recipetype_django_row)
+        recipe_django_row.recipe_types.add(recipetype_django_row)
            
         # We're just creating an association between two rows, don't return anything   
         return None
