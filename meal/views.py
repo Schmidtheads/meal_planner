@@ -191,16 +191,23 @@ def _get_recipe_info_for_meal(meal):
         cookbook = getattr(recipe, 'cook_book')
 
         # Get cookbook name and author
-        cookbook_title = getattr(cookbook, 'title')
-        cookbook_author = str(getattr(cookbook, 'author'))
-        cookbook_id = cookbook.id
+        if cookbook is not None:
+            cookbook_title = getattr(cookbook, 'title')
+            cookbook_author = str(getattr(cookbook, 'author'))
+            cookbook_id = cookbook.id
 
-        # Create cookbook name abbreviation
-        words = cookbook_title.split(' ')
-        if len(words) == 1:
-            cookbook_abbr = words[0][:3]
+            # Create cookbook name abbreviation
+            words = cookbook_title.split(' ')
+            if len(words) == 1:
+                cookbook_abbr = words[0][:3]
+            else:
+                cookbook_abbr = ''.join([w[0] for w in words])
         else:
-            cookbook_abbr = ''.join([w[0] for w in words])
+            # If no cookbook associated with the recipe then cookbook is "Unknown"
+            cookbook_title = 'Unknown'
+            cookbook_abbr = 'Unk'
+            cookbook_author = 'Unknown'
+            cookbook_id = 0
 
         recipe_info = {'meal_id': meal_id, 'recipe_name': name, 'page': page, 'cookbook_id': cookbook_id, 'cookbook': cookbook_title, 'author': cookbook_author, 'abbr': cookbook_abbr}
     else:
