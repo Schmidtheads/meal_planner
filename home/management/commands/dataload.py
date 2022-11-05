@@ -391,7 +391,7 @@ class MealTable(Table):
             scheduled_date = scheduled_date,
             was_made = row['was_made'],
             recipe = row['recipe'],
-            note = '' if row['notes'] is None or row['notes'] == _NV else row['notes']   #TODO: change 'note' to 'notes' in django db
+            notes = '' if row['notes'] is None or row['notes'] == _NV else row['notes'] 
         )
 
         return r
