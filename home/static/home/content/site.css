@@ -321,6 +321,13 @@ input[type="checkbox"].input-validation-error {
  * Custom recipe selector widget
  */
 
+ /* Make the table for the recipe custom selector 100% so search field
+   fills width of modal dialog
+ */
+#id_recipe_search {
+    width: 100%;
+}
+
 /* position the Recipe search button */
 #id_recipe_search_button {
     margin: auto;
@@ -328,6 +335,7 @@ input[type="checkbox"].input-validation-error {
 }
 
 #id_recipe_search_results {
+    height: 100%;
     width: 100%;
 }
 
@@ -336,22 +344,33 @@ input[type="checkbox"].input-validation-error {
 }
 
 #id_table_scroll {
-    height:200px;
-    overflow:auto;
+    height: 100%;
+    overflow-x:auto;
+    /*overflow-y:auto;*/
 }
 
-/* Make the table for the recipe custom selector 100% so search field
-   fills width of modal dialog
- */
-#id_recipe_search {
-    width: 100%;
+/*
+    Keep the footer in a modal dialog at the bottom
+    (Good for resizable modals)
+*/
+.modal-content {
+    height: 100%;
+    border-radius: 0;
+    position:relative;
+  }
+  
+.modal-footer {
+    bottom:0px;
+    right:0px;
+    position:absolute;
+    width:100%;
 }
 
- tbody tr:hover tr.select-row {
+tbody tr:hover tr.select-row {
     background-color: #007bff;
  }
 
- .tableRowHover tbody tr:not(.select-row):hover td {
+.tableRowHover tbody tr:not(.select-row):hover td {
     background-color: #dcdcdc;
     transition: all 0.01s ease-in-out;
 }

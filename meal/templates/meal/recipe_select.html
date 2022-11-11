@@ -1,6 +1,10 @@
 ﻿<!--
   Custom Recipe Search Widget
 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"/>
 <div class="row align-items-end">
     <div class="form-group col-md-7">
         <input type="text" class="form-control"
@@ -11,7 +15,7 @@
                 {% endif %} readonly/>
     </div>
     <div class="form-group col-md-1">
-      <button class="btn btn-default" type="button" data-toggle="modal" data-target="#queryBuilder">
+      <button type="button" class="btn btn-default" onclick="launch()">
             Search
       </button>
     </div>
@@ -35,7 +39,7 @@
             </button>
           </div>
           <div class="modal-body">
-            <table id="id_recipe_search">
+            <table class="table" id="id_recipe_search">
               <tr>
                 <td id="id_recipe_search_container">
                   <input id="id_recipe_search_keys" class="form-control" onkeyup="stoppedTyping()" type="text" />
@@ -66,4 +70,29 @@
 <script>
   // Set global variable to Django widget name for use in imported .js files
   var widgetName = "{{ widget.name }}";
+</script>
+<script>
+  var $modal = $('#queryBuilder');
+  $modal.find('.modal-content')
+    .css({
+      width: 625,
+      height: 425,
+    })
+    .resizable({
+      minWidth: 625,
+      minHeight: 425,
+      handles: 'n, e, s, w, ne, sw, se, nw',
+    })
+    .draggable({
+      handle: '.modal-header'
+    });
+  
+  // focus on the search text input when modal is launched
+  $modal.on('shown.bs.modal', function() {
+    $('#id_recipe_search_keys').focus();
+  });
+
+  var launch = function () {
+    $modal.modal();
+  }  
 </script>
