@@ -93,7 +93,7 @@ function showResults(recipeList) {
         var hcell4 = row.insertCell(3);
 
         // Make the first column (for the ID) hidden
-        hcell1.classList.add("hidden-xs", "hidden-sm", "hidden-md", "hidden-lg");
+        hcell1.classList.add("hidden-xs", "hidden-sm", "hidden-md", "hidden-lg", "table_header");
 
         // Add some bold text in the new cell:
         hcell1.innerHTML = "<b>ID</b>";

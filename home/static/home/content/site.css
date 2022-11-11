@@ -349,6 +349,13 @@ input[type="checkbox"].input-validation-error {
     /*overflow-y:auto;*/
 }
 
+.table_header {
+    /*
+        Keep table header at top
+    */
+    position: sticky;
+}
+
 /*
     Keep the footer in a modal dialog at the bottom
     (Good for resizable modals)
@@ -358,7 +365,15 @@ input[type="checkbox"].input-validation-error {
     border-radius: 0;
     position:relative;
   }
-  
+
+.modal-body {
+    /* 
+        Size the modal body to factor in the header, footer
+        and size of the search text input and button + 15px
+    */
+    height: calc(100% - 208px)
+}
+
 .modal-footer {
     bottom:0px;
     right:0px;
