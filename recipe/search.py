@@ -125,8 +125,12 @@ class Search:
 
 
     def time_filter_date(self, keyword):
+        '''
+        Return list of time filtering keywords
+        '''
 
         return self._time_keywords[keyword]
+
 
     def find(self):
         '''
@@ -198,11 +202,6 @@ class Search:
 
             # TODO: implement time filters
 
-        # test - loop through recipe type queryset to get recipes
-        if not recipe_result is None:
-            for r in recipe_result:
-                print(r.name)
-
         # Get recipe related information
         return recipe_result
 
@@ -225,7 +224,6 @@ class Search:
 
             # if search token not at end of list, grab next token of search values
             # keyword can have muliple search values, if comma separated (no spaces!)
-            search_values = ''
             if token_idx < len(tokens):
                 next_token = tokens[token_idx + 1]
 
@@ -249,6 +247,7 @@ class Search:
                     tokens_not_processed.remove(next_token)
 
         return tokens_not_processed
+
 
     def _parse_time_keywords(self, tokens):
         '''

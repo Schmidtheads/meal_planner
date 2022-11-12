@@ -1,12 +1,11 @@
 ﻿<!--
   Custom Recipe Search Widget
+
+  Note that the methods in recipequery.js are available to this html snippet
+  because it is sourced by the parent html file meals/detail.html
 -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"/>
 <div class="row align-items-end">
-    <div class="form-group col-md-7">
+    <div class="form-group col-md-8">
         <input type="text" class="form-control"
                 id="id_recipe_name_display"
                 name="{{ widget.name }}"
@@ -31,8 +30,8 @@
     <!-- Modal -->
     <div class="modal fade" id="queryBuilder" tabindex="-1" data-backdrop="static" role="dialog" aria-labelledby="queryBuilderTitle" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
+        <div class="modal-content ui-resizable ui-draggable">
+          <div class="modal-header ui-draggable-header">
             <h5 class="modal-title" id="queryBuilderLongTitle">Recipe Search</h5>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
@@ -66,29 +65,4 @@
 <script>
   // Set global variable to Django widget name for use in imported .js files
   var widgetName = "{{ widget.name }}";
-</script>
-<script>
-  var $modal = $('#queryBuilder');
-  $modal.find('.modal-content')
-    .css({
-      width: 625,
-      height: 425,
-    })
-    .resizable({
-      minWidth: 625,
-      minHeight: 425,
-      handles: 'n, e, s, w, ne, sw, se, nw',
-    })
-    .draggable({
-      handle: '.modal-header'
-    });
-  
-  // focus on the search text input when modal is launched
-  $modal.on('shown.bs.modal', function() {
-    $('#id_recipe_search_keys').focus();
-  });
-
-  var launch = function () {
-    $modal.modal();
-  }  
 </script>

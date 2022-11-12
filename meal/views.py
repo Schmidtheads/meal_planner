@@ -75,11 +75,11 @@ def new(request):
                 date_obj = datetime.datetime.strptime(
                     scheduled_date, "%Y-%m-%d")
                 try:
-                    meal = Meal.objects.get(scheduled_date=date_obj)
+                    _ = Meal.objects.get(scheduled_date=date_obj)
 
                     # if meal exists - need to redirect to details page (for update)
                 except Meal.DoesNotExist:
-                    meal = None
+                    print('Meal not found!')
             except:
                 # Invalid date, do not pre-populate the date on the form
                 date_obj = None
@@ -253,6 +253,11 @@ def _search_for_recipes(search_keys):
 
     result_list = []
     for recipe in recipe_result:
+
+        # get last time recipe was made
+        last_made_date = _date_recipe_last_made(recipe)
+        times_made = _number_of_times_recipe_made(recipe)
+
         cb = recipe.cook_book
         cb_title = '' if cb is None else cb.title
         author = None if cb is None else cb.author
@@ -262,8 +267,42 @@ def _search_for_recipes(search_keys):
             'id': recipe.id,
             'name': recipe.name,
             'cookbook': cb_title,
-            'author': f'{author_fn} {author_ln}'
+            'author': f'{author_fn} {author_ln}',
+            'last made': last_made_date,
+            'rating': recipe.rating(),
+            'times made': times_made
         }
         result_list.append(candidate)
 
     return result_list
+
+
+def _date_recipe_last_made(recipe):
+    '''
+    Returns when the recipe was last made
+    '''
+
+    meals_w_recipe = Meal.objects.filter(recipe = recipe).order_by("-scheduled_date")
+
+    # meals sorted by date made (descending), so first is most recent
+    recent_meal = meals_w_recipe.first()
+
+    if recent_meal is not None:
+        date_last_made = recent_meal.scheduled_date.strftime('%d-%b-%Y')
+    else:
+        date_last_made = 'Never made'
+
+    return date_last_made
+
+
+def _number_of_times_recipe_made(recipe):
+    '''
+    Returns the number of times a recipe was made
+    '''
+
+    meals_w_recipe = Meal.objects.filter(recipe = recipe).order_by("-scheduled_date")
+
+    # meals sorted by date made (descending), so first is most recent
+    count = meals_w_recipe.count()
+
+    return count

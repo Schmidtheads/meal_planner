@@ -297,9 +297,31 @@ input[type="checkbox"].input-validation-error {
     width: 100px;
 }
 
-#id_note {
+#id_notes {
+    max-width: 800px;
+    min-width: 250px;
+    width: 400px;
+    min-height: 34px;
+    max-height: 600px;
+}
+
+#id_notes_input {
+    max-width: 800px;
+    width: 400px;
+}
+
+#id_recipe_input {
     max-width: none;
-    width: 500px;
+    width: 400px;
+}
+
+#id_recipe_name_display {
+    max-width: none;
+    width: 250px;
+}
+
+.left_padded_table_cell {
+    padding-left: 10px;
 }
 
 .padded_table_cell {
@@ -337,6 +359,7 @@ input[type="checkbox"].input-validation-error {
 #id_recipe_search_results {
     height: 100%;
     width: 100%;
+    min-width: 800px;
 }
 
 #id_recipe_search_container {
@@ -364,7 +387,7 @@ input[type="checkbox"].input-validation-error {
     height: 100%;
     border-radius: 0;
     position:relative;
-  }
+}
 
 .modal-body {
     /* 
