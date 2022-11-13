@@ -136,7 +136,7 @@ function createDayElement(date, meal, month, year) {
     let cookbook_author = meal.author;
 
     let dayDiv = document.createElement('div');
-
+  
     let daySpan = document.createElement('span');
     daySpan.classList.add('date', 'right');
     //let dayText = document.createTextNode(date);
@@ -161,8 +161,13 @@ function createDayElement(date, meal, month, year) {
         // Create span to hold recipe name so we can control font size
         let recipeSpan = document.createElement('span');
         recipeSpan.classList.add('recipe_text');
+        // Link recipe name to meal details as well
+        let recipeMealLink = document.createElement('a');
         let recipeText = document.createTextNode(recipe_name);
-        recipeSpan.appendChild(recipeText);
+        recipeMealLink.append(recipeText);
+        recipeMealLink.title = 'Edit meal for ' + date + ' of month';
+        recipeMealLink.href = '/meal/' + meal_id;
+        recipeSpan.appendChild(recipeMealLink);
 
         // Create div to hold cookbook abbreviation and page number
         let cookbookDiv = document.createElement('div');
@@ -197,8 +202,15 @@ function createDayElement(date, meal, month, year) {
         dayDiv.appendChild(document.createElement('br'));
         dayDiv.appendChild(recipeSpan);
         dayDiv.appendChild(document.createElement('br')); // create line break
-        dayDiv.append(cookbookDiv);
-        dayDiv.appendChild(pageSpan);
+
+        // If the page number for the recipe is 0 (zero), it is either because
+        // the recipe is not from a book (e.g. a website or recipe card) or
+        // the meal may be "Leftovers" or "Dine Out".
+        // So there is no need to add the cookbook & page number to the calendar date.
+        if (page_number != 0) {
+            dayDiv.append(cookbookDiv);
+            dayDiv.appendChild(pageSpan);
+        }
     }
     else {
         // For days with no recipe, the clicking on the date will link to a 

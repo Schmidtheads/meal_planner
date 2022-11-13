@@ -54,7 +54,7 @@ function recipeSearch() {
 /**
  * Show the results of the Recipe Search
  * 
- * @param {*} recipeList list of recipes that will be displayed.
+ * @param {*} recipeList list of recipes that will be displayed as a JSON object
  * 
  * Notes:
  *  This code will update a table element with each recipe in a new row.
@@ -81,25 +81,33 @@ function showResults(recipeList) {
         // Add table headers
         // Create an empty <thead> element and add it to the table:
         var header = table.getElementsByTagName('thead')[0];
+        header.classList.add("table_header");  // make table header sticky
 
         // Create an empty <tr> element and add it to the first position of <thead>:
         var row = header.insertRow(0);
         row.onclick = rowClick();    
 
+        // Grab first row of results to determine headers
+        first_row = recipeList.recipes[0]
+
         // Insert a new cell (<td>) at the first position of the "new" <tr> element:
-        var hcell1 = row.insertCell(0);
-        var hcell2 = row.insertCell(1);
-        var hcell3 = row.insertCell(2);
-        var hcell4 = row.insertCell(3);
+        var col_idx = 0;
+        for (const header_title in first_row) {
+            var hcell = row.insertCell(col_idx);
 
-        // Make the first column (for the ID) hidden
-        hcell1.classList.add("hidden-xs", "hidden-sm", "hidden-md", "hidden-lg");
+            // Make the first column (for the ID) hidden
+            if (col_idx == 0) {
+                hcell.classList.add("hidden-xs", "hidden-sm", "hidden-md", "hidden-lg");
+            }
 
-        // Add some bold text in the new cell:
-        hcell1.innerHTML = "<b>ID</b>";
-        hcell2.innerHTML = "<b>Recipe</b>";
-        hcell3.innerHTML = "<b>Cookbook</b>";
-        hcell4.innerHTML = "<b>Author</b>";
+            // capitalize first character
+            var header_name = header_title.charAt(0).toUpperCase() + header_title.slice(1);
+
+            hcell.innerHTML = "<b>" + header_name + "</b>"
+            col_idx++;
+        }
+
+        // Add the results to the table
 
         var tbody = table.getElementsByTagName('tbody')[0];
 
@@ -110,19 +118,20 @@ function showResults(recipeList) {
             var row = tbody.insertRow(0);
 
             // Insert new cells (<td> elements) at the 1st and 2nd position of the "new" <tr> element:
-            var cell1 = row.insertCell(0);
-            var cell2 = row.insertCell(1);
-            var cell3 = row.insertCell(2);
-            var cell4 = row.insertCell(3);
 
-            // Add some text to the new cells:
-            cell1.innerHTML = recipe.id;
-            cell2.innerHTML = recipe.name;
-            cell3.innerHTML = recipe.cookbook;
-            cell4.innerHTML = recipe.author;
-            
-            // Hide the ID cell(s)
-            cell1.classList.add("hidden-xs", "hidden-sm", "hidden-md", "hidden-lg");
+            var col_idx = 0;
+            for (col in recipe) {
+                var cell = row.insertCell(col_idx);
+
+                // Hide the ID cell(s)
+                if (col_idx == 0) {
+                    cell.classList.add("hidden-xs", "hidden-sm", "hidden-md", "hidden-lg");
+                }
+
+                // Add column text
+                cell.innerHTML = recipe[col];
+                col_idx++;
+            }
         }
 
         addRowHandlers(tbody);
@@ -189,15 +198,37 @@ function setSearchInput(text) {
 }
 
 
-$(document).ready(function(){
+/**
+ * Launch the Search Recipe Modal Dialog
+ */
+function launch() {
     // Set the disabled state of search button on page load
     stoppedTyping();
+
+    var $recipe_search = $('#queryBuilder');
+
+    $recipe_search.find('.modal-content')
+    .css({
+      width: 625,
+      height: 425,
+    })
+    .resizable({
+      minWidth: 625,
+      minHeight: 425,
+      handles: 'n, e, s, w, ne, sw, se, nw',
+    })
+    .draggable({
+      handle: '.modal-header'
+    });
+
+    $recipe_search.modal();
 
     /**
      * Clear result rows when Recipe Search modal appears
      */
-    $( "#queryBuilder" ).on('show.bs.modal', function(){
+     $recipe_search.on('show.bs.modal', function() {
         clearResults();
         setSearchInput("");
+        $('#id_recipe_search_keys').focus();  // set focus on search input
     });
-  });
+}

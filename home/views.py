@@ -29,6 +29,7 @@ def contact(request):
         {
             'title':'Contact',
             'message':'Your contact page.',
+            'company': 'Schmidtheads',            
             'year':datetime.now().year,
         }
     )
@@ -42,6 +43,7 @@ def about(request):
         {
             'title':'About',
             'message':'Your application description page.',
+            'company': 'Schmidtheads',
             'year':datetime.now().year,
         }
     )

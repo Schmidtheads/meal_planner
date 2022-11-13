@@ -12,17 +12,17 @@
                 <fieldset>
                     <legend>Meal</legend>
                     <table class="inputTable">
-                        <tr class="inputRow"><th><label for="id_scheduled_Date">Date:</label></th>
-                            <td>{{ form.scheduled_date }}</td>
+                        <tr class="inputRow"><th><label for="id_scheduled_date">Date:</label></th>
+                            <td class="left_padded_table_cell">{{ form.scheduled_date }}</td>
                         </tr>
                         <tr class="inputRow"><th><label for="id_was_made">Was Made:</label></th>
-                            <td>{{ form.was_made }}</td>
+                            <td class="left_padded_table_cell">{{ form.was_made }}</td>
                         </tr>
                         <tr class="inputRow"><th><label for="id_recipe">Recipe:</label></th>
-                            <td>{{ form.recipe }}{{ form.recipe.errors }}</td>
+                            <td id="id_recipe_input" class="left_padded_table_cell">{{ form.recipe }}{{ form.recipe.errors }}</td>
                         </tr>
-                        <tr class="inputRow"><th><label for="id_note">Note:</label></th>
-                            <td>{{ form.note }}</td>
+                        <tr class="inputRow"><th><label for="id_note">Notes:</label></th>
+                            <td id="id_notes_input" class="left_padded_table_cell">{{ form.notes }}</td>
                         </tr>
                     </table>
                     <p class="buttonContainer">
