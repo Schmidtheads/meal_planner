@@ -149,6 +149,17 @@ input[type="checkbox"].input-validation-error {
     padding-bottom: 20px;
 }
 
+.printButton {
+    position: absolute;
+    right: 15px;
+    top: 15px;    
+}
+
+.calendarHeader {
+    display: flex;
+    position: relative;
+}
+
 /* Set the colour of the current day */
 
 .date {

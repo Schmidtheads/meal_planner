@@ -6,7 +6,11 @@
 {% load static %}
 <div id="calendar" class="col-sm-12 col-md-12 col-lg-12 mt-5">
     <div class="card">
-        <h3 class="card-header" id="monthAndYear"></h3>
+        <div>
+        <h3 class="card-header calendarHeader" id="monthAndYear"></h3>
+        <button class="btn btn-default col-sm-3 col-lg-2 printButton"
+        onclick="return showPrintPopup(this);">Print</button>
+        </div>
         <table class="table table-bordered table-responsive-sm table-fixed"  id="calendar">
             <colgroup>
                 <col span="7" class="week_column" />
@@ -106,4 +110,5 @@
 
 {% block scripts %}
 <script src="{% static 'home/scripts/calendar.js' %}"></script>
+<script src="{% static 'home/scripts/print.js' %}"></script>
 {% endblock %}
