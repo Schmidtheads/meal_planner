@@ -232,16 +232,23 @@ def _get_recipe_info_for_meal(meal):
 
     return recipe_info
 
+def PrintCreatePopup(request):
 
-def _get_meal_id_by_date(date):
-    '''
-    '''
+	return render(request, "meal/print.html",
+                  {"year": datetime.now().year,
+                   "company": "Schmidtheads Inc.",
+                   "table_name": "authors"})
 
-    # There should be only one meal per date, so only return first meal
-    # object returned from filter.
-    meal = Meal.objects.filter(scheduled_date=date).first()
 
-    return meal
+# def _get_meal_id_by_date(date):
+#     '''
+#     '''
+
+#     # There should be only one meal per date, so only return first meal
+#     # object returned from filter.
+#     meal = Meal.objects.filter(scheduled_date=date).first()
+
+#     return meal
 
 
 def _search_for_recipes(search_keys):

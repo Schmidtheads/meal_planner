@@ -8,8 +8,9 @@
     <div class="card">
         <div>
         <h3 class="card-header calendarHeader" id="monthAndYear"></h3>
-        <button class="btn btn-default col-sm-3 col-lg-2 printButton"
-        onclick="return showPrintPopup(this);">Print</button>
+        <a class="btn btn-default col-sm-3 col-lg-2 printButton"
+        href="{% url 'print' %}"
+        onclick="return showPrintPopup(this);">Print</a>
         </div>
         <table class="table table-bordered table-responsive-sm table-fixed"  id="calendar">
             <colgroup>
@@ -110,5 +111,6 @@
 
 {% block scripts %}
 <script src="{% static 'home/scripts/calendar.js' %}"></script>
+<script src="{% static 'home/scripts/popup.js' %}"></script>
 <script src="{% static 'home/scripts/print.js' %}"></script>
 {% endblock %}
