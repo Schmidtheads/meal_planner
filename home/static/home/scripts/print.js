@@ -35,3 +35,15 @@ function closePrintPopup(win, newID, newRepr, id, element_type="option") {
     }
     win.close();
 }
+
+
+function radio_change(r_id, value) {
+    let is_disabled;
+
+    is_disabled = value == 'ALL';
+
+    for (let i = 1; i <= 5; i++) {
+        let element = '#week' + i;
+        $(element).prop( 'disabled', is_disabled );
+    }    
+}

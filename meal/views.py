@@ -4,19 +4,15 @@ Description: Django views for Recipe object
 Author: M. Schmidt
 '''
 
-import datetime
 import calendar
-#import json
+from datetime import datetime, date
+from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
-#from django.core import serializers
-from django.http import JsonResponse  #, Http404
-#from django.forms import modelform_factory
+from django.http import JsonResponse
 
-#from recipe.models import Recipe
-#from cookbook.models import Cookbook
 from recipe.search import Search
 from .models import Meal
-from .forms import MealForm
+from .forms import MealForm, PrintForm
 
 
 
@@ -43,7 +39,7 @@ def detail(request, id):
 
     return render(request, "meal/detail.html",
                   {"title": "Meal Planner",
-                   "year": datetime.datetime.now().year,
+                   "year": datetime.now().year,
                    "company": "Schmidtheads Inc.",
                    "form": form})
 
@@ -72,7 +68,7 @@ def new(request):
         if not scheduled_date is None:
             # Check if date is valid
             try:
-                date_obj = datetime.datetime.strptime(
+                date_obj = datetime.strptime(
                     scheduled_date, "%Y-%m-%d")
                 try:
                     _ = Meal.objects.get(scheduled_date=date_obj)
@@ -98,7 +94,7 @@ def new(request):
 
     return render(request, "meal/detail.html",
                   {"title": "Meal Planner",
-                   "year": datetime.datetime.now().year,
+                   "year": datetime.now().year,
                    "company": "Schmidtheads Inc.",
                    "form": form})
 
@@ -112,8 +108,26 @@ def meals(request):
     # loads, it will send an Ajax request to retrieve the meals
     return render(request, 'meal/meals.html',
                   {'title': 'Meal Planner',
-                   'year': datetime.datetime.now().year,
+                   'year': datetime.now().year,
                    'company': 'Schmidtheads Inc.'})
+
+
+
+def PrintCreatePopup(request):
+
+    if request.method == "POST":
+        form = request.POST
+
+        return HttpResponse('<script>opener.closePrintPopup(window, "%s", "%s", "#id_author");</script>' % (instance.pk, instance))
+       
+    else:
+        form = PrintForm()
+
+    return render(request, "meal/print.html",
+                  {"year": datetime.now().year,
+                   "company": "Schmidtheads Inc.",
+                   "table_name": "authors",
+                   "form": form})
 
 
 def get_meals_for_month(request):
@@ -125,8 +139,8 @@ def get_meals_for_month(request):
     @return json response string
     '''
 
-    meal_year = int(request.GET.get('year', datetime.datetime.now().year))
-    meal_month = int(request.GET.get('month', datetime.datetime.now().month))
+    meal_year = int(request.GET.get('year', datetime.now().year))
+    meal_month = int(request.GET.get('month', datetime.now().month))
 
     meals_json = _get_meals_for_month(meal_year, meal_month)
 
@@ -173,7 +187,7 @@ def _get_meals_for_month(year, month):
     for day in range(1, days_in_month+1):
         check_date = f'{year}-{month}-{day}'
         meal = meals_for_month.filter(
-            scheduled_date=datetime.date(year, month, day)).first()
+            scheduled_date=date(year, month, day)).first()
 
         meal_info = {'scheduled_date': check_date}
         meal_info.update(_get_recipe_info_for_meal(meal))
@@ -231,13 +245,6 @@ def _get_recipe_info_for_meal(meal):
         recipe_info = {'recipe_name': ''}
 
     return recipe_info
-
-def PrintCreatePopup(request):
-
-	return render(request, "meal/print.html",
-                  {"year": datetime.now().year,
-                   "company": "Schmidtheads Inc.",
-                   "table_name": "authors"})
 
 
 # def _get_meal_id_by_date(date):
