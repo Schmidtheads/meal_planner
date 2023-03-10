@@ -83,6 +83,8 @@ class PrintForm(forms.Form):
         ('5', '5'),
     ]
 
+    meal_year = forms.IntegerField()
+    meal_month = forms.IntegerField(widget=forms.HiddenInput())
     print_weeks = forms.ChoiceField(
         choices=print_choices,
         widget = forms.RadioSelect(attrs={'onchange': 'radio_change(this.id, this.value);'}),

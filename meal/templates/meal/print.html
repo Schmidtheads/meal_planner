@@ -7,6 +7,8 @@
 <div class="container">
     <h3>Print Meal Plan</h3>
     <form method='POST' action='' enctype="multipart/form-data" novalidate id="print">{% csrf_token %}
+        {{ form.meal_year }}
+        {{ form.meal_month }}
         <!-- <input type="radio" id="{{ form.print_weeks.0.id_for_label}}" name="print_weeks" checked onclick="radio_click('{{ form.print_weeks.0.id_for_label }}') " value="{{ form.print_weeks.0.value }}"> -->
         {{ form.print_weeks.0.tag }}
         <label for="{{ form.print_weeks.0.id_for_label }}">{{ form.print_weeks.0.choice_label }}</label><br>

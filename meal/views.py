@@ -118,7 +118,7 @@ def PrintCreatePopup(request):
     if request.method == "POST":
         form = request.POST
 
-        return HttpResponse('<script>opener.closePrintPopup(window, "%s", "%s", "#id_author");</script>' % (instance.pk, instance))
+        return HttpResponse('<script>opener.closePrintPopup(window);</script>')
        
     else:
         form = PrintForm()
@@ -126,8 +126,9 @@ def PrintCreatePopup(request):
     return render(request, "meal/print.html",
                   {"year": datetime.now().year,
                    "company": "Schmidtheads Inc.",
-                   "table_name": "authors",
-                   "form": form})
+                   "form": form,
+                   "meal_month": 3,
+                   "meal_year": 3})
 
 
 def get_meals_for_month(request):
@@ -245,17 +246,6 @@ def _get_recipe_info_for_meal(meal):
         recipe_info = {'recipe_name': ''}
 
     return recipe_info
-
-
-# def _get_meal_id_by_date(date):
-#     '''
-#     '''
-
-#     # There should be only one meal per date, so only return first meal
-#     # object returned from filter.
-#     meal = Meal.objects.filter(scheduled_date=date).first()
-
-#     return meal
 
 
 def _search_for_recipes(search_keys):
