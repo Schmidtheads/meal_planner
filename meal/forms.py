@@ -83,14 +83,18 @@ class PrintForm(forms.Form):
         ('5', '5'),
     ]
 
-    meal_year = forms.IntegerField()
+    meal_year = forms.IntegerField(widget=forms.HiddenInput())
     meal_month = forms.IntegerField(widget=forms.HiddenInput())
     print_weeks = forms.ChoiceField(
         choices=print_choices,
         widget = forms.RadioSelect(attrs={'onchange': 'radio_change(this.id, this.value);'}),
         initial='ALL'
     )
-    weeks = forms.ChoiceField(
-        choices=week_choices,
-        widget = forms.CheckboxSelectMultiple()
+    weeks = forms.MultipleChoiceField(
+        choices=week_choices
+    )
+    print_only_meals = forms.BooleanField(
+        label='Print only meals',
+        initial=False,
+        required=False
     )

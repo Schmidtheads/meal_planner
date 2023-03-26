@@ -15,18 +15,22 @@
         {{ form.print_weeks.1.tag }}
         <!-- <input type="radio" id="{{ form.print_weeks.1.id_for_label }}" name="print_weeks" onclick="radio_click('{{ form.print_weeks.1.id_for_label }}')"> -->
         <label for="{{ form.print_weeks.1.id_for_label }}">{{ form.print_weeks.1.choice_label }}</label><br>
-            <div style="margin-left: 30px">
-                <input type="checkbox" id="week1" disabled>
-                <label for="week1">Week 1</label>
-                <input type="checkbox" id="week2" disabled>
-                <label for="week2">Week 2</label>
-                <input type="checkbox" id="week3" disabled>
-                <label for="week3">Week 3</label>
-                <input type="checkbox" id="week4" disabled>
-                <label for="week4">Week 4</label>
-                <input type="checkbox" id="week5" disabled>
-                <label for="week5">Week 5</label><br><br>
-            </div>           
+        <div style="margin-left: 30px">
+            <input type="checkbox" name="{{ form.weeks.name }}" id="{{ form.weeks.0.id_for_label }}" value="1" disabled>
+            <label for="{{ form.weeks.0.id_for_label }}">Week 1</label>
+            <input type="checkbox" name="{{ form.weeks.name }}" id="{{ form.weeks.1.id_for_label }}" value="2" disabled>
+            <label for="{{ form.weeks.1.id_for_label }}">Week 2</label>
+            <input type="checkbox" name="{{ form.weeks.name }}" id="{{ form.weeks.2.id_for_label }}" value="3" disabled>
+            <label for="{{ form.weeks.2.id_for_label }}">Week 3</label>
+            <input type="checkbox" name="{{ form.weeks.name }}" id="{{ form.weeks.3.id_for_label }}" value="4" disabled>
+            <label for="{{ form.weeks.3.id_for_label }}">Week 4</label>
+            <input type="checkbox" name="{{ form.weeks.name }}" id="{{ form.weeks.4.id_for_label }}" value="5" disabled>
+            <label for="{{ form.weeks.4.id_for_label }}">Week 5</label>
+        </div>
+        <div>
+            {{ form.print_only_meals }}
+            <label for="{{ form.print_only_meals.id_for_label}}">Print only meals</label>
+        </div>
         <input type="submit" value="Print" />
     </form>
 </div>

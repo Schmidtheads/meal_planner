@@ -25,13 +25,9 @@ function showPrintPopup(triggeringLink) {
     `height=${h},width=${w},resizable=yes,scrollbars=yes,top=${top},left=${left}`);
     
     win.onload = function() {
-        var s = window.document.createElement('script');
-        s.innerHTML("(function () {\
-            $('#id_meal_year').val(" + currentYear + ");\
-            $('#id_meal_month').val(" + currentMonth + ");\
-            })();");
-        window.document.body.appendChild(s);
-        window.document.getElementById('id_meal_year').value = currentYear;
+        win.document.getElementById('id_meal_year').value = currentYear;
+        // In Javascript month numbers start at 0, correct that by adding 1
+        win.document.getElementById('id_meal_month').value = currentMonth + 1;
     };
     
     win.focus();
@@ -55,8 +51,8 @@ function radio_change(r_id, value) {
 
     is_disabled = value == 'ALL';
 
-    for (let i = 1; i <= 5; i++) {
-        let element = '#week' + i;
+    for (let i = 0; i <= 4; i++) {
+        let element = '#id_weeks_' + i;
         $(element).prop( 'disabled', is_disabled );
     }    
 }

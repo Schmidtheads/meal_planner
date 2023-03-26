@@ -10,10 +10,10 @@ from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 
+from .calendar_report import MonthlyMealPlan
 from recipe.search import Search
 from .models import Meal
 from .forms import MealForm, PrintForm
-
 
 
 def detail(request, id):
@@ -116,10 +116,31 @@ def meals(request):
 def PrintCreatePopup(request):
 
     if request.method == "POST":
-        form = request.POST
+        form = PrintForm(request.POST)
+        meal_yr = int(form['meal_year'].data)
+        meal_mt = int(form['meal_month'].data)
+        print_flag = form['print_weeks'].data
+        print_wks = form['weeks'].data
+        print_only_meals = form['print_only_meals'].data
+
+        meal_yr_mnth = f'{meal_yr}-{meal_mt:02}'
+        if print_flag == 'ALL':
+            print_weeks = [1,2,3,4,5]
+        else:
+            print_weeks = [int(w) for w in print_wks]
+
+        # Get meals for the previous and next month too!
+        prev_year, prev_month = _get_previous_month_and_year(meal_yr, meal_mt)
+        next_year, next_month = _get_next_month_and_year(meal_yr, meal_mt)
+        prev_month_meals = _get_meals_for_month(prev_year, prev_month)
+        month_meals = _get_meals_for_month(meal_yr, meal_mt)
+        next_month_meals = _get_meals_for_month(next_year, next_month)
+        meals = prev_month_meals + month_meals + next_month_meals
+
+        mmp = MonthlyMealPlan(meal_yr_mnth, meals, print_weeks, print_only_meals)   
 
         return HttpResponse('<script>opener.closePrintPopup(window);</script>')
-       
+    
     else:
         form = PrintForm()
 
@@ -127,8 +148,8 @@ def PrintCreatePopup(request):
                   {"year": datetime.now().year,
                    "company": "Schmidtheads Inc.",
                    "form": form,
-                   "meal_month": 3,
-                   "meal_year": 3})
+                   "meal_month": 0,
+                   "meal_year": 0})
 
 
 def get_meals_for_month(request):
@@ -169,7 +190,7 @@ def search_for_recipes(request):
     return JsonResponse(data)
 
 
-def _get_meals_for_month(year, month):
+def _get_meals_for_month(year: int, month: int):
     '''
     Helper function that gathers meal information for a month from database
 
@@ -310,3 +331,44 @@ def _number_of_times_recipe_made(recipe):
     count = meals_w_recipe.count()
 
     return count
+
+def _get_previous_month_and_year(year, month):
+    '''
+    Returns the previous year and month from the one passed in
+    @param year: 4 digit year as string
+    @param month: 1 or 2 digit month as string
+    @return: tuple of 4 digit year and 1 or 2 digit month
+    '''
+
+    year_int = int(year)
+    month_int = int(month)
+
+    prev_month = month_int - 1
+    if prev_month == 0:
+        prev_month = 12
+        prev_year = year_int -1
+    else:
+        prev_year = year_int
+
+    return (prev_year, prev_month)
+
+
+def _get_next_month_and_year(year: int, month: int):
+    '''
+    Returns the next year and month from the one passed in
+    @param year: 4 digit year
+    @param month: 1 or 2 digit month
+    @return: tuple of 4 digit year and 1 or 2 digit month
+    '''
+
+    year_int = int(year)
+    month_int = int(month)
+
+    next_month = month_int + 1
+    if next_month == 13:
+        next_month = 1
+        next_year = year_int + 1
+    else:
+        next_year = year_int
+
+    return (next_year, next_month)
