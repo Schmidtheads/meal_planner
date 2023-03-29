@@ -6,9 +6,10 @@ Author: M. Schmidt
 
 import calendar
 from datetime import datetime, date
-from django.http import HttpResponse
+from django.http import HttpResponse, FileResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
+import io
 
 from .calendar_report import MonthlyMealPlan
 from recipe.search import Search
@@ -137,10 +138,19 @@ def PrintCreatePopup(request):
         next_month_meals = _get_meals_for_month(next_year, next_month)
         meals = prev_month_meals + month_meals + next_month_meals
 
-        mmp = MonthlyMealPlan(meal_yr_mnth, meals, print_weeks, print_only_meals)   
+        mmp = MonthlyMealPlan(meal_yr_mnth, meals, print_weeks, print_only_meals)
+        mmp.output_filepath = f'MealPlan-{meal_yr}-{meal_mt:02}.pdf'
+        mmp.output_type = 'S'
+        pdf_bytestring = io.BytesIO(mmp.print_page())
+   
+        # from https://docs.djangoproject.com/en/4.1/howto/outputting-pdf/
+        return FileResponse(pdf_bytestring, 
+            as_attachment=True, 
+            filename=f'MealPlan-{meal_yr}-{meal_mt:02}.pdf'
+            )
 
-        return HttpResponse('<script>opener.closePrintPopup(window);</script>')
-    
+        #return HttpResponse('<script>opener.closePrintPopup(window);</script>')
+ 
     else:
         form = PrintForm()
 

@@ -1,6 +1,12 @@
 '''
-Proof of concept to create a calendar in PDF format
-for use with Meal Planner application.
+Title       : calendar_report.py
+Description : Meal Plan calendar PDF generator
+Author      : M. Schmidt
+Date        : 26-Mar-2023
+
+Notes:
+  To use, instantiate the MonthlyMealPlan class.
+  Then use the print_page() to generate the meal plan in PDF format.
 '''
 
 import calendar
@@ -49,7 +55,34 @@ class MonthlyMealPlan(FPDF):
 
         self.only_meals = print_meals_only
 
+        self.out_filepath = None
+        self.out_type = 'F'
+
         calendar.setfirstweekday(calendar.SUNDAY)
+
+
+    @property
+    def output_filepath(self):
+        return self.out_filepath
+    
+
+    @output_filepath.setter
+    def output_filepath(self, value):
+        self.out_filepath = value
+
+
+    @property
+    def output_type(self):
+        return self.out_type
+    
+    
+    @output_type.setter
+    def output_type(self, value):
+        value = value.upper()
+        if value != 'S':
+            value = 'F'
+
+        self.out_type = value
 
 
     def calendar_days(self, month=None) -> list:
@@ -119,12 +152,20 @@ class MonthlyMealPlan(FPDF):
 
     def print_page(self):
         '''
-        Prints the report page
+        Creates the Meal Plan report page.
         '''
         self.add_page()
         self.page_body()
-        self.output('test.pdf', 'F')
+        # May want to validate that out_filepath is an actual file
+        if not self.output_filepath is None:
+            # from https://stackoverflow.com/questions/56639834/pyfpdf-returns-a-blank-pdf-after-encoding-as-a-byte-string
+            if self.output_type == 'S':
+                return self.output(self.out_filepath, 'S').encode('latin-1')
+            else:
+                return self.output(self.out_filepath, 'F')
 
+        return None
+    
 
     def header(self):
         if not self.only_meals:
