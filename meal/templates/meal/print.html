@@ -6,7 +6,11 @@
 {% load static %}
 <div class="container">
     <h3>Print Meal Plan</h3>
-    <form method='POST' action='' enctype="multipart/form-data" novalidate id="print">{% csrf_token %}
+    <!-- 
+        open new tab on submit: https://css-tricks.com/snippets/html/form-submission-new-window/ 
+        close form on submit: https://stackoverflow.com/a/8616435
+    -->
+    <form method='POST' action='' enctype="multipart/form-data" novalidate id="print" onsubmit="return closePrintPopup(window);" target="_blank">{% csrf_token %}
         {{ form.meal_year }}
         {{ form.meal_month }}
         <!-- <input type="radio" id="{{ form.print_weeks.0.id_for_label}}" name="print_weeks" checked onclick="radio_click('{{ form.print_weeks.0.id_for_label }}') " value="{{ form.print_weeks.0.value }}"> -->
@@ -32,7 +36,7 @@
             <label for="{{ form.print_only_meals.id_for_label}}">Print only meals</label>
         </div>
         <input type="submit" value="Print" />
-        <input type="button" value="Cancel" onclick="closePrintPopup(window)" />
+        <input type="button" value="Close" onclick="closePrintPopup(window)" />
     </form>
 </div>
 {% endblock %}

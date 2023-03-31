@@ -143,13 +143,10 @@ def PrintCreatePopup(request):
         mmp.output_type = 'S'
         pdf_bytestring = io.BytesIO(mmp.print_page())
    
-        # from https://docs.djangoproject.com/en/4.1/howto/outputting-pdf/
         return FileResponse(pdf_bytestring, 
-            as_attachment=True, 
+            content_type='application/pdf', 
             filename=f'MealPlan-{meal_yr}-{meal_mt:02}.pdf'
             )
-
-        #return HttpResponse('<script>opener.closePrintPopup(window);</script>')
  
     else:
         form = PrintForm()
