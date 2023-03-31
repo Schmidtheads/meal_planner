@@ -3,14 +3,19 @@ This is the place to add custom site css styles
 */
 
 body {
-    padding-top: 50px;
     padding-bottom: 20px;
 }
 
 /* Set padding to keep content from hitting the edges */
 .body-content {
+    padding-top: 50px;   
     padding-left: 15px;
     padding-right: 15px;
+}
+
+/* for pages that don't have a navigation bar, remove top padding */
+.body-light {
+    padding-top: 0px;
 }
 
 /* Keep the horizontal ruler below divs */
@@ -46,6 +51,10 @@ input[type="checkbox"].input-validation-error {
 
 .validation-summary-valid {
     display: none;
+}
+
+input:disabled+label {
+    color: #ccc;
 }
 
 /* styles for tables used for input */
@@ -147,6 +156,17 @@ input[type="checkbox"].input-validation-error {
 
 #calendar {
     padding-bottom: 20px;
+}
+
+.printButton {
+    position: absolute;
+    right: 15px;
+    top: 15px;    
+}
+
+.calendarHeader {
+    display: flex;
+    position: relative;
 }
 
 /* Set the colour of the current day */

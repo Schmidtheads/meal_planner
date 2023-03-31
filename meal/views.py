@@ -4,20 +4,17 @@ Description: Django views for Recipe object
 Author: M. Schmidt
 '''
 
-import datetime
 import calendar
-#import json
+from datetime import datetime, date
+from django.http import HttpResponse, FileResponse
 from django.shortcuts import render, get_object_or_404, redirect
-#from django.core import serializers
-from django.http import JsonResponse  #, Http404
-#from django.forms import modelform_factory
+from django.http import JsonResponse
+import io
 
-#from recipe.models import Recipe
-#from cookbook.models import Cookbook
+from .calendar_report import MonthlyMealPlan
 from recipe.search import Search
 from .models import Meal
-from .forms import MealForm
-
+from .forms import MealForm, PrintForm
 
 
 def detail(request, id):
@@ -43,7 +40,7 @@ def detail(request, id):
 
     return render(request, "meal/detail.html",
                   {"title": "Meal Planner",
-                   "year": datetime.datetime.now().year,
+                   "year": datetime.now().year,
                    "company": "Schmidtheads Inc.",
                    "form": form})
 
@@ -72,7 +69,7 @@ def new(request):
         if not scheduled_date is None:
             # Check if date is valid
             try:
-                date_obj = datetime.datetime.strptime(
+                date_obj = datetime.strptime(
                     scheduled_date, "%Y-%m-%d")
                 try:
                     _ = Meal.objects.get(scheduled_date=date_obj)
@@ -98,7 +95,7 @@ def new(request):
 
     return render(request, "meal/detail.html",
                   {"title": "Meal Planner",
-                   "year": datetime.datetime.now().year,
+                   "year": datetime.now().year,
                    "company": "Schmidtheads Inc.",
                    "form": form})
 
@@ -112,8 +109,54 @@ def meals(request):
     # loads, it will send an Ajax request to retrieve the meals
     return render(request, 'meal/meals.html',
                   {'title': 'Meal Planner',
-                   'year': datetime.datetime.now().year,
+                   'year': datetime.now().year,
                    'company': 'Schmidtheads Inc.'})
+
+
+
+def PrintCreatePopup(request):
+
+    if request.method == "POST":
+        form = PrintForm(request.POST)
+        meal_yr = int(form['meal_year'].data)
+        meal_mt = int(form['meal_month'].data)
+        print_flag = form['print_weeks'].data
+        print_wks = form['weeks'].data
+        print_only_meals = form['print_only_meals'].data
+
+        meal_yr_mnth = f'{meal_yr}-{meal_mt:02}'
+        if print_flag == 'ALL':
+            print_weeks = [1,2,3,4,5]
+        else:
+            print_weeks = [int(w) for w in print_wks]
+
+        # Get meals for the previous and next month too!
+        prev_year, prev_month = _get_previous_month_and_year(meal_yr, meal_mt)
+        next_year, next_month = _get_next_month_and_year(meal_yr, meal_mt)
+        prev_month_meals = _get_meals_for_month(prev_year, prev_month)
+        month_meals = _get_meals_for_month(meal_yr, meal_mt)
+        next_month_meals = _get_meals_for_month(next_year, next_month)
+        meals = prev_month_meals + month_meals + next_month_meals
+
+        mmp = MonthlyMealPlan(meal_yr_mnth, meals, print_weeks, print_only_meals)
+        mmp.output_filepath = f'MealPlan-{meal_yr}-{meal_mt:02}.pdf'
+        mmp.output_type = 'S'
+        pdf_bytestring = io.BytesIO(mmp.print_page())
+   
+        return FileResponse(pdf_bytestring, 
+            content_type='application/pdf', 
+            filename=f'MealPlan-{meal_yr}-{meal_mt:02}.pdf'
+            )
+ 
+    else:
+        form = PrintForm()
+
+    return render(request, "meal/print.html",
+                  {"year": datetime.now().year,
+                   "company": "Schmidtheads Inc.",
+                   "form": form,
+                   "meal_month": 0,
+                   "meal_year": 0})
 
 
 def get_meals_for_month(request):
@@ -125,8 +168,8 @@ def get_meals_for_month(request):
     @return json response string
     '''
 
-    meal_year = int(request.GET.get('year', datetime.datetime.now().year))
-    meal_month = int(request.GET.get('month', datetime.datetime.now().month))
+    meal_year = int(request.GET.get('year', datetime.now().year))
+    meal_month = int(request.GET.get('month', datetime.now().month))
 
     meals_json = _get_meals_for_month(meal_year, meal_month)
 
@@ -154,7 +197,7 @@ def search_for_recipes(request):
     return JsonResponse(data)
 
 
-def _get_meals_for_month(year, month):
+def _get_meals_for_month(year: int, month: int):
     '''
     Helper function that gathers meal information for a month from database
 
@@ -173,7 +216,7 @@ def _get_meals_for_month(year, month):
     for day in range(1, days_in_month+1):
         check_date = f'{year}-{month}-{day}'
         meal = meals_for_month.filter(
-            scheduled_date=datetime.date(year, month, day)).first()
+            scheduled_date=date(year, month, day)).first()
 
         meal_info = {'scheduled_date': check_date}
         meal_info.update(_get_recipe_info_for_meal(meal))
@@ -231,17 +274,6 @@ def _get_recipe_info_for_meal(meal):
         recipe_info = {'recipe_name': ''}
 
     return recipe_info
-
-
-def _get_meal_id_by_date(date):
-    '''
-    '''
-
-    # There should be only one meal per date, so only return first meal
-    # object returned from filter.
-    meal = Meal.objects.filter(scheduled_date=date).first()
-
-    return meal
 
 
 def _search_for_recipes(search_keys):
@@ -306,3 +338,44 @@ def _number_of_times_recipe_made(recipe):
     count = meals_w_recipe.count()
 
     return count
+
+def _get_previous_month_and_year(year, month):
+    '''
+    Returns the previous year and month from the one passed in
+    @param year: 4 digit year as string
+    @param month: 1 or 2 digit month as string
+    @return: tuple of 4 digit year and 1 or 2 digit month
+    '''
+
+    year_int = int(year)
+    month_int = int(month)
+
+    prev_month = month_int - 1
+    if prev_month == 0:
+        prev_month = 12
+        prev_year = year_int -1
+    else:
+        prev_year = year_int
+
+    return (prev_year, prev_month)
+
+
+def _get_next_month_and_year(year: int, month: int):
+    '''
+    Returns the next year and month from the one passed in
+    @param year: 4 digit year
+    @param month: 1 or 2 digit month
+    @return: tuple of 4 digit year and 1 or 2 digit month
+    '''
+
+    year_int = int(year)
+    month_int = int(month)
+
+    next_month = month_int + 1
+    if next_month == 13:
+        next_month = 1
+        next_year = year_int + 1
+    else:
+        next_year = year_int
+
+    return (next_year, next_month)

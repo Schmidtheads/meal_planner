@@ -140,3 +140,6 @@ dmypy.json
 rs.bat
 .vscode/
 __.vscode/
+
+# User-custom
+.etc
