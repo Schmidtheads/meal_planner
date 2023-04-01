@@ -305,7 +305,7 @@ class RecipeTable(Table):
     def _create_row(self, row):
         t = Recipe(
             name=row['title'],
-            cook_book=row['cookbook'],
+            cook_book=row['cook_book'],
             page_number=0 if row['page_number'] is None or row['page_number'] == _NV else row['page_number'],
             notes=row['notes']
         )
@@ -335,7 +335,7 @@ class RecipeRatingTable(Table):
     def _create_row(self, row):
         r = Recipe(
             name=row['name'],
-            cook_book=row['cookbook'],
+            cook_book=row['cook_book'],
             page_number=row['page_number'],
             notes=row['notes']
         )
@@ -475,7 +475,7 @@ class MealDatabase():
             _NM_KEY: _TABLE_RECIPE,
             _FK_KEY: [
                 {
-                    _CL_KEY: 'cookbook',
+                    _CL_KEY: 'cook_book',
                     _RT_KEY: _TABLE_COOKBOOK
                 }
             ]
