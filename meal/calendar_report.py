@@ -23,7 +23,7 @@ class MonthlyMealPlan(FPDF):
     Class to Create a Monthly Meal Plan
     '''
 
-    def __init__(self, month, meals, weeks_to_print: list=None, print_meals_only: bool=False):
+    def __init__(self, month, meals, weeks_to_print: list=[], print_meals_only: bool=False):
         '''
         Constructor
         @param month: (string) year and month of calendar (YYYY-MM)
@@ -51,7 +51,7 @@ class MonthlyMealPlan(FPDF):
             self.calendar_month = month
 
         self._meals = meals
-        self.weeks_to_print = [0,1,2,3,4,5] if weeks_to_print is None else weeks_to_print
+        self.weeks_to_print = [0,1,2,3,4,5] if weeks_to_print == [] else weeks_to_print
 
         self.only_meals = print_meals_only
 
@@ -242,8 +242,8 @@ class MonthlyMealPlan(FPDF):
                 meal = self._get_meal_for_day(month, day_of_month)
                 if meal is not None and week_no in self.weeks_to_print:
                     recipe = meal['recipe_name']
-                    cookbook_abbr = meal['abbr']
-                    page = f'p.{meal["page"]}'
+                    cookbook_abbr = meal['abbr'] if 'abbr' in meal and meal['abbr'] != 'Unk' else ''
+                    page = f'p.{meal["page"]}' if 'page' in meal and meal['page'] != 0 else ''
                 else:
                     recipe = ''
                     cookbook_abbr = ''
