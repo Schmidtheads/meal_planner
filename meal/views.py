@@ -214,7 +214,7 @@ def _get_meals_for_month(year: int, month: int):
     meals_info = []
     days_in_month = calendar.monthrange(year, month)[1]
     for day in range(1, days_in_month+1):
-        check_date = f'{year}-{month}-{day}'
+        check_date = f'{year}-{month:02}-{day:02}'
         meal = meals_for_month.filter(
             scheduled_date=date(year, month, day)).first()
 
