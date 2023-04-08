@@ -122,6 +122,10 @@ class Table():
 
 
     def load(self):
+        '''
+        Method that starts load of Django database table
+        '''
+        
         # Iterate rows
         for r in self.rows:
 
@@ -132,13 +136,14 @@ class Table():
                 # Use foreign key id to find actual object in django table
                 fk_table = self._datamodel.get_table_by_name(rc[_RT_KEY])
                 fk_mapping = fk_table.pk_mapping
+                #print(f'{fk_table._name}, col: {rc[_CL_KEY]}, rel tbl: {rc[_RT_KEY]}, {r[rc[_CL_KEY]]}')
                 r[rc[_CL_KEY]] = fk_mapping.find_django_row(r[rc[_CL_KEY]])
 
             if not q:
                 new_row = self._create_row(r)
 
                 # Only save row and get djando id if NOT a junction table
-                if not self.is_junction_table:
+                if not self.is_junction_table and new_row is not None:
                     new_row.save()
 
                     # Get Django generated unique id
@@ -303,6 +308,12 @@ class RecipeTable(Table):
 
 
     def _create_row(self, row):
+        # Do some data validation
+        # cook_book is REQUIRED
+        if row['cook_book'] is None:
+            print('Invalid cook_book reference for recipe', row)
+            return None
+        
         t = Recipe(
             name=row['title'],
             cook_book=row['cook_book'],
@@ -375,7 +386,7 @@ class MealTable(Table):
 
     
     def _query_row_exists(self, row):
-        # format date to ensure in YYYY-MM-DD format
+        # format date to ensure in YYYY-MM-DD HH:MM:SS format
         date_obj = datetime.datetime.strptime(row['scheduled_date'], '%Y-%m-%d %H:%M:%S')
         scheduled_date = date_obj.strftime('%Y-%m-%d')
         q = Meal.objects.filter(scheduled_date = scheduled_date)
@@ -384,9 +395,15 @@ class MealTable(Table):
 
     def _create_row(self, row):
         # format date to ensure in YYYY-MM-DD format
-        date_obj = datetime.datetime.strptime(row['scheduled_date'], '%Y-%m-%d %H:%M:%S')
+        date_obj = datetime.datetime.strptime(row['scheduled_date'], '%Y-%m-%d  %H:%M:%S')
         scheduled_date = date_obj.strftime('%Y-%m-%d')
         
+        # Do some data validation
+        # recipe is REQUIRED
+        if row['recipe'] is None:
+            print('Invalid recipe reference for meal', row)
+            return None
+
         r = Meal(
             scheduled_date = scheduled_date,
             was_made = row['was_made'],
@@ -416,39 +433,51 @@ class RecipeToTypeTable(Table):
         recipe_django_id = self._get_fk_table_django_id('recipeid', row)
         recipetype_django_row = self._get_fk_table_django_row('recipetypeid', row)
 
-        q = recipetype_django_row.recipe_set.filter(pk=recipe_django_id).exists()
+        try:
+            q = recipetype_django_row.recipe_set.filter(pk=recipe_django_id).exists()
+            return q
+        except:
+            print('Cannot find recipes for given type!')
+            return None
         
-        return q
-   
     
     def _create_row(self, row):
 
         recipetype_django_row = row['recipetypeid']
         recipe_django_row = row['recipeid']
 
-        recipe_django_row.recipe_types.add(recipetype_django_row)
-           
+        if recipe_django_row is not None:
+            recipe_django_row.recipe_types.add(recipetype_django_row)
+        else:
+            print(f'Django row with id {row["recipeid"]} for Recipe not found!')
+
         # We're just creating an association between two rows, don't return anything   
         return None
 
 
     def _get_fk_table_django_id(self, fk_column_name, row):
         fk_table = self._datamodel.get_table_by_name(self._get_related_table_by_fk(fk_column_name))
-        fk_table_row = fk_table.get_row_by_id(row[fk_column_name])
-        fk_table_django_id = fk_table_row[_DJANGO_ID_COL]
-
-        return fk_table_django_id
-
+        try:
+            fk_table_row = fk_table.get_row_by_id(row[fk_column_name])
+            fk_table_django_id = fk_table_row[_DJANGO_ID_COL]
+            return fk_table_django_id
+        except:
+            return None
+        
 
     def _get_fk_table_django_row(self, fk_column_name, row):
 
         fk_table = self._datamodel.get_table_by_name(self._get_related_table_by_fk(fk_column_name))
-        fk_table_row = fk_table.get_row_by_id(row[fk_column_name])
-        fk_table_django_id = fk_table_row[_DJANGO_ID_COL]
-        fk_table_django_table = fk_table.django_table
-        fk_table_django_row = fk_table_django_table.objects.get(pk=fk_table_django_id)
-
-        return fk_table_django_row
+        try:
+            fk_table_row = fk_table.get_row_by_id(row[fk_column_name])
+            fk_table_django_id = fk_table_row[_DJANGO_ID_COL]
+            fk_table_django_table = fk_table.django_table
+            fk_table_django_row = fk_table_django_table.objects.get(pk=fk_table_django_id)
+            return fk_table_django_row      
+        except:
+            print('Foreign Key table not found!')
+            return None
+  
 
 
 #------------------------------------------------
@@ -456,6 +485,16 @@ class MealDatabase():
     '''
     Class that knows the Meal Planner data model and relationships between tables
     '''
+
+    # TABLE_DEFS
+    # Defines the Meal Planner database structure
+    # A list of dictionaries. Each dictionary is a table.
+    # Each table dictionary contains the following keys:
+    #    _NN_KEY = the name of the table
+    #    _FK_KEY = list of foreign keys definitions (can be empty):
+    #       _NM_KEY = name of column with foreign key
+    #       _RT_KEY = name of related table foreign key links to
+    #   _JT_KEY = (optional) Flag if table is a junction table 
 
     _TABLE_DEFS = [
         {
@@ -540,7 +579,7 @@ class MealDatabase():
 
     def load(self):
         '''
-        Load the Django database
+        This method is used to start the Load the Django database
         '''
 
         # Iterate sorted table list
@@ -608,7 +647,10 @@ class MealDatabase():
 
 
 class PrimaryKeyMapping():
-
+    '''
+    Connects a row in the source data to same record in Django database.
+    '''
+    
     def __init__(self, table: Table):
         self._table = table
         self._rows = []
@@ -644,7 +686,12 @@ class PrimaryKeyMapping():
 
         django_table = self.table.django_table
 
-        return django_table.objects.get(id=d_id)
+        try:
+            found_obj = django_table.objects.get(id=d_id)
+        except:
+            found_obj = None
+
+        return found_obj
 
 
     def find_django_id(self, search_id) -> int:
