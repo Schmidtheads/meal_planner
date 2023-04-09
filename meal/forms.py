@@ -76,11 +76,11 @@ class PrintForm(forms.Form):
         ('SELECT', 'Print only following weeks:')
     ]
     week_choices = [
+        ('0', '0'),
         ('1', '1'),
         ('2', '2'),
         ('3', '3'),
         ('4', '4'),
-        ('5', '5'),
     ]
 
     meal_year = forms.IntegerField(widget=forms.HiddenInput())
