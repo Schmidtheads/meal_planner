@@ -168,12 +168,14 @@ class MonthlyMealPlan(FPDF):
     
 
     def header(self):
-        if not self.only_meals:
-            self.set_font('Arial', 'B', 22)
+        # if printing meals only, hide header text
+        header_text = '' if self.only_meals else f'Meal Plan - {self.month_name} {self.year}'
+            
+        self.set_font('Arial', 'B', 22)
 
-            self.set_text_color(0,96,200)
-            self.cell(self.WIDTH, self.HEADER_HEIGHT, f'Meal Plan - {self.month_name} {self.year}', align='C')
-            self.ln()
+        self.set_text_color(0,96,200)
+        self.cell(self.WIDTH, self.HEADER_HEIGHT, header_text , align='C')
+        self.ln()
 
 
     def page_body(self):
@@ -182,8 +184,8 @@ class MonthlyMealPlan(FPDF):
         '''
 
         # create calendar grid
-        if not self.only_meals:
-            self._build_week_header()
+        #if not self.only_meals:
+        self._build_week_header()
         for w in range(self.WEEKS):
             self._build_week(w)
 
@@ -197,16 +199,24 @@ class MonthlyMealPlan(FPDF):
         self.set_text_color(34, 84, 8)
         self.set_fill_color(232, 212, 155)
 
+        # if printing only meals, hide borders and fill colour
+        fill_flag = False if self.only_meals else True
+        border_flag = 0 if self.only_meals else 1
+        
         for day in DAYS_OF_WEEK:
             ln = 1 if day == DAYS_OF_WEEK[-1] else 0
+
+            # if printing only meals, hide day of week header
+            print_day = '' if self.only_meals else day
+
             self.cell(
                 self.CALENDAR_WIDTH / self.DAYS,
                 self.DATE_HEIGHT,
-                txt = day,
+                txt = print_day,
                 align = 'C',
-                border = 1,
-                ln=ln,
-                fill=True
+                border = border_flag,
+                ln = ln,
+                fill = fill_flag
             )
 
 
