@@ -76,7 +76,7 @@ def new(request):
 
                     # if meal exists - need to redirect to details page (for update)
                 except Meal.DoesNotExist:
-                    print('Meal not found!')
+                    print(f'Meal not found for {scheduled_date}!')
             except:
                 # Invalid date, do not pre-populate the date on the form
                 date_obj = None
@@ -126,7 +126,7 @@ def PrintCreatePopup(request):
 
         meal_yr_mnth = f'{meal_yr}-{meal_mt:02}'
         if print_flag == 'ALL':
-            print_weeks = [1,2,3,4,5]
+            print_weeks = [0,1,2,3,4]
         else:
             print_weeks = [int(w) for w in print_wks]
 
