@@ -1,3 +1,6 @@
+'''
+Name: admin.py
+Description: Register Recipe model objects with Django admin'''
 from django.contrib import admin
 
 from .models import Recipe, RecipeType, RecipeRating, Diner

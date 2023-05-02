@@ -1,67 +1,41 @@
 from django.core.management.base import BaseCommand
 
 import copy
-import pyodbc
+import sqlite3
 import sys
-from .dataload import TableFactory
+from .dataload import MealDatabase
 
-_tables = ['Author', 'Diner', 'Cookbook', 'Meal', 'Recipe', 'RecipeType']
 _meal_plan = []
 
 
 class Command(BaseCommand):
-    help = 'Loads Django database from MS Access'
+
+    help = 'Loads Django database from SQL Lite database'
 
     def add_arguments(self, parser):
-        parser.add_argument('access_db', type=str,
-                            help='Path to Access database')
+        parser.add_argument('db_path', type=str,
+                            help='Path to SQL Lite database')
 
         return super().add_arguments(parser)
 
 
     def handle(self, *args, **kwargs):
 
-        access_db = kwargs['access_db']
-        conn = self.create_connection(access_db)
+        db_path = kwargs['db_path']
+        conn = self.create_connection(db_path)
 
-        # Load the source data
-        for t in _tables:
-            try:
-                rows = self.query_table(conn, t)
+        mdb = MealDatabase(conn)
+        print('Loading...')
+        mdb.load()
 
-                table = TableFactory().createTable(t, rows)
-                _meal_plan.append(table)
-
-                # Load into Django database
-                table.load()
-            except:
-                print(f'***WARNING*** table {t} could not be loaded')
+        print('Done!')   
 
 
-    def create_connection(self, db_path):
+    def create_connection(self, database_path):
 
-        #connect_str = f'Driver={{Microsoft Access Driver (*.mdb, *.accdb)}};DBQ={db_path};'
-        connect_str = r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=D:\Projects\Other\meal_plan\data\MealPlanner.accdb;'
-        conn = pyodbc.connect(connect_str)
+       conn = sqlite3.connect(database_path)
 
-        return conn
-
-
-    def query_table(self, db_conn, table_name):
-
-        cursor = db_conn.cursor()
-        cursor.execute(f'select * from {table_name}')
-        records = cursor.fetchall()
-
-        columns = [column[0] for column in cursor.description]
-        result_set = []
-        for record in records:
-            row = {}
-            for i, value in enumerate(record):
-                row[columns[i].lower()] = value
-            result_set.append(row)
-
-        return result_set
+       return conn
 
 
 '''

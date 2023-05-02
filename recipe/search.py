@@ -38,6 +38,7 @@ import copy
 import datetime
 
 from django.db.models import Q
+
 from .models import Recipe
 
 KEYWORD_TOKENS = [
@@ -55,6 +56,9 @@ TIME_KEYWORD_TOKENS = [
 
 
 class Search:
+    '''
+    Class that manages searching for recipes
+    '''
 
     def __init__(self, search_string):
 
@@ -70,10 +74,16 @@ class Search:
 
     @property
     def tokens(self):
+        '''
+        Return list of search tokens
+        '''
         return [t.upper() for t in self._tokens]
 
     @property
     def free_tokens(self):
+        '''
+        Return list of free search tokens
+        '''
         return [t.upper() for t in self._freetokens]
 
     @property
@@ -115,8 +125,12 @@ class Search:
 
 
     def time_filter_date(self, keyword):
+        '''
+        Return list of time filtering keywords
+        '''
 
         return self._time_keywords[keyword]
+
 
     def find(self):
         '''
@@ -153,7 +167,7 @@ class Search:
         # Build queries and search for matches, based on
         # contents of keyword_searches dictionary
 
-        # TODO Would it be better to initialize as an empty Django result set?
+        #TODO: Would it be better to initialize as an empty Django result set?
         recipe_result = None
 
         for keyword in keyword_searches:
@@ -188,13 +202,9 @@ class Search:
 
             # TODO: implement time filters
 
-        # test - loop through recipe type queryset to get recipes
-        if not recipe_result is None:
-            for r in recipe_result:
-                print(r.name)
-
         # Get recipe related information
         return recipe_result
+
 
     def _parse_keywords(self, tokens):
         '''
@@ -214,7 +224,6 @@ class Search:
 
             # if search token not at end of list, grab next token of search values
             # keyword can have muliple search values, if comma separated (no spaces!)
-            search_values = ''
             if token_idx < len(tokens):
                 next_token = tokens[token_idx + 1]
 
@@ -238,6 +247,7 @@ class Search:
                     tokens_not_processed.remove(next_token)
 
         return tokens_not_processed
+
 
     def _parse_time_keywords(self, tokens):
         '''

@@ -1,9 +1,19 @@
+'''
+Name: forms.py
+Description: Defines forms for Meal objects
+'''
+
 from django import forms
-from . import models
-from django.template import loader
 from django.utils.safestring import mark_safe
+from django.template import loader
+
+from . import models
+
 
 class RecipeWidget(forms.widgets.Select):
+    '''
+    Class to define custom Recipe Widget
+    '''
     template_name =  'meal/recipe_select.html'
     _recipe_name = ""
 
@@ -21,18 +31,29 @@ class RecipeWidget(forms.widgets.Select):
 
     @property
     def recipe_name(self):
+        '''
+        Returns the recipe's name
+        '''
         return self._recipe_name
 
     @recipe_name.setter
     def recipe_name(self, value):
+        '''
+        Sets the recipe's name
+        '''
         self._recipe_name = value
 
 
 class MealForm(forms.ModelForm):
-
+    '''
+    Class to define form for Meal
+    '''
     recipe_name = ""
 
     class Meta:
+        '''
+        Metadata class
+        '''
         model = models.Meal
         fields = '__all__'
         widgets={'recipe': RecipeWidget()}
@@ -41,10 +62,39 @@ class MealForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(MealForm, self).__init__(*args, **kwargs)
         the_meal = kwargs.get('instance')
-        
+
         # Set properties, if a meal for the date was found
         if not the_meal is None:
             self.recipe_name = the_meal.recipe.name
             self.fields['recipe'].widget.recipe_name = self.recipe_name
-        
 
+
+class PrintForm(forms.Form):
+
+    print_choices = [
+        ('ALL', 'Print all weeks'), 
+        ('SELECT', 'Print only following weeks:')
+    ]
+    week_choices = [
+        ('0', '0'),
+        ('1', '1'),
+        ('2', '2'),
+        ('3', '3'),
+        ('4', '4'),
+    ]
+
+    meal_year = forms.IntegerField(widget=forms.HiddenInput())
+    meal_month = forms.IntegerField(widget=forms.HiddenInput())
+    print_weeks = forms.ChoiceField(
+        choices=print_choices,
+        widget = forms.RadioSelect(attrs={'onchange': 'radio_change(this.id, this.value);'}),
+        initial='ALL'
+    )
+    weeks = forms.MultipleChoiceField(
+        choices=week_choices
+    )
+    print_only_meals = forms.BooleanField(
+        label='Print only meals',
+        initial=False,
+        required=False
+    )

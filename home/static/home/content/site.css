@@ -3,14 +3,19 @@ This is the place to add custom site css styles
 */
 
 body {
-    padding-top: 50px;
     padding-bottom: 20px;
 }
 
 /* Set padding to keep content from hitting the edges */
 .body-content {
+    padding-top: 50px;   
     padding-left: 15px;
     padding-right: 15px;
+}
+
+/* for pages that don't have a navigation bar, remove top padding */
+.body-light {
+    padding-top: 0px;
 }
 
 /* Keep the horizontal ruler below divs */
@@ -46,6 +51,10 @@ input[type="checkbox"].input-validation-error {
 
 .validation-summary-valid {
     display: none;
+}
+
+input:disabled+label {
+    color: #ccc;
 }
 
 /* styles for tables used for input */
@@ -148,6 +157,19 @@ input[type="checkbox"].input-validation-error {
 #calendar {
     padding-bottom: 20px;
 }
+
+
+.printButton {
+    position: absolute;
+    right: 15px;
+    top: 15px;    
+}
+
+.calendarHeader {
+    display: flex;
+    position: relative;
+}
+
 
 /* Set the colour of the current day */
 
@@ -297,10 +319,33 @@ input[type="checkbox"].input-validation-error {
     width: 100px;
 }
 
-#id_note {
-    max-width: none;
-    width: 500px;
+#id_notes {
+    max-width: 800px;
+    min-width: 250px;
+    width: 400px;
+    min-height: 34px;
+    max-height: 600px;
 }
+
+#id_notes_input {
+    max-width: 800px;
+    width: 400px;
+}
+
+#id_recipe_input {
+    max-width: none;
+    width: 400px;
+}
+
+#id_recipe_name_display {
+    max-width: none;
+    width: 250px;
+}
+
+.left_padded_table_cell {
+    padding-left: 10px;
+}
+
 
 .padded_table_cell {
     padding: 10px;
@@ -321,6 +366,13 @@ input[type="checkbox"].input-validation-error {
  * Custom recipe selector widget
  */
 
+ /* Make the table for the recipe custom selector 100% so search field
+   fills width of modal dialog
+ */
+#id_recipe_search {
+    width: 100%;
+}
+
 /* position the Recipe search button */
 #id_recipe_search_button {
     margin: auto;
@@ -328,7 +380,9 @@ input[type="checkbox"].input-validation-error {
 }
 
 #id_recipe_search_results {
+    height: 100%;
     width: 100%;
+    min-width: 800px;
 }
 
 #id_recipe_search_container {
@@ -336,22 +390,48 @@ input[type="checkbox"].input-validation-error {
 }
 
 #id_table_scroll {
-    height:200px;
-    overflow:auto;
+    height: 100%;
+    overflow-x:auto;
+    /*overflow-y:auto;*/
 }
 
-/* Make the table for the recipe custom selector 100% so search field
-   fills width of modal dialog
- */
-#id_recipe_search {
-    width: 100%;
+.table_header {
+    /*
+        Keep table header at top
+    */
+    position: sticky;
 }
 
- tbody tr:hover tr.select-row {
+/*
+    Keep the footer in a modal dialog at the bottom
+    (Good for resizable modals)
+*/
+.modal-content {
+    height: 100%;
+    border-radius: 0;
+    position:relative;
+}
+
+.modal-body {
+    /* 
+        Size the modal body to factor in the header, footer
+        and size of the search text input and button + 15px
+    */
+    height: calc(100% - 208px)
+}
+
+.modal-footer {
+    bottom:0px;
+    right:0px;
+    position:absolute;
+    width:100%;
+}
+
+tbody tr:hover tr.select-row {
     background-color: #007bff;
  }
 
- .tableRowHover tbody tr:not(.select-row):hover td {
+.tableRowHover tbody tr:not(.select-row):hover td {
     background-color: #dcdcdc;
     transition: all 0.01s ease-in-out;
 }

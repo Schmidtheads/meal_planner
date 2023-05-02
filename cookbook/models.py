@@ -18,7 +18,7 @@ class Author(models.Model):
 class Cookbook(models.Model):
     title = models.CharField(max_length=50)
     description = models.CharField(max_length=200, blank=True)
-    author = models.ForeignKey(Author, on_delete=models.CASCADE)
+    author = models.ForeignKey(Author, on_delete=models.CASCADE, blank=True, null=True)
     publish_date = models.PositiveSmallIntegerField()
     url = models.CharField(max_length=200, blank=True)
     edition = models.CharField(max_length=20, blank=True)

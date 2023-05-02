@@ -1,0 +1,46 @@
+{% extends 'home/layout_light.html' %}
+
+{% block title %}Print{% endblock %}
+
+{% block content %}
+{% load static %}
+<div class="container">
+    <h3>Print Meal Plan</h3>
+    <!-- 
+        open new tab on submit: https://css-tricks.com/snippets/html/form-submission-new-window/ 
+        close form on submit: https://stackoverflow.com/a/8616435
+    -->
+    <form method='POST' action='' enctype="multipart/form-data" novalidate id="print" onsubmit="return closePrintPopup(window);" target="_blank">{% csrf_token %}
+        {{ form.meal_year }}
+        {{ form.meal_month }}
+        <!-- <input type="radio" id="{{ form.print_weeks.0.id_for_label}}" name="print_weeks" checked onclick="radio_click('{{ form.print_weeks.0.id_for_label }}') " value="{{ form.print_weeks.0.value }}"> -->
+        {{ form.print_weeks.0.tag }}
+        <label for="{{ form.print_weeks.0.id_for_label }}">{{ form.print_weeks.0.choice_label }}</label><br>
+        {{ form.print_weeks.1.tag }}
+        <!-- <input type="radio" id="{{ form.print_weeks.1.id_for_label }}" name="print_weeks" onclick="radio_click('{{ form.print_weeks.1.id_for_label }}')"> -->
+        <label for="{{ form.print_weeks.1.id_for_label }}">{{ form.print_weeks.1.choice_label }}</label><br>
+        <div style="margin-left: 30px">
+            <input type="checkbox" name="{{ form.weeks.name }}" id="{{ form.weeks.0.id_for_label }}" value="0" disabled>
+            <label for="{{ form.weeks.0.id_for_label }}">Week 1</label>
+            <input type="checkbox" name="{{ form.weeks.name }}" id="{{ form.weeks.1.id_for_label }}" value="1" disabled>
+            <label for="{{ form.weeks.1.id_for_label }}">Week 2</label>
+            <input type="checkbox" name="{{ form.weeks.name }}" id="{{ form.weeks.2.id_for_label }}" value="2" disabled>
+            <label for="{{ form.weeks.2.id_for_label }}">Week 3</label>
+            <input type="checkbox" name="{{ form.weeks.name }}" id="{{ form.weeks.3.id_for_label }}" value="3" disabled>
+            <label for="{{ form.weeks.3.id_for_label }}">Week 4</label>
+            <input type="checkbox" name="{{ form.weeks.name }}" id="{{ form.weeks.4.id_for_label }}" value="4" disabled>
+            <label for="{{ form.weeks.4.id_for_label }}">Week 5</label>
+        </div>
+        <div>
+            {{ form.print_only_meals }}
+            <label for="{{ form.print_only_meals.id_for_label}}">Print only meals</label>
+        </div>
+        <input type="submit" value="Print" />
+        <input type="button" value="Close" onclick="closePrintPopup(window)" />
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'home/scripts/print.js' %}"></script>
+{% endblock %}

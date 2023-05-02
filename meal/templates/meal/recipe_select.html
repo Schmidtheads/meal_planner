@@ -1,8 +1,11 @@
 ﻿<!--
   Custom Recipe Search Widget
+
+  Note that the methods in recipequery.js are available to this html snippet
+  because it is sourced by the parent html file meals/detail.html
 -->
 <div class="row align-items-end">
-    <div class="form-group col-md-7">
+    <div class="form-group col-md-8">
         <input type="text" class="form-control"
                 id="id_recipe_name_display"
                 name="{{ widget.name }}"
@@ -11,7 +14,7 @@
                 {% endif %} readonly/>
     </div>
     <div class="form-group col-md-1">
-      <button class="btn btn-default" type="button" data-toggle="modal" data-target="#queryBuilder">
+      <button type="button" class="btn btn-default" onclick="launch()">
             Search
       </button>
     </div>
@@ -27,15 +30,15 @@
     <!-- Modal -->
     <div class="modal fade" id="queryBuilder" tabindex="-1" data-backdrop="static" role="dialog" aria-labelledby="queryBuilderTitle" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
+        <div class="modal-content ui-resizable ui-draggable">
+          <div class="modal-header ui-draggable-header">
             <h5 class="modal-title" id="queryBuilderLongTitle">Recipe Search</h5>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
           <div class="modal-body">
-            <table id="id_recipe_search">
+            <table class="table" id="id_recipe_search">
               <tr>
                 <td id="id_recipe_search_container">
                   <input id="id_recipe_search_keys" class="form-control" onkeyup="stoppedTyping()" type="text" />
@@ -44,17 +47,13 @@
                   <button id="id_recipe_search_button" type="button" class="btn btn-primary" onclick="recipeSearch()">Search</button>                  
                 </td>
               </tr>
-              <tr>
-                <td colspan="2">
-                  <div id="id_table_scroll">
-                    <table id="id_recipe_search_results" class="table tableRowHover">
-                      <thead></thead>
-                      <tbody></tbody>
-                    </table>
-                  </div>
-                </td>
-              </tr>
             </table>
+            <div id="id_table_scroll">
+              <table id="id_recipe_search_results" class="table tableRowHover">
+                <thead></thead>
+                <tbody></tbody>
+              </table>
+            </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
