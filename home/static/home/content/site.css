@@ -158,6 +158,7 @@ input:disabled+label {
     padding-bottom: 20px;
 }
 
+
 .printButton {
     position: absolute;
     right: 15px;
@@ -168,6 +169,7 @@ input:disabled+label {
     display: flex;
     position: relative;
 }
+
 
 /* Set the colour of the current day */
 
@@ -343,6 +345,7 @@ input:disabled+label {
 .left_padded_table_cell {
     padding-left: 10px;
 }
+
 
 .padded_table_cell {
     padding: 10px;

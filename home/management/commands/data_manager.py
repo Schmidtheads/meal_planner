@@ -9,6 +9,7 @@ _meal_plan = []
 
 
 class Command(BaseCommand):
+
     help = 'Loads Django database from SQL Lite database'
 
     def add_arguments(self, parser):
@@ -35,9 +36,6 @@ class Command(BaseCommand):
        conn = sqlite3.connect(database_path)
 
        return conn
-
-
- 
 
 
 '''
