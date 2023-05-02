@@ -1,5 +1,9 @@
-# meal_planner
-Web application for meal plan management
+# Meal Planner
+Web application for meal plan management.
+
+This web-based application provides a user interface to assist in the planning of weekly meal plans. It provides the ability to search from a database of recipes based on recipe name, cookbook, author or custom tags assoicated with the recipe. It will produce a monthly calendar in PDF format that can then be printed. It allows for one week of meals to be printed at a time and can be printed over an existing calendar.
+
+This is a data driven application. It's usefulness increases as more recipes, cookboks and meals are entered into the system. This application does not come with any data pre-loaded.
 
 Conists of three apps:
 - coobook app: view cookbooks and their authors
