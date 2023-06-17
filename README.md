@@ -5,10 +5,20 @@ This web-based application provides a user interface to assist in the planning o
 
 This is a data driven application. It's usefulness increases as more recipes, cookboks and meals are entered into the system. This application does not come with any data pre-loaded.
 
-Conists of three apps:
-- coobook app: view cookbooks and their authors
-- recipe app: view recipes, their type and rating, and from which cookbook they are from
-- meal app: view meals, when they took place, and what recipe was used; plan future meals
+The Meal Planner Web application conists of three compnents:
+- Meals app: view meals, when they took place, and what recipe was used; plan future meals
+- Coobooks app: view cookbooks and their authors
+- Recipes app: view recipes, their type and rating, and from which cookbook they are from
+
+## Requirements
+The Meal Planner a
+pplication is written in Python 3.10.9 and requires the following packages:
+- Django 3.2.16
+- Fpdf 1.7.2
+- Pillow 9.4.0
+- pytz 2022.7
+- sqlparse 0.4.3
+- asgiref 3.6.0
 
 
 ## Data Loader
