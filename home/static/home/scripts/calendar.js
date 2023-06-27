@@ -224,19 +224,7 @@ function createDayElement(date, meal, month, year) {
         dayMealLink.href = '/meal/new?date=' + year + '-' + (month+1) + '-' + date;
         daySpan.appendChild(dayMealLink);
     }
-    else {
-        // For days with no recipe, the clicking on the date will link to a 
-        // new meal form.
-
-        // Create a link from the date to the new meal page
-        let dayMealLink = document.createElement('a');
-        let dayText = document.createTextNode(date);
-        dayMealLink.append(dayText);
-        dayMealLink.title = 'Set meal for ' + date  + ' of month';
-        dayMealLink.href = '/meal/new?date=' + year + '-' + (month+1) + '-' + date;
-        daySpan.appendChild(dayMealLink);
-    }
-
+    
     return dayDiv;
 }
 
