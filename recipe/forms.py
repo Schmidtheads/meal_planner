@@ -1,5 +1,6 @@
 from django import forms
 from .models import Recipe, RecipeRating, RecipeType, Diner
+import string
 
 
 class RecipeForm(forms.ModelForm):
@@ -25,7 +26,8 @@ class RecipeTypeForm(forms.ModelForm):
             if str(instance.name).lower() == str(name).lower():
                 raise forms.ValidationError(f'There is already a Recipe Tag of "{name}"')
 
-        return str(name).lower()
+        # Format recipe type to capital case
+        return string.capwords(str(name))
 
 
 class DinerForm(forms.ModelForm):
