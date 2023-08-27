@@ -320,7 +320,7 @@ def _date_recipe_last_made(recipe):
     recent_meal = meals_w_recipe.first()
 
     if recent_meal is not None:
-        date_last_made = recent_meal.scheduled_date.strftime('%d-%b-%Y')
+        date_last_made = recent_meal.scheduled_date.strftime('%d-%b-%Y') if recent_meal.was_made else 'Never made'
     else:
         date_last_made = 'Never made'
 
