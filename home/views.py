@@ -41,8 +41,8 @@ def about(request):
         request,
         'home/about.html',
         {
-            'title':'About',
-            'message':'Your application description page.',
+            'title':'About Meal Planner',
+            'message':'Overview of the Meal Planner application.',
             'company': 'Schmidtheads',
             'year':datetime.now().year,
         }
