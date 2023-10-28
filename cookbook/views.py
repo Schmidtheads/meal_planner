@@ -1,3 +1,11 @@
+'''
+Name:           views.py
+Description:    Web Request Handler for Cookbook object
+Date:           
+Author:         M. Schmidt
+'''
+
+from django.contrib.auth.decorators import login_required, permission_required
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
@@ -28,6 +36,7 @@ def detail(request, id):
                   "cookbook": cookbook})
 
 
+@permission_required('cookbook.add_cookbook')
 def new(request):
     if request.method == "POST":
         form = CookbookForm(request.POST, request.FILES)
