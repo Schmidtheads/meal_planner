@@ -1,9 +1,12 @@
 '''
-Name: models.py
-Description: Defines schema of Recipe and related objects
+Name:           views.py
+Description:    Web Request Handler for Recipe object
+Date:           
+Author:         M. Schmidt
 '''
 
 from datetime import datetime
+from django.contrib.auth.decorators import login_required, permission_required
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 
@@ -38,6 +41,7 @@ def detail(request, id):
                   "button_label": "Update"})
 
 
+@permission_required('recipe.add_recipe')
 def new(request):
     '''
     View used to create a new Recipe

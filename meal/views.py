@@ -1,11 +1,13 @@
 '''
-Name: views.py
-Description: Django views for Recipe object
-Author: M. Schmidt
+Name:           views.py
+Description:    Web Request Handler for Meal object
+Date:           
+Author:         M. Schmidt
 '''
 
 import calendar
 from datetime import datetime, date
+from django.contrib.auth.decorators import login_required, permission_required
 from django.http import HttpResponse, FileResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
@@ -45,12 +47,13 @@ def detail(request, id):
                    "form": form})
 
 
+@permission_required('meal.add_meal')
 def new(request):
     '''
     This view is used to assign a meal to a day which does not currently have one.
     The date is passed in as a URL query string with the syntax: ?date=YYYY-MM-DD
     '''
-
+   
     if request.method == "POST":
         form = MealForm(request.POST)
         if form.is_valid():
