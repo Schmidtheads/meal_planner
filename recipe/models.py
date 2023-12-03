@@ -37,7 +37,8 @@ class Recipe(models.Model):
     notes = models.CharField(max_length=750, blank=True)
     recipe_types = models.ManyToManyField(RecipeType)
 
-    def rating(self):
+    @property
+    def rating(self) -> float:
         '''
         Calculate a recipe rating
         '''

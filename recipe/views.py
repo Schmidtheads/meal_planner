@@ -16,13 +16,15 @@ from .forms import RatingForm, RecipeForm, RecipeTypeForm, DinerForm
 
 # Create your views here.
 
+#@permission_required('recipe.view_recipe')
 def detail(request, id):
     '''
     View to edit or view a Recipe
     '''
     recipe = get_object_or_404(Recipe, pk=id)
 
-    if request.method == "POST":
+    current_user = request.user
+    if request.method == "POST" and current_user.has_perm('recipe.update_recipe'):
         form = RecipeForm(request.POST, instance=recipe)
         if form.is_valid():
             form.save()
@@ -35,7 +37,7 @@ def detail(request, id):
     return render(request, "recipe/detail.html",
                  {"form": form,
                  "recipe_id": id,
-                 "recipe_rating": recipe.rating(),
+                 "recipe_rating": recipe.rating,
                   "year": datetime.now().year,
                   "company": "Schmidtheads Inc.",
                   "button_label": "Update"})
@@ -85,6 +87,7 @@ def diner_detail(request):
                   "button_label": "Update"})
 
 
+@permission_required('recipe.rating.add_rating')
 def rating_detail(request, id):
     '''
     View to edit or view a recipe rating
@@ -118,7 +121,7 @@ def ratings_list(request, recipe_id):
 
     return render(request, "recipe/rating_list.html",
                   {"recipe_ratings": recipe_ratings,
-                   "recipe_rating": recipe.rating(),
+                   "recipe_rating": recipe.rating,
                    "recipe_name": recipe.name,
                    "recipe_id": recipe_id,
                    "table_name": "Recipe Ratings",
