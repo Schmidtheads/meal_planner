@@ -1,9 +1,11 @@
 from django import forms
+from django.core.validators import MaxValueValidator, MinValueValidator
 from .models import Recipe, RecipeRating, RecipeType, Diner
 import string
 
 
 class RecipeForm(forms.ModelForm):
+
     recipe_types = forms.ModelMultipleChoiceField(
         queryset=RecipeType.objects.all(), 
         required=False, 
@@ -13,6 +15,13 @@ class RecipeForm(forms.ModelForm):
         model = Recipe
         fields = '__all__'
         
+    def __init__(self, readonly_form=False, *args, **kwargs):
+        super(RecipeForm, self).__init__(*args, **kwargs)
+        if readonly_form:
+            for field in self.fields:
+                #self.fields[field].widget.attrs['readonly'] = True
+                self.fields[field].disabled = True
+
 
 class RecipeTypeForm(forms.ModelForm):
     class Meta:
@@ -41,6 +50,25 @@ class RatingForm(forms.ModelForm):
         model = RecipeRating
         fields = '__all__'
 
+    def __init__(self, readonly_form=False, *args, **kwargs):
+        super(RatingForm, self).__init__(*args, **kwargs)
+
+        # Get Min, Max Validators for rating to set limits on widget
+        min_value = 1  # default
+        max_value = 5  # default
+        for v in RecipeRating._meta.get_field('rating').validators:
+            if isinstance(v, MaxValueValidator):
+                max_value = v.limit_value
+            elif isinstance(v, MinValueValidator):
+                min_value = v.limit_value
+
+        self.fields['rating'].widget.attrs.update(
+            {'max': max_value,
+             'min': min_value}
+        )
+        if readonly_form:
+            for field in self.fields:
+                self.fields[field].disabled = True
 
     def clean_rating(self):
         rating = self.cleaned_data.get('rating')   

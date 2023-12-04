@@ -16,7 +16,6 @@ from .forms import RatingForm, RecipeForm, RecipeTypeForm, DinerForm
 
 # Create your views here.
 
-#@permission_required('recipe.view_recipe')
 def detail(request, id):
     '''
     View to edit or view a Recipe
@@ -24,23 +23,28 @@ def detail(request, id):
     recipe = get_object_or_404(Recipe, pk=id)
 
     current_user = request.user
-    if request.method == "POST" and current_user.has_perm('recipe.update_recipe'):
+    if request.method == "POST": #MIGHT NOT BE NEEDED: and current_user.has_perm('recipe.change_recipe'):
         form = RecipeForm(request.POST, instance=recipe)
         if form.is_valid():
             form.save()
             return redirect("recipes")
     else:
-        form = RecipeForm(instance=recipe)
+        if current_user.has_perm('recipe.change_recipe'):
+            form = RecipeForm(instance=recipe)
+        else:
+            form = RecipeForm(instance=recipe, readonly_form=True)
 
     #recipe_rating = calculate_recipe_rating(id)
 
     return render(request, "recipe/detail.html",
-                 {"form": form,
-                 "recipe_id": id,
-                 "recipe_rating": recipe.rating,
-                  "year": datetime.now().year,
-                  "company": "Schmidtheads Inc.",
-                  "button_label": "Update"})
+        {
+            "form": form,
+            "recipe_id": id,
+            "recipe_rating": recipe.rating,
+            "year": datetime.now().year,
+            "company": "Schmidtheads Inc.",
+            "button_label": "Update"
+        })
 
 
 @permission_required('recipe.add_recipe')
@@ -146,9 +150,10 @@ def new_rating(request, recipe_id):
     '''
     recipe = Recipe.objects.get(id=recipe_id)
     recipe_name = recipe.name
+    current_user = request.user
 
     if request.method == "POST":
-        form = RatingForm(request.POST, request.FILES)
+        form = RatingForm(data=request.POST, files=request.FILES)
 
         #TODO: ensure a diner can't have more than one rating per recipe
         if form.is_valid():
@@ -159,7 +164,10 @@ def new_rating(request, recipe_id):
             # if from is invalid on submission, need to set recipe again
             form.fields['recipe'].initial = recipe         
     else:
-        form = RatingForm()
+        if current_user.has_perm('recipe.add_reciperating') or current_user.has_perm('recipe.update_reciperating'):
+            form = RatingForm()
+        else:
+            form = RatingForm(readonly_form=True)        
         # Set recipe to read only
         form.fields['recipe'].initial = recipe
 

@@ -4,6 +4,8 @@ Description: Defines the schema and behaviour for Recipe model
 '''
 
 from django.db import models
+from django.core.validators import MaxValueValidator, MinValueValidator
+
 from cookbook.models import Cookbook
 
 
@@ -82,6 +84,12 @@ class RecipeRating(models.Model):
     '''
     Defines the ReciepRating schema
     '''
-    rating = models.PositiveSmallIntegerField()
+    rating = models.PositiveSmallIntegerField(
+        default=1,
+        validators=[
+            MaxValueValidator(5),
+            MinValueValidator(1),
+        ]
+    )
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     diner = models.ForeignKey(Diner, on_delete=models.CASCADE)

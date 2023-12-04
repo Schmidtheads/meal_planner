@@ -30,11 +30,13 @@
                             </div>
                         </td>
                         <td class="padded_table_cell">
+                            {% if perms.recipe.add_recipe_type %}
                             <div>
                                 <a href="{% url 'recipe_type_create' %}" id="add_recipe_type" style="cursor: pointer; cursor: hand;"
                                 onclick="return showAddPopup(this);">
                                 <img src="{% static 'home/images/plus24.png' %}" title="Add new Recipe Tag"></a>
                             </div>    
+                            {% endif %}
                         </td>
                     </tr>
                     <tr><th><label for="id_rating">Rating:</label></th>
@@ -49,10 +51,12 @@
                         </td>
                     </tr>
                 </table>
+                {% if perms.recipe.update_recipe %}
                 <p class="buttonContainer">
                     {% csrf_token %}
                     <button class="btn btn-default" type="submit">{{button_label}}</button>
                 </p>
+                {% endif %}
             </fieldset>
         </form>
     </div>
