@@ -153,23 +153,79 @@ def new_rating(request, recipe_id):
     current_user = request.user
 
     if request.method == "POST":
-        form = RatingForm(data=request.POST, files=request.FILES)
+        # Check if rating already exists for user and recipe
+        d_matches = Diner.objects.filter(user_name=current_user.username)
+        rating_id = -1  # initialize, may be updated below
+        rating = None   # intialize, may be updated below
+        user_id = -1 if d_matches.count() == 0 else d_matches[0].id
+        if user_id != -1:
+            r_matches = RecipeRating.objects.filter(
+                diner=user_id,
+                recipe=recipe_id
+            )
+            if r_matches.count() != 0:
+                rating_id = r_matches[0].id
+                rating = RecipeRating.objects.get(id=rating_id)
 
-        #TODO: ensure a diner can't have more than one rating per recipe
+        # set up form, depending if creating new rating or updating existing one        
+        if user_id == -1 or rating_id == -1:
+            form = RatingForm(data=request.POST, files=request.FILES)
+        else:
+            form = RatingForm(data=request.POST, instance=rating)
+
         if form.is_valid():
             form.save()
             # Go back to the associated recipe
+            #TODO: If rating update initiated from rating list, then maybe return there instead of recipe
             return redirect('recipe_detail', recipe_id)
         else:
             # if from is invalid on submission, need to set recipe again
             form.fields['recipe'].initial = recipe         
     else:
-        if current_user.has_perm('recipe.add_reciperating') or current_user.has_perm('recipe.update_reciperating'):
-            form = RatingForm()
+        # Steps
+        # 1. Check if current user is in Diner table
+        d_matches = Diner.objects.filter(user_name=current_user.username)
+
+        #  If user does not exist, insert username, first and last name in table; get row ID
+        if d_matches.count() == 0:
+            new_user = Diner.objects.create(
+                user_name = current_user.username,
+                first_name = current_user.first_name,
+                last_name = current_user.last_name
+            )
+            user_id = new_user.id
         else:
+            # If user does exist, get row ID
+            # If multiple instances of the same user exist (it shouldn't!),
+            # use the first instance
+            user_id = d_matches[0].id
+
+        # 2. Check if rating for current user and recipe already exists
+        r_matches = RecipeRating.objects.filter(recipe=recipe_id, diner=user_id)
+
+        # If it does get the recipe rating row and get recipe rating
+        if r_matches.count() == 1:
+            rating_id = r_matches[0].id
+            rating_value = r_matches[0].rating
+        else:
+            rating_value = 1
+
+        # 3. Open form, pasinging in row ID or just rating?
+
+        if current_user.has_perm('recipe.add_reciperating') or current_user.has_perm('recipe.update_reciperating'):
+            form = RatingForm(initial={
+                'diner': user_id,
+                'recipe': recipe_id,
+                'rating': rating_value})
+
+            #TODO: hide diner dropdown unless admin
+            diner_field = form.fields['diner']
+            diner_field.widget = diner_field.hidden_widget()            
+        else:
+            # if user does not have permission to add or update rating, then maybe they shouldn't be here at all?
+            # perhaps retrict hyperlink for rating on recipe list page so it is not clickable instead
             form = RatingForm(readonly_form=True)        
-        # Set recipe to read only
-        form.fields['recipe'].initial = recipe
+        #form.fields['recipe'].initial = recipe
 
     return render(request, "recipe/rating_detail.html",
                  {

@@ -30,7 +30,7 @@
                             </div>
                         </td>
                         <td class="padded_table_cell">
-                            {% if perms.recipe.add_recipe_type %}
+                            {% if perms.recipe.add_recipetype %}
                             <div>
                                 <a href="{% url 'recipe_type_create' %}" id="add_recipe_type" style="cursor: pointer; cursor: hand;"
                                 onclick="return showAddPopup(this);">
@@ -51,7 +51,7 @@
                         </td>
                     </tr>
                 </table>
-                {% if perms.recipe.update_recipe %}
+                {% if perms.recipe.change_recipe %}
                 <p class="buttonContainer">
                     {% csrf_token %}
                     <button class="btn btn-default" type="submit">{{button_label}}</button>

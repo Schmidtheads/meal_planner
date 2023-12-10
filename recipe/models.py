@@ -67,6 +67,7 @@ class Diner(models.Model):
     '''
     first_name = models.CharField(max_length=25)
     last_name = models.CharField(max_length=25)
+    user_name = models.CharField(max_length=25, default='-nouser-')  # store username used for authentication
 
 
     def last_name_first(self):
