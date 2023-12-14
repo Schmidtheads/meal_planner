@@ -24,7 +24,7 @@ def detail(request, id):
 
     current_user = request.user
     if request.method == "POST": #MIGHT NOT BE NEEDED: and current_user.has_perm('recipe.change_recipe'):
-        form = RecipeForm(request.POST, instance=recipe)
+        form = RecipeForm(data=request.POST, instance=recipe)
         if form.is_valid():
             form.save()
             return redirect("recipes")
