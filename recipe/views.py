@@ -144,7 +144,7 @@ def recipes(request):
                   "company": "Schmidtheads Inc.",})
 
 
-def new_rating(request, recipe_id):
+def update_rating(request, recipe_id):
     '''
     View to create a new recipe rating
     '''
@@ -177,7 +177,8 @@ def new_rating(request, recipe_id):
             form.save()
             # Go back to the associated recipe
             #TODO: If rating update initiated from rating list, then maybe return there instead of recipe
-            return redirect('recipe_detail', recipe_id)
+            #return redirect('recipe_detail', recipe_id)
+            return redirect(request.META.get('HTTP_REFERER'))
         else:
             # if from is invalid on submission, need to set recipe again
             form.fields['recipe'].initial = recipe         

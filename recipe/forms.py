@@ -70,6 +70,7 @@ class RatingForm(forms.ModelForm):
             for field in self.fields:
                 self.fields[field].disabled = True
 
+
     def clean_rating(self):
         rating = self.cleaned_data.get('rating')   
 
@@ -79,13 +80,13 @@ class RatingForm(forms.ModelForm):
         return rating
 
 
-    def clean_diner(self):
-        # check to make sure that only one diner has rating for current recipe
-        recipe = self.cleaned_data.get('recipe')
-        diner = self.cleaned_data.get('diner')
-        recipe_ratings = RecipeRating.objects.filter(recipe = recipe).filter(diner = diner)
+    # def clean_diner(self):
+    #     # check to make sure that only one diner has rating for current recipe
+    #     recipe = self.cleaned_data.get('recipe')
+    #     diner = self.cleaned_data.get('diner')
+    #     recipe_ratings = RecipeRating.objects.filter(recipe = recipe).filter(diner = diner)
         
-        if recipe_ratings.count() > 0:
-            raise forms.ValidationError('Diner has already rated this recipe')
+    #     if recipe_ratings.count() > 0:
+    #         raise forms.ValidationError('Diner has already rated this recipe')
 
-        return diner
+    #     return diner
