@@ -9,5 +9,7 @@ urlpatterns = [
     path('new', views.new, name='recipe_new'),
     path('recipe_type/create', views.RecipeTypeCreatePopup, name='recipe_type_create'),
     path('<int:recipe_id>/recipe_ratings', views.ratings_list, name='recipe_rating_list'),
-    path('<int:recipe_id>/recipe_ratings/rating', views.update_rating, name='rating_new'),
+    path('<int:recipe_id>/recipe_ratings/rating', views.update_rating_from_list, name='rating_update_list'),
+    path('<int:recipe_id>/recipe_ratings/rating', views.update_rating_from_recipe, name='rating_update_recipe'),
+    #path('<int:recipe_id>/recipe_ratings/rating', views.update_rating, name='rating_new'),
 ]

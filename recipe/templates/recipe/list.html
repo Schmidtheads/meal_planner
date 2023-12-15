@@ -26,7 +26,7 @@
             <td  class="viewCell">{{recipe.cook_book}}</td>
             <td  class="viewCell">{{recipe.page_number}}</td>
             <td  class="viewCell">
-                <a href="{% url 'rating_new' recipe.id %}">
+                <a href="{% url 'rating_update_list' recipe.id %}">
                 <i>{{recipe.rating}}</i>
                 </a>
             </td>

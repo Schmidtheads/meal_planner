@@ -21,7 +21,11 @@
                         <th></th>
                         <td> {{ form.errors.rating }}</td>
                     </tr>
-                    <tr class="inputRow"><th><label for="id_diner">Diner:</label></th>
+                    <tr class="inputRow"><th>
+                        {% if not form.diner.is_hidden %}
+                        <label for="id_diner">Diner:</label>
+                        {% endif %}
+                    </th>
                         <td> {{ form.diner }}</td>
                     </tr>
                     <tr>

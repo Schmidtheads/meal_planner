@@ -121,7 +121,9 @@ def ratings_list(request, recipe_id):
     recipe = Recipe.objects.get(id=recipe_id)
     recipe_ratings = recipe.reciperating_set.all()
 
-    #recipe_rating = calculate_recipe_rating(recipe_id)
+    #TODO: when displaying list, create hyperlink on rating
+    # for CURRENT USER, so that it can be updated
+    # diable "New Rating" button, except for admin (or special add_reciperating?)
 
     return render(request, "recipe/rating_list.html",
                   {"recipe_ratings": recipe_ratings,
@@ -144,9 +146,32 @@ def recipes(request):
                   "company": "Schmidtheads Inc.",})
 
 
-def update_rating(request, recipe_id):
+@permission_required('recipe.add_reciperating')
+def update_rating_from_list(request, recipe_id: int):
+    '''
+    View to update recipe rating, launched from recipe list
+    '''
+
+    return update_rating(request, recipe_id, 'recipes')
+
+
+@permission_required('recipe.add_reciperating')
+def update_rating_from_recipe(request, recipe_id: int):
+    '''
+    View to update recipe rating, launched from recipe
+    '''
+
+    return update_rating(request, recipe_id, 'recipe')
+
+
+def update_rating(request, recipe_id: int, redirect_page: str):
     '''
     View to create a new recipe rating
+    THIS VIEW SHOULD NOT BE CALLED DIRECTLY FROM TEMPLATE
+
+    @param request: request object
+    @param recipe_id: id of recipe to rate
+    @param redirect_page: name of page to redirect back to
     '''
     recipe = Recipe.objects.get(id=recipe_id)
     recipe_name = recipe.name
@@ -175,10 +200,8 @@ def update_rating(request, recipe_id):
 
         if form.is_valid():
             form.save()
-            # Go back to the associated recipe
-            #TODO: If rating update initiated from rating list, then maybe return there instead of recipe
-            #return redirect('recipe_detail', recipe_id)
-            return redirect(request.META.get('HTTP_REFERER'))
+            # Go back to the originating page
+            return redirect(redirect_page)
         else:
             # if from is invalid on submission, need to set recipe again
             form.fields['recipe'].initial = recipe         
@@ -231,9 +254,9 @@ def update_rating(request, recipe_id):
     return render(request, "recipe/rating_detail.html",
                  {
                   "form": form,
-                  "title": "New Rating",
+                  "title": "Update Rating",
                   "recipe_name": recipe_name,
-                  "button_label": "Create",
+                  "button_label": "Update",
                   "year": datetime.now().year,
                   "company": "Schmidtheads Inc.",
                  })
