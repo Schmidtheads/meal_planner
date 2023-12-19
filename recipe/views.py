@@ -152,7 +152,10 @@ def update_rating_from_list(request, recipe_id: int):
     View to update recipe rating, launched from recipe list
     '''
 
-    return update_rating(request, recipe_id, 'recipes')
+    return update_rating(request, recipe_id, 
+        'recipes', 
+        'Back to Recipe List',
+        'recipes')
 
 
 @permission_required('recipe.add_reciperating')
@@ -161,10 +164,17 @@ def update_rating_from_recipe(request, recipe_id: int):
     View to update recipe rating, launched from recipe
     '''
 
-    return update_rating(request, recipe_id, 'recipe')
+    return update_rating(request, recipe_id, 
+        'recipe', 
+        'Back to Recipe',
+        'recipe_detail'
+    )
 
 
-def update_rating(request, recipe_id: int, redirect_page: str):
+def update_rating(request, recipe_id: int, 
+    redirect_page: str, 
+    exit_label: str,
+    redirect_path: str):
     '''
     View to create a new recipe rating
     THIS VIEW SHOULD NOT BE CALLED DIRECTLY FROM TEMPLATE
@@ -172,6 +182,7 @@ def update_rating(request, recipe_id: int, redirect_page: str):
     @param request: request object
     @param recipe_id: id of recipe to rate
     @param redirect_page: name of page to redirect back to
+    @param exit_label: label for exit button
     '''
     recipe = Recipe.objects.get(id=recipe_id)
     recipe_name = recipe.name
@@ -256,7 +267,10 @@ def update_rating(request, recipe_id: int, redirect_page: str):
                   "form": form,
                   "title": "Update Rating",
                   "recipe_name": recipe_name,
+                  "recipe_id": recipe_id,
+                  "redirect_page": redirect_path,
                   "button_label": "Update",
+                  "button_exit_label": exit_label,
                   "year": datetime.now().year,
                   "company": "Schmidtheads Inc.",
                  })

@@ -43,7 +43,12 @@
         </form>
     </div>
 </div>
-<p><a class="btn btn-default" href="{% url 'recipes' %}">Back to Recipe list &raquo;</a></p>
+<p>{% if redirect_page == 'recipe_detail' %}
+    <a class="btn btn-default" href="{% url redirect_page recipe_id %}">
+   {% else %}
+   <a class="btn btn-default" href="{% url redirect_page %}">
+   {% endif %}
+    {{ button_exit_label }} &raquo;</a></p>
 {% endblock %}
 {% block scripts %}
 <script src="{% static 'home/scripts/popup.js' %}"></script>
