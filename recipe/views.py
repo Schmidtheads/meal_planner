@@ -165,9 +165,9 @@ def update_rating_from_recipe(request, recipe_id: int):
     '''
 
     return update_rating(request, recipe_id, 
-        'recipe', 
-        'Back to Recipe',
-        'recipe_detail'
+        'recipe_rating_list', 
+        'Back to Ratings List',
+        'recipe_rating_list'
     )
 
 
@@ -212,7 +212,11 @@ def update_rating(request, recipe_id: int,
         if form.is_valid():
             form.save()
             # Go back to the originating page
-            return redirect(redirect_page)
+            # if redirecting back to ratings list, need to specify recipe id
+            if redirect_page == 'recipe_rating_list':
+                return redirect(redirect_page, recipe_id)
+            else:
+                return redirect(redirect_page)
         else:
             # if from is invalid on submission, need to set recipe again
             form.fields['recipe'].initial = recipe         

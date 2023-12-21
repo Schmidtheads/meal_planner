@@ -43,8 +43,8 @@
         </form>
     </div>
 </div>
-<p>{% if redirect_page == 'recipe_detail' %}
-    <a class="btn btn-default" href="{% url redirect_page recipe_id %}">
+<p>{% if redirect_page == 'recipe_rating_list' %}
+   <a class="btn btn-default" href="{% url redirect_page recipe_id %}">
    {% else %}
    <a class="btn btn-default" href="{% url redirect_page %}">
    {% endif %}
