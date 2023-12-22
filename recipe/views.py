@@ -34,8 +34,6 @@ def detail(request, id):
         else:
             form = RecipeForm(instance=recipe, readonly_form=True)
 
-    #recipe_rating = calculate_recipe_rating(id)
-
     return render(request, "recipe/detail.html",
         {
             "form": form,
@@ -119,7 +117,7 @@ def ratings_list(request, recipe_id):
     View to see all the ratings for a recipe
     '''
     recipe = Recipe.objects.get(id=recipe_id)
-    recipe_ratings = recipe.reciperating_set.all()
+    recipe_ratings = recipe.reciperating_set.all()  #type: ignore
 
     #TODO: when displaying list, create hyperlink on rating
     # for CURRENT USER, so that it can be updated
@@ -193,14 +191,14 @@ def update_rating(request, recipe_id: int,
         d_matches = Diner.objects.filter(user_name=current_user.username)
         rating_id = -1  # initialize, may be updated below
         rating = None   # intialize, may be updated below
-        user_id = -1 if d_matches.count() == 0 else d_matches[0].id
+        user_id = -1 if d_matches.count() == 0 else d_matches[0].id  #type: ignore
         if user_id != -1:
             r_matches = RecipeRating.objects.filter(
                 diner=user_id,
                 recipe=recipe_id
             )
             if r_matches.count() != 0:
-                rating_id = r_matches[0].id
+                rating_id = r_matches[0].id  #type: ignore
                 rating = RecipeRating.objects.get(id=rating_id)
 
         # set up form, depending if creating new rating or updating existing one        
@@ -232,19 +230,19 @@ def update_rating(request, recipe_id: int,
                 first_name = current_user.first_name,
                 last_name = current_user.last_name
             )
-            user_id = new_user.id
+            user_id = new_user.id  #type: ignore
         else:
             # If user does exist, get row ID
             # If multiple instances of the same user exist (it shouldn't!),
             # use the first instance
-            user_id = d_matches[0].id
+            user_id = d_matches[0].id  #type: ignore
 
         # 2. Check if rating for current user and recipe already exists
         r_matches = RecipeRating.objects.filter(recipe=recipe_id, diner=user_id)
 
         # If it does get the recipe rating row and get recipe rating
         if r_matches.count() == 1:
-            rating_id = r_matches[0].id
+            rating_id = r_matches[0].id  #type: ignore
             rating_value = r_matches[0].rating
         else:
             rating_value = 1
@@ -308,7 +306,7 @@ def calculate_recipe_rating(recipe_id):
     Calculate a recipe rating
     '''
     recipe = Recipe.objects.get(id=recipe_id)
-    all_ratings = recipe.reciperating_set.all()
+    all_ratings = recipe.reciperating_set.all()  #type: ignore
 
     # Calculate average rating
     sum_rating = 0

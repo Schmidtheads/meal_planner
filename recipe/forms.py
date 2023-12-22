@@ -19,7 +19,6 @@ class RecipeForm(forms.ModelForm):
         super(RecipeForm, self).__init__(*args, **kwargs)
         if readonly_form:
             for field in self.fields:
-                #self.fields[field].widget.attrs['readonly'] = True
                 self.fields[field].disabled = True
 
 

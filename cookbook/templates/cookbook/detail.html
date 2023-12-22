@@ -26,11 +26,21 @@
                         <td>
                             <div>
                                 {{ form.author }}
+                                {% comment %}
+                                Hide creation and changing of author, if user
+                                does not have permission to do so.
+                                {% endcomment %}
+                                {% if perms.cookbook.add_author %}
                                 <a href="{% url 'author_create' %}" id="add_author" style="cursor: pointer; cursor: hand;"
                                     onclick="return showAddPopup(this);">
-                                    <img src="{% static 'home/images/plus24.png' %}"></a>
+                                    <img src="{% static 'home/images/plus24.png' %}">
+                                </a>
+                                {% endif %}
+                                {% if perms.cookbook.change_author %}
                                 <a id="edit_author" style="cursor: pointer; cursor: hand;">
-                                    <img src="{% static 'home/images/edit24.png' %}"></a>
+                                    <img src="{% static 'home/images/edit24.png' %}">
+                                </a>
+                                {% endif %}
                             </div>
                         </td>
                     </tr>
@@ -47,10 +57,12 @@
                         <td>{{ form.image }}</td>
                     </tr>
                 </table>
+                {% if perms.cookbook.change_cookbook %}
                 <p class="buttonContainer">
                     {% csrf_token %}
                     <button class="btn btn-default" type="submit">Update</button>
                 </p>
+                {% endif %}
             </fieldset>
         </form>
     </div>
