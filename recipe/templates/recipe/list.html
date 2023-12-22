@@ -27,7 +27,13 @@
             <td  class="viewCell">{{recipe.page_number}}</td>
             <td  class="viewCell">
                 <a href="{% url 'rating_update_list' recipe.id %}">
-                <i>{{recipe.rating}}</i>
+                <i>
+                    {% if recipe.rating == 0 %}
+                    -
+                    {% else %} 
+                    {{recipe.rating}}
+                    {% endif %}
+                </i>
                 </a>
             </td>
             <td  class="viewCell">{{recipe.notes}}</td>

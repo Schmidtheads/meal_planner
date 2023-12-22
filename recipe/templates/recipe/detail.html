@@ -40,7 +40,11 @@
                         </td>
                     </tr>
                     <tr><th><label for="id_rating">Rating:</label></th>
-                        <td>{{ recipe_rating }}
+                        <td>{% if recipe_rating == 0 %}
+                            -
+                            {% else %}
+                            {{ recipe_rating }}
+                            {% endif %}
                             {% comment %}
                             When creating a new recipe (recipe_id = 0), hide the Ratings link
                             as we don't yet have a valid recipe_id so, the link will fail.

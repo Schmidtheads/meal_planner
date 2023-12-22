@@ -89,7 +89,7 @@ def diner_detail(request):
                   "button_label": "Update"})
 
 
-@permission_required('recipe.rating.add_rating')
+""" @permission_required('recipe.rating.add_rating')
 def rating_detail(request, id):
     '''
     View to edit or view a recipe rating
@@ -110,7 +110,7 @@ def rating_detail(request, id):
                   "year": datetime.now().year,
                   "company": "Schmidtheads Inc.",
                   "button_label": "Update"})
-
+ """
 
 def ratings_list(request, recipe_id):
     '''
@@ -119,15 +119,21 @@ def ratings_list(request, recipe_id):
     recipe = Recipe.objects.get(id=recipe_id)
     recipe_ratings = recipe.reciperating_set.all()  #type: ignore
 
-    #TODO: when displaying list, create hyperlink on rating
-    # for CURRENT USER, so that it can be updated
-    # diable "New Rating" button, except for admin (or special add_reciperating?)
+    # check if current user has a rating to update
+    # if not, flag, so "New" button can be enabled.
+    current_user = request.user
+    diner_id = get_user_diner(current_user)
+    diner_has_rating = recipe_ratings.filter(diner=diner_id).count() != 0
+
+    #TODO: 
+    # disable "New Rating" button, except for admin (or special add_reciperating?)
 
     return render(request, "recipe/rating_list.html",
                   {"recipe_ratings": recipe_ratings,
                    "recipe_rating": recipe.rating,
                    "recipe_name": recipe.name,
                    "recipe_id": recipe_id,
+                   "diner_has_rating": diner_has_rating,
                    "table_name": "Recipe Ratings",
                    "year": datetime.now().year,
                    "company": "Schmidtheads Inc.",})
@@ -185,6 +191,7 @@ def update_rating(request, recipe_id: int,
     recipe = Recipe.objects.get(id=recipe_id)
     recipe_name = recipe.name
     current_user = request.user
+    button_label = "Update"  # default value
 
     if request.method == "POST":
         # Check if rating already exists for user and recipe
@@ -221,31 +228,20 @@ def update_rating(request, recipe_id: int,
     else:
         # Steps
         # 1. Check if current user is in Diner table
-        d_matches = Diner.objects.filter(user_name=current_user.username)
-
-        #  If user does not exist, insert username, first and last name in table; get row ID
-        if d_matches.count() == 0:
-            new_user = Diner.objects.create(
-                user_name = current_user.username,
-                first_name = current_user.first_name,
-                last_name = current_user.last_name
-            )
-            user_id = new_user.id  #type: ignore
-        else:
-            # If user does exist, get row ID
-            # If multiple instances of the same user exist (it shouldn't!),
-            # use the first instance
-            user_id = d_matches[0].id  #type: ignore
+        user_id = get_user_diner(current_user)
 
         # 2. Check if rating for current user and recipe already exists
         r_matches = RecipeRating.objects.filter(recipe=recipe_id, diner=user_id)
 
         # If it does get the recipe rating row and get recipe rating
+        # Also set button label to "Update" or "Create" appropriately
         if r_matches.count() == 1:
             rating_id = r_matches[0].id  #type: ignore
             rating_value = r_matches[0].rating
+            button_label = "Update"
         else:
             rating_value = 1
+            button_label = "Create"
 
         # 3. Open form, pasinging in row ID or just rating?
 
@@ -271,7 +267,7 @@ def update_rating(request, recipe_id: int,
                   "recipe_name": recipe_name,
                   "recipe_id": recipe_id,
                   "redirect_page": redirect_path,
-                  "button_label": "Update",
+                  "button_label": button_label,
                   "button_exit_label": exit_label,
                   "year": datetime.now().year,
                   "company": "Schmidtheads Inc.",
@@ -316,3 +312,32 @@ def calculate_recipe_rating(recipe_id):
     average_rating = 0 if all_ratings.count() == 0 else sum_rating / all_ratings.count()
 
     return average_rating
+
+
+def get_user_diner(user) -> int:
+    '''
+    Checks if passed in user is in Diner table
+    If not, they are added. Return id of diner
+
+    @params user: user object
+    @return: id of Diner for current user
+    '''
+
+    # 1. Check if current user is in Diner table
+    d_matches = Diner.objects.filter(user_name=user.username)
+
+    #  If user does not exist, insert username, first and last name in table; get row ID
+    if d_matches.count() == 0:
+        new_user = Diner.objects.create(
+            user_name = user.username,
+            first_name = user.first_name,
+            last_name = user.last_name
+        )
+        user_id = new_user.id  #type: ignore
+    else:
+        # If user does exist, get row ID
+        # If multiple instances of the same user exist (it shouldn't!),
+        # use the first instance
+        user_id = d_matches[0].id  #type: ignore
+
+    return user_id
