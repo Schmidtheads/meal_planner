@@ -5,10 +5,19 @@
 {% block content %}
 {% load static %}
 <h1>Recipe Ratings for {{recipe_name}}</h1>
-<p>Overall rating {{recipe_rating}}</p>
+<h4>Overall rating: 
+{% if recipe_rating == 0 %}
+-
+{% else %}
+{{recipe_rating}}
+{% endif %}
+</h4>
 <div style="display: inline-block; text-align: left;">
     <!-- redirect up one level to get path http://<host>/rating instead of http://<host>recipe_rating/rating -->
+    {% if user.is_superuser or not diner_has_rating %}
     <button class="btn btn-default" id="new" onclick="window.location.href='../{{recipe_id}}/recipe_ratings/rating'">New Rating</button>
+    {% endif %}
+    {% if recipe_ratings.count > 0 %}
     <table id="{{table_name}}" class="viewTable">
         <tr>
             <th class="viewCell">Rating</th>
@@ -16,11 +25,22 @@
         </tr>
         {% for rating in recipe_ratings %}
         <tr>
-            <td class="viewCell">{{rating.rating}}</td>
+            <td class="viewCell">
+            {% if rating.diner.user_name == user.get_username %}
+                <a href="{% url 'rating_update_recipe' recipe_id %}">
+                <i>{{rating.rating}}</i>
+                </a>
+            {% else %}
+                {{rating.rating}}
+            {% endif %}
+            </td>
             <td class="viewCell">{{rating.diner}}</td>
         </tr>
         {% endfor %}
     </table>
+    {% else %}
+    <br><br>
+    {% endif %}
 </div>
 <p><a class="btn btn-default" href="{% url 'recipe_detail' recipe_id %}">Back to Recipe &raquo;</a></p>
 {% endblock %}

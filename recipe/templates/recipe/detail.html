@@ -30,15 +30,21 @@
                             </div>
                         </td>
                         <td class="padded_table_cell">
+                            {% if perms.recipe.add_recipetype %}
                             <div>
                                 <a href="{% url 'recipe_type_create' %}" id="add_recipe_type" style="cursor: pointer; cursor: hand;"
                                 onclick="return showAddPopup(this);">
                                 <img src="{% static 'home/images/plus24.png' %}" title="Add new Recipe Tag"></a>
                             </div>    
+                            {% endif %}
                         </td>
                     </tr>
                     <tr><th><label for="id_rating">Rating:</label></th>
-                        <td>{{ recipe_rating }}
+                        <td>{% if recipe_rating == 0 %}
+                            -
+                            {% else %}
+                            {{ recipe_rating }}
+                            {% endif %}
                             {% comment %}
                             When creating a new recipe (recipe_id = 0), hide the Ratings link
                             as we don't yet have a valid recipe_id so, the link will fail.
@@ -49,10 +55,12 @@
                         </td>
                     </tr>
                 </table>
+                {% if perms.recipe.change_recipe %}
                 <p class="buttonContainer">
                     {% csrf_token %}
                     <button class="btn btn-default" type="submit">{{button_label}}</button>
                 </p>
+                {% endif %}
             </fieldset>
         </form>
     </div>

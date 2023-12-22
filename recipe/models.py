@@ -4,6 +4,8 @@ Description: Defines the schema and behaviour for Recipe model
 '''
 
 from django.db import models
+from django.core.validators import MaxValueValidator, MinValueValidator
+
 from cookbook.models import Cookbook
 
 
@@ -37,7 +39,8 @@ class Recipe(models.Model):
     notes = models.CharField(max_length=750, blank=True)
     recipe_types = models.ManyToManyField(RecipeType)
 
-    def rating(self):
+    @property
+    def rating(self) -> float:
         '''
         Calculate a recipe rating
         '''
@@ -64,6 +67,7 @@ class Diner(models.Model):
     '''
     first_name = models.CharField(max_length=25)
     last_name = models.CharField(max_length=25)
+    user_name = models.CharField(max_length=25, default='-nouser-')  # store username used for authentication
 
 
     def last_name_first(self):
@@ -81,6 +85,12 @@ class RecipeRating(models.Model):
     '''
     Defines the ReciepRating schema
     '''
-    rating = models.PositiveSmallIntegerField()
+    rating = models.PositiveSmallIntegerField(
+        default=1,
+        validators=[
+            MaxValueValidator(5),
+            MinValueValidator(1),
+        ]
+    )
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     diner = models.ForeignKey(Diner, on_delete=models.CASCADE)

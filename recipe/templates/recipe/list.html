@@ -13,6 +13,7 @@
             <th class="viewCell sortableHeader titleCell" onclick="sortTable('{{table_name}}', 0)">Name</th>
             <th class="viewCell">Cookbook</th>
             <th class="viewCell">Page Number</th>
+            <th class="viewCell">Rating</th>
             <th class="viewCell">Notes</th>
         </tr>
         {% for recipe in recipes %}
@@ -24,6 +25,17 @@
             </td>
             <td  class="viewCell">{{recipe.cook_book}}</td>
             <td  class="viewCell">{{recipe.page_number}}</td>
+            <td  class="viewCell">
+                <a href="{% url 'rating_update_list' recipe.id %}">
+                <i>
+                    {% if recipe.rating == 0 %}
+                    -
+                    {% else %} 
+                    {{recipe.rating}}
+                    {% endif %}
+                </i>
+                </a>
+            </td>
             <td  class="viewCell">{{recipe.notes}}</td>
         </tr>
         {% endfor %}

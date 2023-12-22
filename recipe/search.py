@@ -60,7 +60,7 @@ class Search:
     Class that manages searching for recipes
     '''
 
-    def __init__(self, search_string):
+    def __init__(self, search_string: str):
 
         # Tokens: elements used for searching, separated by spaces in search_string
         # Keyword tokens: special tokens used to focus search on specific properties

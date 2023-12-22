@@ -116,7 +116,6 @@ def meals(request):
                    'company': 'Schmidtheads Inc.'})
 
 
-
 def PrintCreatePopup(request):
 
     if request.method == "POST":
@@ -279,7 +278,7 @@ def _get_recipe_info_for_meal(meal):
     return recipe_info
 
 
-def _search_for_recipes(search_keys):
+def _search_for_recipes(search_keys: str) -> list:
 
     # Call serach object
     # TEST SEARCH
@@ -304,7 +303,7 @@ def _search_for_recipes(search_keys):
             'cookbook': cb_title,
             'author': f'{author_fn} {author_ln}',
             'last made': last_made_date,
-            'rating': recipe.rating(),
+            'rating': recipe.rating,
             'times made': times_made
         }
         result_list.append(candidate)
