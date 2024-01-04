@@ -19,6 +19,7 @@ from .models import Meal
 from .forms import MealForm, PrintForm
 
 
+@permission_required('meal.update_meal')
 def detail(request, id):
     '''
     This view is used to view/update meal details for a date that already has a meal assigned.
@@ -143,7 +144,7 @@ def PrintCreatePopup(request):
         mmp = MonthlyMealPlan(meal_yr_mnth, meals, print_weeks, print_only_meals)
         mmp.output_filepath = f'MealPlan-{meal_yr}-{meal_mt:02}.pdf'
         mmp.output_type = 'S'
-        pdf_bytestring = io.BytesIO(mmp.print_page())
+        pdf_bytestring = io.BytesIO(mmp.print_page())  # type: ignore
    
         return FileResponse(pdf_bytestring, 
             content_type='application/pdf', 
