@@ -14,8 +14,6 @@ from .models import Recipe, Diner, RecipeRating
 from .forms import RatingForm, RecipeForm, RecipeTypeForm, DinerForm
 
 
-# Create your views here.
-
 def detail(request, id):
     '''
     View to edit or view a Recipe
@@ -42,7 +40,8 @@ def detail(request, id):
             "year": datetime.now().year,
             "company": "Schmidtheads Inc.",
             "button_label": "Update"
-        })
+        }
+    )
 
 
 @permission_required('recipe.add_recipe')
@@ -59,13 +58,16 @@ def new(request):
         form = RecipeForm()
 
     return render(request, "recipe/detail.html", 
-                 {"title": "New Recipe",
-                  "recipe_id": 0,
-                  "recipe_rating": 0,
-                  "year": datetime.now().year,
-                  "company": "Schmidtheads Inc.",
-                  "form": form,
-                  "button_label": "Create"})
+        {
+            "title": "New Recipe",
+            "recipe_id": 0,
+            "recipe_rating": 0,
+            "year": datetime.now().year,
+            "company": "Schmidtheads Inc.",
+            "form": form,
+            "button_label": "Create"
+        }
+    )
 
 
 def diner_detail(request):
@@ -83,34 +85,14 @@ def diner_detail(request):
         form = DinerForm(instance=diner)
 
     return render(request, "recipe/diner_detail.html",
-                 {"form": form,
-                  "year": datetime.now().year,
-                  "company": "Schmidtheads Inc.",
-                  "button_label": "Update"})
+        {
+            "form": form,
+            "year": datetime.now().year,
+            "company": "Schmidtheads Inc.",
+            "button_label": "Update"
+        }
+    )
 
-
-""" @permission_required('recipe.rating.add_rating')
-def rating_detail(request, id):
-    '''
-    View to edit or view a recipe rating
-    '''
-    rating = get_object_or_404(RecipeRating, pk=id)
-
-    if request.method == "POST":
-        form = RatingForm(request.POST, instance=rating)
-        if form.is_valid():
-            form.save()
-            return redirect("home")
-    else:
-        form = RatingForm(instance=rating)
-
-
-    return render(request, "recipe/rating_detail.html",
-                 {"form": form,
-                  "year": datetime.now().year,
-                  "company": "Schmidtheads Inc.",
-                  "button_label": "Update"})
- """
 
 def ratings_list(request, recipe_id):
     '''
@@ -125,18 +107,18 @@ def ratings_list(request, recipe_id):
     diner_id = get_user_diner(current_user)
     diner_has_rating = recipe_ratings.filter(diner=diner_id).count() != 0
 
-    #TODO: 
-    # disable "New Rating" button, except for admin (or special add_reciperating?)
-
     return render(request, "recipe/rating_list.html",
-                  {"recipe_ratings": recipe_ratings,
-                   "recipe_rating": recipe.rating,
-                   "recipe_name": recipe.name,
-                   "recipe_id": recipe_id,
-                   "diner_has_rating": diner_has_rating,
-                   "table_name": "Recipe Ratings",
-                   "year": datetime.now().year,
-                   "company": "Schmidtheads Inc.",})
+        {
+            "recipe_ratings": recipe_ratings,
+            "recipe_rating": recipe.rating,
+            "recipe_name": recipe.name,
+            "recipe_id": recipe_id,
+            "diner_has_rating": diner_has_rating,
+            "table_name": "Recipe Ratings",
+            "year": datetime.now().year,
+            "company": "Schmidtheads Inc.",
+        }
+    )
 
 
 def recipes(request):
@@ -144,10 +126,13 @@ def recipes(request):
     View to list all recipes
     '''
     return render(request, "recipe/list.html",
-                 {"recipes": Recipe.objects.all(),
-                  "table_name": "recipes",
-                  "year": datetime.now().year,
-                  "company": "Schmidtheads Inc.",})
+        {
+            "recipes": Recipe.objects.all(),
+            "table_name": "recipes",
+            "year": datetime.now().year,
+            "company": "Schmidtheads Inc.",
+        }
+    )
 
 
 @permission_required('recipe.add_reciperating')
@@ -159,7 +144,8 @@ def update_rating_from_list(request, recipe_id: int):
     return update_rating(request, recipe_id, 
         'recipes', 
         'Back to Recipe List',
-        'recipes')
+        'recipes'
+    )
 
 
 @permission_required('recipe.add_reciperating')
@@ -194,11 +180,19 @@ def update_rating(request, recipe_id: int,
     button_label = "Update"  # default value
 
     if request.method == "POST":
-        # Check if rating already exists for user and recipe
-        d_matches = Diner.objects.filter(user_name=current_user.username)
         rating_id = -1  # initialize, may be updated below
-        rating = None   # intialize, may be updated below
-        user_id = -1 if d_matches.count() == 0 else d_matches[0].id  #type: ignore
+        rating = None   # intialize, may be updated below        
+
+        # if super user, check rating based on passed in Diner
+        if current_user.is_superuser:
+            user_id = int(request.POST.get('diner', '-1'))
+        else:
+        # Use currently logged in user for rating check
+
+            # Check if rating already exists for user and recipe
+            d_matches = Diner.objects.filter(user_name=current_user.username)
+            user_id = -1 if d_matches.count() == 0 else d_matches[0].id  #type: ignore
+        
         if user_id != -1:
             r_matches = RecipeRating.objects.filter(
                 diner=user_id,
@@ -231,17 +225,24 @@ def update_rating(request, recipe_id: int,
         user_id = get_user_diner(current_user)
 
         # 2. Check if rating for current user and recipe already exists
-        r_matches = RecipeRating.objects.filter(recipe=recipe_id, diner=user_id)
-
-        # If it does get the recipe rating row and get recipe rating
-        # Also set button label to "Update" or "Create" appropriately
-        if r_matches.count() == 1:
-            rating_id = r_matches[0].id  #type: ignore
-            rating_value = r_matches[0].rating
-            button_label = "Update"
+        if user_id != -1:  # only find ratings for non-anymous users
+            r_matches = RecipeRating.objects.filter(recipe=recipe_id, diner=user_id)
+ 
+            # If it does get the recipe rating row and get recipe rating
+            # Also set button label to "Update" or "Create" appropriately
+            if r_matches.count() == 1:
+                rating_id = r_matches[0].id  #type: ignore
+                rating_value = r_matches[0].rating
+                button_label = "Update"
+            else:
+                rating_value = 1
+                button_label = "Create"
         else:
-            rating_value = 1
-            button_label = "Create"
+            # for anonymous user, will be prompted to login
+            # so button lable and intial rating value are moot
+            # but set here for consistency
+            button_label = ''
+            rating_value = 0
 
         # 3. Open form, pasinging in row ID or just rating?
 
@@ -251,27 +252,31 @@ def update_rating(request, recipe_id: int,
                 'recipe': recipe_id,
                 'rating': rating_value})
 
-            #TODO: hide diner dropdown unless admin
+            # hide diner field, unless user is admin
             diner_field = form.fields['diner']
-            diner_field.widget = diner_field.hidden_widget()            
+            if not current_user.is_superuser:
+                diner_field.widget = diner_field.hidden_widget()            
         else:
-            # if user does not have permission to add or update rating, then maybe they shouldn't be here at all?
-            # perhaps retrict hyperlink for rating on recipe list page so it is not clickable instead
+            # if user does not have permission to add or update rating, 
+            # then maybe they shouldn't be here at all?
+            # perhaps restrict hyperlink for rating on recipe list page
+            # so it is not clickable instead
             form = RatingForm(readonly_form=True)        
-        #form.fields['recipe'].initial = recipe
+
 
     return render(request, "recipe/rating_detail.html",
-                 {
-                  "form": form,
-                  "title": "Update Rating",
-                  "recipe_name": recipe_name,
-                  "recipe_id": recipe_id,
-                  "redirect_page": redirect_path,
-                  "button_label": button_label,
-                  "button_exit_label": exit_label,
-                  "year": datetime.now().year,
-                  "company": "Schmidtheads Inc.",
-                 })
+        {
+            "form": form,
+            "title": "Update Rating",
+            "recipe_name": recipe_name,
+            "recipe_id": recipe_id,
+            "redirect_page": redirect_path,
+            "button_label": button_label,
+            "button_exit_label": exit_label,
+            "year": datetime.now().year,
+            "company": "Schmidtheads Inc.",
+        }
+    )
 
 
 # Creating Recipe Types for a Recipe implemented using guidance
@@ -290,10 +295,13 @@ def RecipeTypeCreatePopup(request):
         return HttpResponse('<script>opener.closePopup(window, "%s", "%s", "#id_recipe_types", "checkbox");</script>' % (instance.pk, instance))
 
     return render(request, "recipe/recipe_type.html",
-                  {"form": form,
-                   "year": datetime.now().year,
-                   "company": "Schmidtheads Inc.",
-                   "table_name": "recipe_type"})
+        {
+            "form": form,
+            "year": datetime.now().year,
+            "company": "Schmidtheads Inc.",
+            "table_name": "recipe_type"
+        }
+    )
 
 
 # Calcule Recipe Rating
@@ -323,10 +331,15 @@ def get_user_diner(user) -> int:
     @return: id of Diner for current user
     '''
 
-    # 1. Check if current user is in Diner table
+    # if user is anonymous (i.e. nobody logged in)
+    # return user_id of -1
+    if user.is_anonymous:
+        return -1
+
+    # Check if current user is in Diner table
     d_matches = Diner.objects.filter(user_name=user.username)
 
-    #  If user does not exist, insert username, first and last name in table; get row ID
+    # If user does not exist, insert username, first and last name in table; get row ID
     if d_matches.count() == 0:
         new_user = Diner.objects.create(
             user_name = user.username,

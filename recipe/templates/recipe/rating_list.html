@@ -26,7 +26,11 @@
         {% for rating in recipe_ratings %}
         <tr>
             <td class="viewCell">
-            {% if rating.diner.user_name == user.get_username %}
+            {% comment %}
+            Hyperlink rating value for current user as means to update it.
+            Unless user is superuser, then hyperlink ALL ratings
+            {% endcomment %}
+            {% if rating.diner.user_name == user.get_username or user.is_superuser%}
                 <a href="{% url 'rating_update_recipe' recipe_id %}">
                 <i>{{rating.rating}}</i>
                 </a>
