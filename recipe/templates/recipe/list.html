@@ -23,17 +23,17 @@
                 <i>{{recipe.name}}</i>
                 </a>
             </td>
-            <td  class="viewCell">{{recipe.cook_book}}</td>
+            <td  class="viewCell">
+                {% if recipe.cook_book is None %}
+                -
+                {% else %}
+                {{recipe.cook_book}}
+                {% endif %}
+            </td>
             <td  class="viewCell">{{recipe.page_number}}</td>
             <td  class="viewCell">
                 <a href="{% url 'rating_update_list' recipe.id %}">
-                <i>
-                    {% if recipe.rating == 0 %}
-                    -
-                    {% else %} 
-                    {{recipe.rating}}
-                    {% endif %}
-                </i>
+                <i>{{recipe.rating_as_string}}</i>
                 </a>
             </td>
             <td  class="viewCell">{{recipe.notes}}</td>

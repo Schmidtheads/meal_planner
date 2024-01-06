@@ -287,27 +287,28 @@ def _search_for_recipes(search_keys: str) -> list:
     recipe_result = srch.find()
 
     result_list = []
-    for recipe in recipe_result:
+    if not recipe_result is None:
+        for recipe in recipe_result:
 
-        # get last time recipe was made
-        last_made_date = _date_recipe_last_made(recipe)
-        times_made = _number_of_times_recipe_made(recipe)
+            # get last time recipe was made
+            last_made_date = _date_recipe_last_made(recipe)
+            times_made = _number_of_times_recipe_made(recipe)
 
-        cb = recipe.cook_book
-        cb_title = '' if cb is None else cb.title
-        author = None if cb is None else cb.author
-        author_fn = '' if author is None else author.first_name
-        author_ln = '' if author is None else author.last_name
-        candidate = {
-            'id': recipe.id,
-            'name': recipe.name,
-            'cookbook': cb_title,
-            'author': f'{author_fn} {author_ln}',
-            'last made': last_made_date,
-            'rating': recipe.rating,
-            'times made': times_made
-        }
-        result_list.append(candidate)
+            cb = recipe.cook_book
+            cb_title = '' if cb is None else cb.title
+            author = None if cb is None else cb.author
+            author_fn = '' if author is None else author.first_name
+            author_ln = '' if author is None else author.last_name
+            candidate = {
+                'id': recipe.id,  # type: ignore
+                'name': recipe.name,
+                'cookbook': cb_title,
+                'author': f'{author_fn} {author_ln}',
+                'last made': last_made_date,
+                'rating': recipe.rating_as_string,
+                'times made': times_made
+            }
+            result_list.append(candidate)
 
     return result_list
 
