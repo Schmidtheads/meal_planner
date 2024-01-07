@@ -1,0 +1,51 @@
+{
+    "metadata" : {
+        "description": [
+            "Configuration used to create user groups for Meal Planner",
+            "web application based on Django.",
+            "Updating this file and runing the user_manager command in",
+            "Django can alter permissions in the Meal Planner web app."
+        ]
+    },
+    "settings": {
+        "groups": [
+            {
+                "name": "Diner",
+                "permissions": [
+                    "view_author",
+                    "view_meal",
+                    "view_diner",
+                    "view_recipe",
+                    "add_reciperating",
+                    "change_reciperating",
+                    "view_reciperating",
+                    "view_recipetype"
+                ]
+            },
+            {
+                "name": "Meal Planner",
+                "permissions": [
+                    "view_cookbook",
+                    "add_cookbook",
+                    "change_cookbook",
+                    "view_author",
+                    "add_author",
+                    "change_author",
+                    "view_meal",
+                    "add_meal",
+                    "change_meal",
+                    "view_recipe",
+                    "add_recipe",
+                    "change_recipe",
+                    "view_reciperating",
+                    "add_reciperating",
+                    "change_reciperating",
+                    "view_recipetype",
+                    "add_recipetype",
+                    "change_recipetype",
+                    "view_diner"
+                ]
+            }
+        ]
+    }
+}
