@@ -3,7 +3,7 @@ from django.core.management.base import BaseCommand
 import copy
 import sqlite3
 import sys
-from .dataload import MealDatabase
+from ._dataload import MealDatabase
 
 _meal_plan = []
 
