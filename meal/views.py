@@ -19,7 +19,7 @@ from .models import Meal
 from .forms import MealForm, PrintForm
 
 
-@permission_required('meal.update_meal')
+@permission_required('meal.change_meal')
 def detail(request, id):
     '''
     This view is used to view/update meal details for a date that already has a meal assigned.

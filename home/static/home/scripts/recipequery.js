@@ -39,7 +39,7 @@ function recipeSearch() {
     let search_keys = document.getElementById('id_recipe_search_keys').value;
 
     $.ajax({
-        url: '/meal/recipe_search',
+        url: 'recipe_search',
         data: {
             'keys': search_keys
         },

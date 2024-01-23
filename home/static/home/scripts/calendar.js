@@ -155,7 +155,7 @@ function createDayElement(date, meal, month, year) {
         let dayText = document.createTextNode(date);
         dayMealLink.append(dayText);
         dayMealLink.title = 'Edit meal for ' + date + ' of month';
-        dayMealLink.href = '/meal/' + meal_id;
+        dayMealLink.href = meal_id;
         daySpan.appendChild(dayMealLink);
 
         // Create span to hold recipe name so we can control font size
@@ -166,7 +166,7 @@ function createDayElement(date, meal, month, year) {
         let recipeText = document.createTextNode(recipe_name);
         recipeMealLink.append(recipeText);
         recipeMealLink.title = 'Edit meal for ' + date + ' of month';
-        recipeMealLink.href = '/meal/' + meal_id;
+        recipeMealLink.href = meal_id;
         recipeSpan.appendChild(recipeMealLink);
 
         // Create div to hold cookbook abbreviation and page number
@@ -183,7 +183,7 @@ function createDayElement(date, meal, month, year) {
         let cookbookTitleLink = document.createElement('a');
         let cookbookTooltipText1 = document.createTextNode(cookbook_title);
         cookbookTitleLink.title = 'Cookbook details';
-        cookbookTitleLink.href = '/cookbook/' + cookbook_id;
+        cookbookTitleLink.href = '../cookbook/' + cookbook_id;
         cookbookTitleLink.append(cookbookTooltipText1);
 
         let tooltipBreak = document.createElement('br');
@@ -221,7 +221,7 @@ function createDayElement(date, meal, month, year) {
         let dayText = document.createTextNode(date);
         dayMealLink.append(dayText);
         dayMealLink.title = 'Set meal for ' + date  + ' of month';
-        dayMealLink.href = '/meal/new?date=' + year + '-' + (month+1) + '-' + date;
+        dayMealLink.href = 'new?date=' + year + '-' + (month+1) + '-' + date;
         daySpan.appendChild(dayMealLink);
     }
     
@@ -239,7 +239,7 @@ function get_meals_for_month(month, year) {
     // When submitting the month, add one because for some
     // stupid reason, JavaScript has January = 0,.. December = 11
     $.ajax({
-        url: '/meal/meals_by_month',
+        url: 'meals_by_month',
         data: {
             'year': year,
             'month': month + 1
