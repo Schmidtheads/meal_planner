@@ -11,4 +11,3 @@ urlpatterns = [
     path('recipe_search', views.search_for_recipes, name='recipe_search'),
     path('print', views.PrintCreatePopup, name='print'),
 ]
-

@@ -241,6 +241,7 @@ def _get_recipe_info_for_meal(meal):
         meal_id = meal.id
         recipe = getattr(meal, 'recipe')
         # Get the recipe information
+        recipe_id = getattr(recipe, 'id')
         name = getattr(recipe, 'name')
         page = getattr(recipe, 'page_number')
         cookbook = getattr(recipe, 'cook_book')
@@ -267,6 +268,7 @@ def _get_recipe_info_for_meal(meal):
         recipe_info = {
             'meal_id': meal_id,
             'recipe_name': name,
+            'recipe_id': recipe_id,
             'page': page,
             'cookbook_id': cookbook_id,
             'cookbook': cookbook_title,
@@ -288,7 +290,7 @@ def _search_for_recipes(search_keys: str) -> list:
 
     result_list = []
     if not recipe_result is None:
-        for recipe in recipe_result:
+        for recipe in recipe_result:  # type: ignore
 
             # get last time recipe was made
             last_made_date = _date_recipe_last_made(recipe)
