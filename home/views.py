@@ -35,7 +35,7 @@ def contact(request):
         'home/contact.html',
         {
             'title':'Contact',
-            'message':'Your contact page.',
+            'message':'Need help? Questions? Suggestions? Need somewhere to send a postcard?',
             'company': 'Schmidtheads',            
             'year':datetime.now().year,
         }

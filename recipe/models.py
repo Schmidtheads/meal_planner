@@ -44,17 +44,26 @@ class Recipe(models.Model):
         '''
         Calculate a recipe rating
         '''
-        recipe = Recipe.objects.get(id=self.id)
-        all_ratings = recipe.reciperating_set.all()
+        recipe = Recipe.objects.get(id=self.id)  # type: ignore
+        all_ratings = recipe.reciperating_set.all()  # type: ignore
 
         # Calculate average rating
         sum_rating = 0
         for rating in all_ratings:
             sum_rating += rating.rating
 
-        average_rating = 0 if all_ratings.count() == 0 else sum_rating / all_ratings.count()
+        average_rating = 0 if all_ratings.count() == 0 else round(sum_rating / all_ratings.count(), 2)
 
         return average_rating
+
+
+    @property
+    def rating_as_string(self) -> str:
+        '''
+        Provide rating as a string so that '-' can be return for null or zero rating
+        '''
+        rating = self.rating
+        return '-' if rating == 0 else str(rating)
 
 
     def __str__(self):

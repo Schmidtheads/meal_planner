@@ -36,7 +36,7 @@ def detail(request, id):
         {
             "form": form,
             "recipe_id": id,
-            "recipe_rating": recipe.rating,
+            "recipe_rating": recipe.rating_as_string,
             "year": datetime.now().year,
             "company": "Schmidtheads Inc.",
             "button_label": "Update"
@@ -110,7 +110,7 @@ def ratings_list(request, recipe_id):
     return render(request, "recipe/rating_list.html",
         {
             "recipe_ratings": recipe_ratings,
-            "recipe_rating": recipe.rating,
+            "recipe_rating": recipe.rating_as_string,
             "recipe_name": recipe.name,
             "recipe_id": recipe_id,
             "diner_has_rating": diner_has_rating,

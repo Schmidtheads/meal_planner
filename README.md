@@ -7,10 +7,14 @@ Conists of three apps:
 - meal app: view meals, when they took place, and what recipe was used; plan future meals
 
 
-## Data Loader
+## Managment Commands
+
+A couple of management commands are provided for convenience of setting up the Meal Planner application. The Data Loader provides a tool to bulk load the Meal Planner database. The User Manager command provides the ability to add user accounts to the Meal Planner database.
+
+### Data Loader
 
 The data loader (data_manager.py) is used to perform an intial load of the Django database from an SQL Lite database, but the data capture is completed in an MS Access database. 
 
 The MS Access database is then converted to SQL Lite using the Python Script found [here](https://gist.github.com/snorfalorpagus/8578272).  SQL Lite is used because loading MS Access database when a 32-bit version of Office 365 is installed is problematic when using 64-bit Python.
 
-
+### User Manager

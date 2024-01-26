@@ -19,7 +19,7 @@ from .models import Meal
 from .forms import MealForm, PrintForm
 
 
-@permission_required('meal.update_meal')
+@permission_required('meal.change_meal')
 def detail(request, id):
     '''
     This view is used to view/update meal details for a date that already has a meal assigned.
@@ -241,6 +241,7 @@ def _get_recipe_info_for_meal(meal):
         meal_id = meal.id
         recipe = getattr(meal, 'recipe')
         # Get the recipe information
+        recipe_id = getattr(recipe, 'id')
         name = getattr(recipe, 'name')
         page = getattr(recipe, 'page_number')
         cookbook = getattr(recipe, 'cook_book')
@@ -267,6 +268,7 @@ def _get_recipe_info_for_meal(meal):
         recipe_info = {
             'meal_id': meal_id,
             'recipe_name': name,
+            'recipe_id': recipe_id,
             'page': page,
             'cookbook_id': cookbook_id,
             'cookbook': cookbook_title,
@@ -287,27 +289,28 @@ def _search_for_recipes(search_keys: str) -> list:
     recipe_result = srch.find()
 
     result_list = []
-    for recipe in recipe_result:
+    if not recipe_result is None:
+        for recipe in recipe_result:  # type: ignore
 
-        # get last time recipe was made
-        last_made_date = _date_recipe_last_made(recipe)
-        times_made = _number_of_times_recipe_made(recipe)
+            # get last time recipe was made
+            last_made_date = _date_recipe_last_made(recipe)
+            times_made = _number_of_times_recipe_made(recipe)
 
-        cb = recipe.cook_book
-        cb_title = '' if cb is None else cb.title
-        author = None if cb is None else cb.author
-        author_fn = '' if author is None else author.first_name
-        author_ln = '' if author is None else author.last_name
-        candidate = {
-            'id': recipe.id,
-            'name': recipe.name,
-            'cookbook': cb_title,
-            'author': f'{author_fn} {author_ln}',
-            'last made': last_made_date,
-            'rating': recipe.rating,
-            'times made': times_made
-        }
-        result_list.append(candidate)
+            cb = recipe.cook_book
+            cb_title = '' if cb is None else cb.title
+            author = None if cb is None else cb.author
+            author_fn = '' if author is None else author.first_name
+            author_ln = '' if author is None else author.last_name
+            candidate = {
+                'id': recipe.id,  # type: ignore
+                'name': recipe.name,
+                'cookbook': cb_title,
+                'author': f'{author_fn} {author_ln}',
+                'last made': last_made_date,
+                'rating': recipe.rating_as_string,
+                'times made': times_made
+            }
+            result_list.append(candidate)
 
     return result_list
 

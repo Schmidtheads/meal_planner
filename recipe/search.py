@@ -155,7 +155,7 @@ class Search:
             # if token is a keyword, then extract the search values
             if token in self.keywords:
                 search_values = self.keyword_search_values(token)
-                keyword_searches[token] = search_values
+                keyword_searches[token] = search_values  # type: ignore
 
             # Else if token is a free token, add it to all keyword searches
             else:
@@ -184,6 +184,9 @@ class Search:
                 elif keyword == "RECIPE:":
                     recipe_qs = Recipe.objects.filter(
                         name__icontains=value)
+                else:
+                    # create empty query set by default
+                    recipe_qs = Recipe.objects.none
                 # [end] if keyword
 
                 # Combine individual recipe type querysets into one big queryset
@@ -191,8 +194,7 @@ class Search:
                     recipe_result = recipe_qs
                 else:
                     recipe_result = recipe_result.union(recipe_qs)
-                    #recipe_result = recipe_result | recipe_qs
-                    # recipe_result = recipe_result.distinct()  # remove duplicates
+                # [end] if recipe_result
             # [end] for value
         # [end] for keyword            
 
@@ -248,25 +250,6 @@ class Search:
 
         return tokens_not_processed
 
-
-    def _parse_time_keywords(self, tokens):
-        '''
-        *** DEPRECATED ***
-        Parse the time keywords in the search text to extract dates
-
-        @param tokens: list of tokens to parse for time searching
-        @return: list of tokens not used for time searching
-        '''
-
-        for k in self.time_keywords:
-            # check if datetime is valid
-            date = self._parse_date(self.time_filter_date(k))
-
-            # if date invalid, remove time keyword
-            if date is None:
-                del self._time_keywords[k]
-            else:
-                self._time_keywords[k] = date
 
     def _parse_date(self, date_string):
         for fmt in ('%Y-%m-%d', '%d.%m.%Y', '%d/%m/%Y', '%d-%b-%Y'):
