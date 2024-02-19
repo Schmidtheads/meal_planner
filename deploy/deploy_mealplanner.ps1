@@ -47,18 +47,21 @@ function main {
     # Read in configuration file
     Get-Config($ConfigFile)
 
-    # Copy and upack zipped source code
-    # Unzip into temp location, then move contents of folder within
-    # temp location to actual location and clean up
-    Write-Host "`nUnzipping $($appZipfile)..."
-    $TempExtract = "$($env:TEMP)\_temp$($appName)"
-    Expand-Archive $appZipfile -DestinationPath $TempExtract
-    Read-Host -Prompt "Press any key"
-    $UnZipFolder = (Get-ChildItem -Path $env:TEMP -Attributes Directory)[0].Name
-    Write-Host "Moving from temp folder to $($appRoot)\$($appName)"
-    Move-Item -Path "$($UnZipFolder)\*" -Destination "$($appRoot)\$($appName)\"
-    Remove-Item -Path $TempExtract -Recurse
-    Read-Host -Prompt "Press any key"
+    # Download and upack zipped source code from repo
+    $appZipfile = Split-Path -Path $appRepoZipFile -Leaf
+    $appZipfilePath = "$($env:TEMP)\$($appZipfile)"
+    
+    Write-Host ="`nDownloading Meal Planner repo from $($appRepoZipFile)..."
+    Invoke-WebRequest $appRepoZipFile -OutFile $appZipfilePath
+   
+    # Unzip into the applicaton root (appRoot), then rename the repo
+    # to actual application name
+    Write-Host "`nUnzipping $($appZipfilePath) to $($appRoot)..."
+    Expand-Archive $appZipfilePath -DestinationPath $appRoot
+    
+    $UnZipFolder = (Get-ChildItem -Path  $appRoot -Attributes Directory)[0].Name
+    Write-Host "Renaming extracted folder $($UnZipFolder) to $($appRoot)\$($appName)"
+    Rename-Item -Path "$($appRoot)\$($UnZipFolder)" -NewName "$($appRoot)\$($appName)"
 
     # Create Python virtual environment
     Write-Host "`nSet up Python Virtual Environment"
@@ -70,6 +73,12 @@ function main {
 
     # Deploy Python packages & other dependencies
     Invoke-Expression "$($appRoot)\$($appName)\$($pythonVenvHome)\Scripts\python.exe -m pip install -r $($appRoot)\$($appName)\requirements.txt"
+
+    # Check OS 
+    if ($IsLinux) {
+        # TODO: check if Apache is running
+        
+    }
 
     # Modify Web Server (Apache)
     
