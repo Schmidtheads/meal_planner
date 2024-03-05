@@ -10,7 +10,7 @@
 #>
 
 # Script Variables
-$script:DefaultApacheConfFile="/etc/apache2/sites-available/000-default.conf"
+$Script:DefaultApacheConfFile="/etc/apache2/sites-available/000-default.conf"
 
 
 function Get-Config {
@@ -27,8 +27,18 @@ function Get-Config {
         if ($clean.Length -gt 0) {
             $variableName = $clean.split("=")[0]
             $variableValue = $clean.split("=",2)[1].Trim()
-            Write-Host "Setting variable $($variableName) = '$($variableValue)'"
-            Set-Variable -Name $variableName -Value $variableValue -Scope Script
+
+            # if value has a comma, create a hashtable
+            if ($variableValue.contains(",")) {
+                $hkey = $variableValue.split(",")[0]
+                $hvalue = $variableValue.split(",")[1]
+                Write-Host "Setting Hashtable variable $($variableName) to key: $($hkey) = $($hvalue)"
+                Set-Variable -Name $variableName -Value @{$hkey=$hvalue} -Scope Script
+            }
+            else {
+                Write-Host "Setting variable $($variableName) = '$($variableValue)'"
+                Set-Variable -Name $variableName -Value $variableValue -Scope Script
+            }
         }
 
     }
@@ -43,7 +53,7 @@ function Get-PythonExe {
     )
 
     $pythonPath = ""
-    if (%$IsLinux) {
+    if ($IsLinux) {
         if ($venvPath.Length -eq 0) {
         $pythonPath = which python3
         }
@@ -72,13 +82,14 @@ function Get-IsPythonVersionValid {
         $pythonPath
     )
 
-    $pyVersion = (Invoke-Expression "$($pythonPath) --version").Split()[1].Split(".")
-    Write-Host "Version of Python is $($pyVersion)"
+    $pyFullVersion = (Invoke-Expression "$($pythonPath) --version").Split()[1]
+    Write-Host "Version of Python is $($pyFullVersion)"
+    $pyVersion = $pyFullVersion.Split(".")
 
-    $pyMinVersion = $pythonMinVersion.Split(".")
+    $pyMinVersion = $config.settings.python.minVersion.Split(".")
 
     # Check major, minor and release
-    $valid = [int]$pyVersion[0] -ge [int]$pyMinVersion[0] -and [int]$pyVersion[1] -ge [int]$pyMinVersion[1] -and [int]$pytVersion[2] -ge [int]$pyMinVersion[2]
+    $valid = [int]$pyVersion[0] -ge [int]$pyMinVersion[0] -and [int]$pyVersion[1] -ge [int]$pyMinVersion[1] -and [int]$pyVersion[2] -ge [int]$pyMinVersion[2]
 
     return $valid
 }
@@ -121,7 +132,17 @@ function Set-Apache {
 
     # Make changes to 000-default.conf
 
-    
+    # Read template conf xml
+    $confXML = Get-Content -Path ./apache_template.xml
+
+    foreach ($line in $confXML) {
+        $config.settings.wsgiSettings.PSObject.Properties | ForEach-Object {
+            if ($line.contains("[$($_.Name)]")) {
+                $line = $line.replace("[$($_.Name)]", $_.Value)
+            }
+        }
+        Write-Output $line
+    }
     # Locate any existing WSGI settings
     # ScriptAlias; Alias [media, static]
     # DaemonProcess; ProcessGroup
@@ -141,23 +162,24 @@ function main {
     }
 
     # Read in configuration file
-    Get-Config($ConfigFile)
+    #Get-Config($ConfigFile)
+    $Script:config = Get-Content -Raw $ConfigFile | ConvertFrom-Json
 
     # Download and upack zipped source code from repo
-    $appZipfile = Split-Path -Path $appRepoZipFile -Leaf
+    $appZipfile = Split-Path -Path $config.settings.appRepoZipfile -Leaf
     $appZipfilePath = "$($env:TEMP)\$($appZipfile)"
     
-    Write-Host ="`nDownloading Meal Planner repo from $($appRepoZipFile)..."
-    Invoke-WebRequest $appRepoZipFile -OutFile $appZipfilePath
+    Write-Host ="`nDownloading Meal Planner repo from $($config.settings.appRepoZipfile)..."
+    Invoke-WebRequest $config.settings.appRepoZipfile -OutFile $appZipfilePath
    
     # Unzip into the applicaton root (appRoot), then rename the repo
     # to actual application name
-    Write-Host "`nUnzipping $($appZipfilePath) to $($appRoot)..."
-    Expand-Archive $appZipfilePath -DestinationPath $appRoot
+    Write-Host "`nUnzipping $($appZipfilePath) to $($config.settings.appRoot)..."
+    Expand-Archive $appZipfilePath -DestinationPath $config.settings.appRoot
     
-    $UnZipFolder = (Get-ChildItem -Path  $appRoot -Attributes Directory)[0].Name
-    Write-Host "Renaming extracted folder $($UnZipFolder) to $($appRoot)\$($appName)"
-    Rename-Item -Path "$($appRoot)\$($UnZipFolder)" -NewName "$($appRoot)\$($appName)"
+    $UnZipFolder = (Get-ChildItem -Path $config.settings.appRoot -Attributes Directory)[0].Name
+    Write-Host "Renaming extracted folder $($UnZipFolder) to $($config.settings.appRoot)\$($config.settings.appName)"
+    Rename-Item -Path "$($config.settings.appRoot)\$($UnZipFolder)" -NewName "$($config.settings.appRoot)\$($config.settings.appName)"
 
     # ---- Python Tasks ----
     # Create Python virtual environment
@@ -166,7 +188,7 @@ function main {
     # Get Python executable and check if version meets requirements
     $pythonExePath = Get-PythonExe
     Write-Host "Found Python exe at $($pythonExePath)."
-    $userPythonPath = Read-Host "Press <ENTER> to use Python exe, or enter alternative location: "
+    $userPythonPath = Read-Host "Press <ENTER> to use Python exe, or enter alternative location"
     if ($userPythonPath.Length -gt 0) {
         if (Test-Path -Path $userPythonPath) {
             $pythonExePath = $userPythonPath
@@ -176,12 +198,13 @@ function main {
             Exit
         }
     }
-    if (Get-IsPythonVersionValid $pythonExePath -not) {
-        Write-Host "Python version does not meet minimum version requirement of $($pythonMinVersion)"
+    $isValid = Get-IsPythonVersionValid $pythonExePath
+    if ($isValid -ne $true) {
+        Write-Host "Python version does not meet minimum version requirement of $($config.settings.python.minVersion)"
         Exit
     }
 
-    $pythonVenvFullPath = "$($appRoot)\$($appName)\$($pythonVenvHome)"
+    $pythonVenvFullPath = "$($config.settings.appRoot)\$($config.settings.appName)\$($config.settings.python.venvHome)"
     Invoke-Expression "$($pythonExePath) -m venv $($pythonVenvFullPath)"
 
     # All further work now done in virtual environment
@@ -192,13 +215,13 @@ function main {
     Invoke-Expression "$($pythonVenvPythonExe) -m pip install --upgrade pip"
 
     # Deploy Python packages & other dependencies
-    Invoke-Expression "$($pythonVenvPythonExe) -m pip install -r $($appRoot)\$($appName)\requirements.txt"
+    Invoke-Expression "$($pythonVenvPythonExe) -m pip install -r $($config.settings.appRoot)\$($config.settings.appName)\requirements.txt"
 
     # --- Web Server Tasks ---
     # Check OS 
     if ($IsLinux) {
         # TODO: check if Apache is running
-        if (Get-Apache().Length -gt 0) {
+        if (Get-Apache.Length -gt 0) {
             Write-Host "Apache web server found running. Will modify for web app deployment."
             # Modify Web Server (Apache)
             

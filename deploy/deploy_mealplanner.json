@@ -1,0 +1,26 @@
+{
+    "metadata": {
+        "description": "Configuration for Meal Planner Deployment",
+        "notes": [
+            "use apacheConfFile to override default location of configuration",
+            "remove or assign nothing to use default value",
+            "default value is /etc/apache2/sites-available/000-default.conf"
+        ]
+    },
+    "settings": {
+        "appRepoZipfile": "https://github.com/Schmidtheads/meal_planner/archive/refs/heads/feature_deployment.zip",
+        "appRoot": "C:\\Users\\mrk_s\\Documents\\test_mp_deploy\\staging\\webapps",
+        "appName": "meal_planner-dev",
+        "python": {
+            "minVersion": "3.10.9",
+            "venvHome": "venv"
+        },
+        "wsgiSettings": {
+            "servername": "",
+            "serveralias": "",
+            "approot": "",
+            "appname": "",
+            "processname": ""
+        }
+    }
+}
