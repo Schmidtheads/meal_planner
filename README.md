@@ -13,8 +13,24 @@ A couple of management commands are provided for convenience of setting up the M
 
 ### Data Loader
 
-The data loader (data_manager.py) is used to perform an intial load of the Django database from an SQL Lite database, but the data capture is completed in an MS Access database. 
+The data loader (`data_manager.py`) is used to perform an intial bulk load of the Django database from an SQL Lite database. This is provide an alternative to using the Meal Planner web application to do data entry, which would have a high level of effort for a large amount of data.
 
-The MS Access database is then converted to SQL Lite using the Python Script found [here](https://gist.github.com/snorfalorpagus/8578272).  SQL Lite is used because loading MS Access database when a 32-bit version of Office 365 is installed is problematic when using 64-bit Python.
+**A third party application is required for data entry** such as [SQLliteStudio](https://sqlitestudio.pl/+
+398). The data module used in the SQLlite database must match that of the database used for the Meal Planner application. 
+
+#### Usage
+
+```
+manage.py data_manager [-h] [--version] [-v {0,1,2,3}] [--settings SETTINGS] [--pythonpath PYTHONPATH]
+                       [--traceback] [--no-color] [--force-color] [--skip-checks]
+                       db_path
+```
+
+From a terminal prompt run the Data Loader using Django's `manage.py` script
+
+```batch
+C:> python manage.py data_manager C:\
+```
+
 
 ### User Manager
