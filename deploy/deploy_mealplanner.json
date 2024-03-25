@@ -2,8 +2,8 @@
     "metadata": {
         "description": "Configuration for Meal Planner Deployment",
         "notes": [
-            "use apacheConfFile to override default location of configuration",
-            "remove or assign nothing to use default value",
+            "use configFilePath under apache settings to override default location",
+            "of Apache configuration; remove or assign nothing to use default value",
             "default value is /etc/apache2/sites-available/000-default.conf"
         ]
     },
@@ -15,12 +15,15 @@
             "minVersion": "3.10.9",
             "venvHome": "venv"
         },
+        "apache": {
+            "configFilePath": "C:\\Users\\mrk_s\\Documents\\test_mp_deploy\\staging\\webconfig\\000-default.conf"
+        },
         "wsgiSettings": {
-            "servername": "",
-            "serveralias": "",
-            "approot": "",
-            "appname": "",
-            "processname": ""
+            "servername": "web.acme.ca",
+            "serveralias": "web",
+            "approot": "/srv/web/apps",
+            "appname": "myapp",
+            "processname": "myappproc"
         }
     }
 }

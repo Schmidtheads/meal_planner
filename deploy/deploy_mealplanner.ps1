@@ -11,7 +11,7 @@
 
 # Script Variables
 $Script:DefaultApacheConfFile="/etc/apache2/sites-available/000-default.conf"
-
+$Script:DEBUG = $true
 
 function Get-Config {
     <#
@@ -102,32 +102,42 @@ function Get-Apache {
     #>
     $apachePath = (get-process -Name apache2 -ErrorAction:Ignore | Select-Object CommandLine -first 1 | ForEach-Object {$_.CommandLine}[0])
 
+    if ($null -eq $apachePath -and $DEBUG) {
+        $apachePath = $env:TEMP  # Use a valid, but harmless folder for testing
+    }
     return $apachePath
 }
+
 
 
 function Set-Apache {
 
     # Check if default location for config overridded
-    if (Test-Path variable:apacheConfFile -not) {
+    if ($null -eq $config.settings.apache.configFilePath) {
         $apacheConfFile = $DefaultApacheConfFile
+    }
+    else {
+        $apacheConfFile = $config.settings.apache.configFilePath
     }
 
     # Check if config file exists
-    if (Test-Path -Path $apacheConfFile -not) {
+    if ((Test-Path -Path $apacheConfFile) -eq $false) {
         Write-Host "***ERR*** Invalid path for Apache conf file ($($apacheConfFile)). ABORTING."
         Exit
     }
 
     # Backup up existing conf file
-    Write-Host "Backing up Apache conf file..."
-    $backupFile = "$($apacheConfFile).$(Get-Date -Format yyyyMMddHH:ss)"
+    $backupFile = "$($apacheConfFile).$(Get-Date -Format yyyyMMddHHss).bak"
+    Write-Host "Backing up Apache conf file to $($backupFile)..."
     Copy-Item $apacheConfFile $backupFile -Force
 
     # If backup failed, abort
-    if (Test-Path -Path $backupFile -not) {
+    if ((Test-Path -Path $backupFile) -eq $false) {
         Write-Host "***WRN*** Backup of conf file failed. ABORTING."
         Exit
+    }
+    else {
+        Write-Host "...backup successful"
     }
 
     # Make changes to 000-default.conf
@@ -135,14 +145,16 @@ function Set-Apache {
     # Read template conf xml
     $confXML = Get-Content -Path ./apache_template.xml
 
+    $outputXML = @()  # create new empty array for output
     foreach ($line in $confXML) {
         $config.settings.wsgiSettings.PSObject.Properties | ForEach-Object {
             if ($line.contains("[$($_.Name)]")) {
                 $line = $line.replace("[$($_.Name)]", $_.Value)
             }
+        $outputXML += $line
         }
-        Write-Output $line
     }
+    Out-File -InputObject $outputXML -Append -FilePath $apacheConfFile
     # Locate any existing WSGI settings
     # ScriptAlias; Alias [media, static]
     # DaemonProcess; ProcessGroup
@@ -219,12 +231,13 @@ function main {
 
     # --- Web Server Tasks ---
     # Check OS 
-    if ($IsLinux) {
+    if ($IsLinux -or $DEBUG) {
         # TODO: check if Apache is running
-        if (Get-Apache.Length -gt 0) {
+        $apachePath = Get-Apache
+        if ($apachePath.Length -gt 0) {
             Write-Host "Apache web server found running. Will modify for web app deployment."
             # Modify Web Server (Apache)
-            
+            Set-Apache
 
         }
     }
