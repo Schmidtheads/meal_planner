@@ -22,7 +22,6 @@
             "servername": "web.acme.ca",
             "serveralias": "web",
             "approot": "/srv/web/apps",
-            "appname": "myapp",
             "processname": "myappproc"
         }
     }

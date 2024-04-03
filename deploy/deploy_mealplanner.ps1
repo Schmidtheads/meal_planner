@@ -9,9 +9,17 @@
     install_mp.ps1 <config_file>
 #>
 
+# Script Parameters
+# configFile -- full path to configuration json file defining deployment
+param (
+    [Parameter(Mandatory=$true)]
+    [string]$ConfigFile
+)
+
 # Script Variables
 $Script:DefaultApacheConfFile="/etc/apache2/sites-available/000-default.conf"
 $Script:DEBUG = $true
+
 
 function Get-Config {
     <#
@@ -44,6 +52,7 @@ function Get-Config {
     }
 }
 
+
 function Get-PythonExe {
     <#
     Provide full path to Python executable. Assume Python 3.x
@@ -73,6 +82,7 @@ function Get-PythonExe {
 
     return $pythonPath
 }
+
 
 function Get-IsPythonVersionValid {
     <#
@@ -109,8 +119,10 @@ function Get-Apache {
 }
 
 
-
 function Set-Apache {
+    <#
+        Update conifguration for Apache Web Server
+    #>
 
     # Check if default location for config overridded
     if ($null -eq $config.settings.apache.configFilePath) {
@@ -142,19 +154,31 @@ function Set-Apache {
 
     # Make changes to 000-default.conf
 
+    #Exit # TODO: Remove
+     
     # Read template conf xml
     $confXML = Get-Content -Path ./apache_template.xml
 
     $outputXML = @()  # create new empty array for output
-    foreach ($line in $confXML) {
+    # Replace tokens with settings from configuration
+    ForEach ($line in $confXML) {
         $config.settings.wsgiSettings.PSObject.Properties | ForEach-Object {
             if ($line.contains("[$($_.Name)]")) {
                 $line = $line.replace("[$($_.Name)]", $_.Value)
             }
-        $outputXML += $line
         }
+        
+        if ($line.contains("[venv]")) {
+            $line = $line.replace("[venv]", $config.settings.python.venvHome)
+        }
+
+        if ($line.contains("[appname]")) {
+            $line = $line.replace("[appname]", $config.settings.appName)
+        }
+        
+        $outputXML += $line
     }
-    Out-File -InputObject $outputXML -Append -FilePath $apacheConfFile
+    Out-File -InputObject $outputXML -Append -FilePath "$($apacheConfFile)"
     # Locate any existing WSGI settings
     # ScriptAlias; Alias [media, static]
     # DaemonProcess; ProcessGroup
@@ -162,10 +186,14 @@ function Set-Apache {
 
 
 function main {
+    <#
+        Main Function
+    #>
+
     param (
-        $ConfigFile
+        [Parameter(Mandatory=$true)]
+        [string]$ConfigFile
     )
-    # Main function
 
     # Validate arguments
     if ($ConfigFile.Length -eq 0) {
@@ -246,4 +274,4 @@ function main {
 }
 
 # ---- MAIN ----
-main $args[0]
+main $ConfigFile
