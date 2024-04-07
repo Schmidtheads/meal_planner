@@ -24,6 +24,8 @@ $Script:DEBUG = $true
 function Get-Config {
     <#
     Read configuration file and create variables to hold settings
+
+    THIS FUNCTION IS DEPRECATED
     #>
     param (
         $ConfigFile
@@ -185,6 +187,48 @@ function Set-Apache {
 }
 
 
+function Get-SourceCode {
+    <#
+        Downloads source code from GitHub
+    #>
+    param (
+        [string]$githubURL,
+        [string]$outFile
+    )
+
+    Write-Output "Enter credentials for URL $($githubURL)"
+    $credentials = Get-Credential
+    
+    Write-Host ="`nDownloading Meal Planner repo from $($config.settings.appRepoZipfile)..."    
+    Invoke-WebRequest $githubURL -Credential $credentials -Outfile $outFile
+
+}
+
+
+function Deploy-Code {
+    <#
+        Unzip a file to specified location
+    #>
+    param (
+        [string]$zipfilePath,
+        [string]$appRoot,
+        [string]$appName
+    )
+
+    # Unzip into the applicaton root (appRoot), then rename the repo
+    # to actual application name
+    Write-Host "`nUnzipping $($zipfilePath) to $($appRoot)..."
+    Expand-Archive $zipfilePath -DestinationPath $appRoot
+    
+    $UnZipFolder = (Get-ChildItem -Path $appRoot -Attributes Directory)[0].Name
+    $unzipFolderPath = Join-Path -Path $appRoot -ChildPath $UnZipFolder
+    $appFolderPath = Join-Path -Path $appRoot -ChildPath $appName
+    Write-Host "Renaming extracted folder $($UnZipFolder) to $($appFolderPath)"
+    Rename-Item -Path "$($unzipFolderPath)" -NewName "$($appFolderPath)"
+
+}
+
+
 function main {
     <#
         Main Function
@@ -202,24 +246,18 @@ function main {
     }
 
     # Read in configuration file
-    #Get-Config($ConfigFile)
     $Script:config = Get-Content -Raw $ConfigFile | ConvertFrom-Json
 
     # Download and upack zipped source code from repo
     $appZipfile = Split-Path -Path $config.settings.appRepoZipfile -Leaf
     $appZipfilePath = "$($env:TEMP)\$($appZipfile)"
     
-    Write-Host ="`nDownloading Meal Planner repo from $($config.settings.appRepoZipfile)..."
-    Invoke-WebRequest $config.settings.appRepoZipfile -OutFile $appZipfilePath
+    Get-SourceCode $config.settings.appRepoZipfile $appZipfilePath
    
     # Unzip into the applicaton root (appRoot), then rename the repo
     # to actual application name
-    Write-Host "`nUnzipping $($appZipfilePath) to $($config.settings.appRoot)..."
-    Expand-Archive $appZipfilePath -DestinationPath $config.settings.appRoot
     
-    $UnZipFolder = (Get-ChildItem -Path $config.settings.appRoot -Attributes Directory)[0].Name
-    Write-Host "Renaming extracted folder $($UnZipFolder) to $($config.settings.appRoot)\$($config.settings.appName)"
-    Rename-Item -Path "$($config.settings.appRoot)\$($UnZipFolder)" -NewName "$($config.settings.appRoot)\$($config.settings.appName)"
+    Deploy-Code $appZipfilePath $config.settings.appRoot $config.settings.appName
 
     # ---- Python Tasks ----
     # Create Python virtual environment
