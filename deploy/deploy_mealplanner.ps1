@@ -21,6 +21,19 @@ $Script:DefaultApacheConfFile="/etc/apache2/sites-available/000-default.conf"
 $Script:DEBUG = $true
 
 
+function Get-TempFolder {
+    <#
+    Get temporary folder, depending on OS
+    #>
+
+    if ($IsLinux) {
+        return "/tmp"
+    } else {
+        return $env:TEMP
+    }
+}
+
+
 function Get-Config {
     <#
     Read configuration file and create variables to hold settings
@@ -60,7 +73,7 @@ function Get-PythonExe {
     Provide full path to Python executable. Assume Python 3.x
     #>
     param (
-        $venvPath
+        [string]$venvPath
     )
 
     $pythonPath = ""
@@ -91,7 +104,7 @@ function Get-IsPythonVersionValid {
     Check that version of Python reaches minimum requirements
     #>
     param (
-        $pythonPath
+        [string]$pythonPath
     )
 
     $pyFullVersion = (Invoke-Expression "$($pythonPath) --version").Split()[1]
@@ -141,7 +154,7 @@ function Set-Apache {
     }
 
     # Backup up existing conf file
-    $backupFile = "$($apacheConfFile).$(Get-Date -Format yyyyMMddHHss).bak"
+    $backupFile = "$($apacheConfFile).$(Get-Date -Format yyyyMMddHHmm).bak"
     Write-Host "Backing up Apache conf file to $($backupFile)..."
     Copy-Item $apacheConfFile $backupFile -Force
 
@@ -250,7 +263,7 @@ function main {
 
     # Download and upack zipped source code from repo
     $appZipfile = Split-Path -Path $config.settings.appRepoZipfile -Leaf
-    $appZipfilePath = "$($env:TEMP)\$($appZipfile)"
+    $appZipfilePath = Join-Path -Path (Get-TempFolder) -ChildPath $appZipfile
     
     Get-SourceCode $config.settings.appRepoZipfile $appZipfilePath
    
@@ -263,7 +276,7 @@ function main {
     # Create Python virtual environment
     Write-Host "`nSet up Python Virtual Environment"
 
-    # Get Python executable and check if version meets requirements
+    # Get base Python executable and check if version meets requirements
     $pythonExePath = Get-PythonExe
     Write-Host "Found Python exe at $($pythonExePath)."
     $userPythonPath = Read-Host "Press <ENTER> to use Python exe, or enter alternative location"
@@ -282,7 +295,7 @@ function main {
         Exit
     }
 
-    $pythonVenvFullPath = "$($config.settings.appRoot)\$($config.settings.appName)\$($config.settings.python.venvHome)"
+    $pythonVenvFullPath = Join-Path $config.settings.appRoot $config.settings.appName $config.settings.python.venvHome
     Invoke-Expression "$($pythonExePath) -m venv $($pythonVenvFullPath)"
 
     # All further work now done in virtual environment
@@ -293,7 +306,8 @@ function main {
     Invoke-Expression "$($pythonVenvPythonExe) -m pip install --upgrade pip"
 
     # Deploy Python packages & other dependencies
-    Invoke-Expression "$($pythonVenvPythonExe) -m pip install -r $($config.settings.appRoot)\$($config.settings.appName)\requirements.txt"
+    $requirementsPath = Join-Path $config.settings.appRoot $config.settings.appName "requirements.txt" 
+    Invoke-Expression "$($pythonVenvPythonExe) -m pip install -r $($requirementsPath)"
 
     # --- Web Server Tasks ---
     # Check OS 
@@ -311,5 +325,7 @@ function main {
     Write-Host "---Done---"
 }
 
-# ---- MAIN ----
+<#
+ ---- MAIN ----
+#>
 main $ConfigFile
