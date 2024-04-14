@@ -325,6 +325,15 @@ function main {
     Write-Host "---Done---"
 }
 
+# Other things that need to be added to script
+# - update <app>\settings.py ALLOWED_HOSTS setting to include '<server_name>'
+# - make sure www-data is group for all items in application folder
+# - run python3 manage.py collectstatic a (files may be put in /srv/webapps/appname/srv/webapps/appname/static...)
+#   copy it to /srv/webapps/appname/home/static/... (see Trello for details)
+# - make sure db.sqlite3 has group write permissions AND parent folder has write permissions
+# - *may* have to update names of images in media/images to match what application _thinks_ they are, otherwise
+#   there will be broken images
+
 <#
  ---- MAIN ----
 #>
