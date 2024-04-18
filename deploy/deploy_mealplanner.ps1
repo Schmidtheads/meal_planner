@@ -21,6 +21,32 @@ $Script:DefaultApacheConfFile="/etc/apache2/sites-available/000-default.conf"
 $Script:DEBUG = $true
 
 
+function Backup-File {
+    <#
+        Back up given file 
+
+        Returns path to backup file
+    #>
+    param (
+        [Parameter(Mandatory=$true)]
+        [string]$sourcePath
+    )
+
+    # Backup up existing file
+    $backupFile = "$($sourcePath).$(Get-Date -Format yyyyMMddHHmm).bak"
+    Write-Host "Backing up $($sourcePath) file to $($backupFile)..."
+    Copy-Item $sourcePath $backupFile -Force
+
+    # Test if backup file path is valid, if not
+    # return empty string
+    if ((Test-Path -Path $backupFile) -eq $false) {
+        $backupFile = ""
+    }
+
+    return $backupFile
+}
+
+
 function Get-TempFolder {
     <#
     Get temporary folder, depending on OS
@@ -154,12 +180,13 @@ function Set-Apache {
     }
 
     # Backup up existing conf file
-    $backupFile = "$($apacheConfFile).$(Get-Date -Format yyyyMMddHHmm).bak"
-    Write-Host "Backing up Apache conf file to $($backupFile)..."
-    Copy-Item $apacheConfFile $backupFile -Force
+    $backupFile = Backup-File $apacheConfFile
+    #$backupFile = "$($apacheConfFile).$(Get-Date -Format yyyyMMddHHmm).bak"
+    #Write-Host "Backing up Apache conf file to $($backupFile)..."
+    #Copy-Item $apacheConfFile $backupFile -Force
 
     # If backup failed, abort
-    if ((Test-Path -Path $backupFile) -eq $false) {
+    if ($backupFile) -eq "") {
         Write-Host "***WRN*** Backup of conf file failed. ABORTING."
         Exit
     }
@@ -225,7 +252,8 @@ function Deploy-Code {
     param (
         [string]$zipfilePath,
         [string]$appRoot,
-        [string]$appName
+        [string]$appName,
+        [string]$groupOwner
     )
 
     # Unzip into the applicaton root (appRoot), then rename the repo
@@ -239,6 +267,57 @@ function Deploy-Code {
     Write-Host "Renaming extracted folder $($UnZipFolder) to $($appFolderPath)"
     Rename-Item -Path "$($unzipFolderPath)" -NewName "$($appFolderPath)"
 
+    # Update group ownership of application
+    if ($IsLinux) {
+        chgrp -R $groupOwner (Join-Path -Path $appRoot -ChildPath $appNAme)
+        
+        # Give write access to database and parent folder of database
+        # to group to allow database to be modified
+        chmod g+w (Join-Path -Path $appRoot -ChildPath $appName)
+        chmod g+w (Join-Path $appRoot $appName "*.sqlite3")
+    }
+}
+
+
+function Update-AllowedHosts {
+    <#
+        Updates the ALLOWED_HOSTS variable in the
+        settings.py file of the web application
+
+        Returns $true if successful, $false if not
+    #>
+    param (
+        [string]$appRoot,
+        [string]$appName,
+        [string[]]$hostList
+    )
+
+    $success = $true  # assume success
+
+    # Make backup of settings.py file
+    $settingsPath = Join-Path $appRoot $appName $appName "settings.py"
+    $backupFile = Backup-File $settingsPath
+
+    if ($backupFile -eq "") {
+        Write-Host "Backup failed. ABORTING"
+        Exit
+    }
+
+    # Open settings file 
+    # Use -Raw option to read file in as one string
+    # Updated ALLOWED_HOSTS list with hostList
+    try {
+        (Get-Content -Path $settingsPath -Raw) `
+        -replace "ALLOWED_HOSTS = []", "ALLOWED_HOSTS = [" + "'$($hostList -join "','")'" + "]" | `
+        Set-Content -Path $settingsPath
+        $success = $true
+    }
+    catch {
+        Write-Host "Error updating settings.py"
+        $success = $false
+    }
+
+    return $success
 }
 
 
@@ -270,7 +349,7 @@ function main {
     # Unzip into the applicaton root (appRoot), then rename the repo
     # to actual application name
     
-    Deploy-Code $appZipfilePath $config.settings.appRoot $config.settings.appName
+    Deploy-Code $appZipfilePath $config.settings.appRoot $config.settings.appName $config.settings.groupOwner
 
     # ---- Python Tasks ----
     # Create Python virtual environment
@@ -325,12 +404,15 @@ function main {
     Write-Host "---Done---"
 }
 
-# Other things that need to be added to script
 # - update <app>\settings.py ALLOWED_HOSTS setting to include '<server_name>'
-# - make sure www-data is group for all items in application folder
+if (Update-AllowedHosts -eq $false) {
+    Write-Host "Update Allowed Hostes FAILED. ABORTING"
+    Exit
+}
+
+# Other things that need to be added to script
 # - run python3 manage.py collectstatic a (files may be put in /srv/webapps/appname/srv/webapps/appname/static...)
 #   copy it to /srv/webapps/appname/home/static/... (see Trello for details)
-# - make sure db.sqlite3 has group write permissions AND parent folder has write permissions
 # - *may* have to update names of images in media/images to match what application _thinks_ they are, otherwise
 #   there will be broken images
 

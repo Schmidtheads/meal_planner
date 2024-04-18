@@ -11,6 +11,11 @@
         "appRepoZipfile": "https://github.com/Schmidtheads/meal_planner/archive/refs/heads/feature_deployment.zip",
         "appRoot": "C:\\Users\\mrk_s\\Documents\\test_mp_deploy\\staging\\webapps",
         "appName": "meal_planner-dev",
+        "groupOwner": "www-data",
+        "allowedHosts": [
+            "raspberrypi4",
+            "192.168.86.102"
+        ],
         "python": {
             "minVersion": "3.10.9",
             "venvHome": "venv"
