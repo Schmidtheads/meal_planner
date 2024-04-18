@@ -20,16 +20,16 @@
         <!-- <input type="radio" id="{{ form.print_weeks.1.id_for_label }}" name="print_weeks" onclick="radio_click('{{ form.print_weeks.1.id_for_label }}')"> -->
         <label for="{{ form.print_weeks.1.id_for_label }}">{{ form.print_weeks.1.choice_label }}</label><br>
         <div style="margin-left: 30px">
-            <input type="checkbox" name="{{ form.weeks.name }}" id="{{ form.weeks.0.id_for_label }}" value="0" disabled>
-            <label for="{{ form.weeks.0.id_for_label }}">Week 1</label>
-            <input type="checkbox" name="{{ form.weeks.name }}" id="{{ form.weeks.1.id_for_label }}" value="1" disabled>
-            <label for="{{ form.weeks.1.id_for_label }}">Week 2</label>
-            <input type="checkbox" name="{{ form.weeks.name }}" id="{{ form.weeks.2.id_for_label }}" value="2" disabled>
-            <label for="{{ form.weeks.2.id_for_label }}">Week 3</label>
-            <input type="checkbox" name="{{ form.weeks.name }}" id="{{ form.weeks.3.id_for_label }}" value="3" disabled>
-            <label for="{{ form.weeks.3.id_for_label }}">Week 4</label>
-            <input type="checkbox" name="{{ form.weeks.name }}" id="{{ form.weeks.4.id_for_label }}" value="4" disabled>
-            <label for="{{ form.weeks.4.id_for_label }}">Week 5</label>
+            <input type="checkbox" name="{{ form.weeks.name }}" id="id_weeks_0" value="0" disabled>
+            <label for="id_weeks_0">Week 1</label>
+            <input type="checkbox" name="{{ form.weeks.name }}" id="id_weeks_1" value="1" disabled>
+            <label for="id_weeks_1">Week 2</label>
+            <input type="checkbox" name="{{ form.weeks.name }}" id="id_weeks_2" value="2" disabled>
+            <label for="id_weeks_2">Week 3</label>
+            <input type="checkbox" name="{{ form.weeks.name }}" id="id_weeks_3" value="3" disabled>
+            <label for="id_weeks_3">Week 4</label>
+            <input type="checkbox" name="{{ form.weeks.name }}" id="id_weeks_4" value="4" disabled>
+            <label for="id_weeks_4">Week 5</label>
         </div>
         <div>
             {{ form.print_only_meals }}
