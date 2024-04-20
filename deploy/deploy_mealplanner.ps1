@@ -183,7 +183,7 @@ function Set-Apache {
     $backupFile = Backup-File $apacheConfFile
 
     # If backup failed, abort
-    if ($backupFile) -eq "") {
+    if (($backupFile) -eq "") {
         Write-Host "***WRN*** Backup of conf file failed. ABORTING."
         Exit
     }
@@ -415,25 +415,27 @@ function main {
 
         }
     }
+
+    # - update <app>\settings.py ALLOWED_HOSTS setting to include '<server_name>'
+    if (Update-AllowedHosts -eq $false) {
+        Write-Host "Update Allowed Hosts FAILED. ABORTING"
+        Exit
+    }
+
+    # Collect static items
+    if ((Get-StaticFiles $pythonExePath) -eq $false) {
+        Write-Host "Collect static files FAILED. ABORTING"
+        Exit
+    }
+
+    # Other things that need to be added to script
+    # - *may* have to update names of images in media/images to match what application _thinks_ they are, otherwise
+    #   there will be broken images
     
     Write-Host "---Done---"
 }
 
-# - update <app>\settings.py ALLOWED_HOSTS setting to include '<server_name>'
-if (Update-AllowedHosts -eq $false) {
-    Write-Host "Update Allowed Hosts FAILED. ABORTING"
-    Exit
-}
 
-# Collect static items
-if ((Get-StaticFiles $pythonExePath) -eq $false) {
-    Write-Host "Collect static files FAILED. ABORTING"
-    Exit
-}
-
-# Other things that need to be added to script
-# - *may* have to update names of images in media/images to match what application _thinks_ they are, otherwise
-#   there will be broken images
 
 <#
  ---- MAIN ----
