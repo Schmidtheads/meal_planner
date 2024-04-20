@@ -181,9 +181,6 @@ function Set-Apache {
 
     # Backup up existing conf file
     $backupFile = Backup-File $apacheConfFile
-    #$backupFile = "$($apacheConfFile).$(Get-Date -Format yyyyMMddHHmm).bak"
-    #Write-Host "Backing up Apache conf file to $($backupFile)..."
-    #Copy-Item $apacheConfFile $backupFile -Force
 
     # If backup failed, abort
     if ($backupFile) -eq "") {
@@ -321,6 +318,24 @@ function Update-AllowedHosts {
 }
 
 
+function Get-StaticFiles {
+    param (
+        [string]$pythonPath  # full path to Python executable
+    )
+
+    # - run python3 manage.py collectstatic a (files may be put in /srv/webapps/appname/srv/webapps/appname/static...)
+    #   copy it to /srv/webapps/appname/home/static/... (see Trello for details)
+    $result = (Invoke-Expression "$($pythonPath) manage.py collectstatic --clear --noinput")
+
+    $last_line = $result[-1]
+    $file_count = $last_lines.split()[0]
+
+    $success = ($last_line.lower().Contains('static files copied')) -and ($file_count -gt 0)
+
+    return $success
+}
+
+
 function main {
     <#
         Main Function
@@ -406,13 +421,17 @@ function main {
 
 # - update <app>\settings.py ALLOWED_HOSTS setting to include '<server_name>'
 if (Update-AllowedHosts -eq $false) {
-    Write-Host "Update Allowed Hostes FAILED. ABORTING"
+    Write-Host "Update Allowed Hosts FAILED. ABORTING"
+    Exit
+}
+
+# Collect static items
+if ((Get-StaticFiles $pythonExePath) -eq $false) {
+    Write-Host "Collect static files FAILED. ABORTING"
     Exit
 }
 
 # Other things that need to be added to script
-# - run python3 manage.py collectstatic a (files may be put in /srv/webapps/appname/srv/webapps/appname/static...)
-#   copy it to /srv/webapps/appname/home/static/... (see Trello for details)
 # - *may* have to update names of images in media/images to match what application _thinks_ they are, otherwise
 #   there will be broken images
 
