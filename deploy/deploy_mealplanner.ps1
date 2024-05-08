@@ -10,8 +10,8 @@
 #>
 
 # Script Parameters
-# configFile -- full path to configuration json file defining deployment
 param (
+    # ConfigFile - (required) full path to configuration JSON file defining deployment
     [Parameter(Mandatory=$true)]
     [string]$ConfigFile
 )
@@ -23,19 +23,28 @@ $Script:DEBUG = $true
 
 function Backup-File {
     <#
-        Back up given file 
-
-        Returns path to backup file
+        .SYNOPSIS
+        Creates a copy of specific file for backup purposes 
+        .DESCRIPTION
+        Creates a copy of the specified file by putting a time stamp and
+        .bak extension on copy of file. Timestamp is in YYYYMMDDHHmm format
+        where YYYY is four digit year; MM is two digit month, DD two digit
+        day, HH two digit hour (24hr) and mm two digit minutes
+        .INPUTS
+        (required) file path to file
+        .OUTPUTS
+        File path to backup file
     #>
     param (
+        # SourcePath - (required) file path to be backed up
         [Parameter(Mandatory=$true)]
-        [string]$sourcePath
+        [string]$SourcePath
     )
 
     # Backup up existing file
-    $backupFile = "$($sourcePath).$(Get-Date -Format yyyyMMddHHmm).bak"
-    Write-Host "Backing up $($sourcePath) file to $($backupFile)..."
-    Copy-Item $sourcePath $backupFile -Force
+    $backupFile = "$($SourcePath).$(Get-Date -Format yyyyMMddHHmm).bak"
+    Write-Host "Backing up $($SourcePath) file to $($backupFile)..."
+    Copy-Item $SourcePath $backupFile -Force
 
     # Test if backup file path is valid, if not
     # return empty string
@@ -49,7 +58,12 @@ function Backup-File {
 
 function Get-TempFolder {
     <#
-    Get temporary folder, depending on OS
+        .SYNOPSIS
+        Get path to temporary folder
+        .DESCRIPTION
+        Get the temporary folder based on the current operating system.
+        .OUTPUTS
+        Full path to temporary folder
     #>
 
     if ($IsLinux) {
@@ -60,64 +74,52 @@ function Get-TempFolder {
 }
 
 
-function Get-Config {
-    <#
-    Read configuration file and create variables to hold settings
-
-    THIS FUNCTION IS DEPRECATED
-    #>
-    param (
-        $ConfigFile
-    )
-
-    Foreach ($i in $(Get-Content $ConfigFile)){
-        # strip and part of string after and inclduing hash (#)
-        $clean = $i.split('#')[0]
-        if ($clean.Length -gt 0) {
-            $variableName = $clean.split("=")[0]
-            $variableValue = $clean.split("=",2)[1].Trim()
-
-            # if value has a comma, create a hashtable
-            if ($variableValue.contains(",")) {
-                $hkey = $variableValue.split(",")[0]
-                $hvalue = $variableValue.split(",")[1]
-                Write-Host "Setting Hashtable variable $($variableName) to key: $($hkey) = $($hvalue)"
-                Set-Variable -Name $variableName -Value @{$hkey=$hvalue} -Scope Script
-            }
-            else {
-                Write-Host "Setting variable $($variableName) = '$($variableValue)'"
-                Set-Variable -Name $variableName -Value $variableValue -Scope Script
-            }
-        }
-
-    }
-}
-
-
 function Get-PythonExe {
     <#
-    Provide full path to Python executable. Assume Python 3.x
+        .SYNOPSIS
+        Provide full path to Python executable
+        .DESCRIPTION
+        Determine the path to the Python executable, assiming version 3.x.
+        Considers operating system and if virtual envrionment provided.
+        User has option to override path.
+        .INPUTS
+        (optional) path to Python virtual environment
+        .OUTPUTS
+        File path to Python executable.
     #>
     param (
-        [string]$venvPath
+        # VenvPath - (optional) Path to Python virtual environment
+        [string]$VenvPath = ""
     )
 
     $pythonPath = ""
     if ($IsLinux) {
-        if ($venvPath.Length -eq 0) {
+        if ($VenvPath.Length -eq 0) {
         $pythonPath = which python3
         }
         else {
-            $pythonPath = "$($venvPath)/bin/python"
+            $pythonPath = "$($VenvPath)/bin/python"
         }
     }
     else {
-        if ($venvPath.Length -eq 0) {
+        if ($VenvPath.Length -eq 0) {
             # If multiple Python versions installed, return first
             $pythonPath = (where.exe python)[0]
         }
         else {
-            $pythonPath = "$($venvPath)\Scripts\python.exe"
+            $pythonPath = "$($VenvPath)\Scripts\python.exe"
+        }
+    }
+
+    Write-Host "Found Python exe at $($pythonPath)."
+    $userPythonPath = Read-Host "Press <ENTER> to use Python exe, or enter alternative location"
+    if ($userPythonPath.Length -gt 0) {
+        if (Test-Path -Path $userPythonPath) {
+            $pythonPath = $userPythonPath
+        }
+        else {
+            Write-Host "***ERR*** Invalid path to Python executable. ABORTING."
+            Exit
         }
     }
 
@@ -127,13 +129,23 @@ function Get-PythonExe {
 
 function Get-IsPythonVersionValid {
     <#
-    Check that version of Python reaches minimum requirements
+        .SYNOPSIS
+        Check that version of Python reaches minimum requirements
+        .DESCRIPTION
+        Verifies that the available Python version meetings minimum
+        requirements.
+        .INPUTS
+        Path to Python executable.
+        .OUTPUTS
+        True if Python Version is valid, False if not
     #>
     param (
-        [string]$pythonPath
+        # PythonPath - (required) File path to Python executable
+        [Parameter(Mandatory=$true)]
+        [string]$PythonPath
     )
 
-    $pyFullVersion = (Invoke-Expression "$($pythonPath) --version").Split()[1]
+    $pyFullVersion = (Invoke-Expression "$($PythonPath) --version").Split()[1]
     Write-Host "Version of Python is $($pyFullVersion)"
     $pyVersion = $pyFullVersion.Split(".")
 
@@ -148,21 +160,32 @@ function Get-IsPythonVersionValid {
 
 function Get-Apache {
     <#
-    Check if Apache is running on deployment server.
-    Return location of installation.
+        .SYNOPSIS
+        Check if Apache is running on deployment server.
+        .DESCRIPTION
+        Identify Apache running process and derive path to executable from it.
+        .OUTPUTS
+        Return location of Apache installation.
     #>
-    $apachePath = (get-process -Name apache2 -ErrorAction:Ignore | Select-Object CommandLine -first 1 | ForEach-Object {$_.CommandLine}[0])
+    $apachePath = (Get-Process -Name apache2 -ErrorAction:Ignore | Select-Object CommandLine -first 1 | ForEach-Object {$_.CommandLine}[0])
 
+    # For testing/debug purposes, return "fake" folder
     if ($null -eq $apachePath -and $DEBUG) {
         $apachePath = $env:TEMP  # Use a valid, but harmless folder for testing
     }
+
     return $apachePath
 }
 
 
 function Set-Apache {
     <#
+        .SYNOPSIS
         Update conifguration for Apache Web Server
+        .DESCRIPTION
+        Makes a copy (as a backup) and then updates the Apache
+        configuration file with virtual host information for the
+        web application.
     #>
 
     # Check if default location for config overridded
@@ -226,14 +249,24 @@ function Set-Apache {
 
 function Get-SourceCode {
     <#
-        Downloads source code from GitHub
+       .SYNOPSIS
+       Downloads source code from GitHub
+       .DESCRIPTION
+       The source is downloaded as a zip file to a temporary location.
+       .INPUTS
+       GitHubURL - (required) URL to repo zip file
+       OutFile - (required) Location where repo is downloaded
     #>
     param (
-        [string]$githubURL,
-        [string]$outFile
+        # GitHubURL - URL to zip file of repo
+        [Parameter(Mandatory=$true)]
+        [string]$GitHubURL,
+        # OutFile - File path to location where zip file will be saved
+        [Parameter(Mandatory=$true)]
+        [string]$OutFile
     )
 
-    Write-Output "Enter credentials for URL $($githubURL)"
+    Write-Output "Enter credentials for URL $($GitHubURL)"
     $credentials = Get-Credential
     
     Write-Host ="`nDownloading Meal Planner repo from $($config.settings.appRepoZipfile)..."    
@@ -244,55 +277,88 @@ function Get-SourceCode {
 
 function Deploy-Code {
     <#
+        .SYNOPSIS
         Unzip a file to specified location
+        .DESCRIPTION
+        Unzips a zip file into a defined application location.
+        Changes group ownership on the deployed files to the specified 
+        group. Changes permissions on the database file and parent folder
+        so that the group can modify it.
+        .INPUTS
+        ZipFilePath (required) - File path to the zipfile
+        AppRoot (reuquired) - Parent folder of application
+        AppName (required) - Name of application
+        GroupOwner (Required) - Name of group to own files
     #>
     param (
-        [string]$zipfilePath,
-        [string]$appRoot,
-        [string]$appName,
-        [string]$groupOwner
+        # ZipFilePath - File path to the zipfile
+        [Parameter(Mandatory=$true)]
+        [string]$ZipFilePath,
+        # AppRoot - Parent folder of application
+        [Parameter(Mandatory=$true)]
+        [string]$AppRoot,
+        # AppName - Name of application
+        [Parameter(Mandatory=$true)]
+        [string]$AppName,
+        # GroupOwner - Name of group to own files
+        [Parameter(Mandatory=$true)]
+        [string]$GroupOwner
     )
 
     # Unzip into the applicaton root (appRoot), then rename the repo
     # to actual application name
-    Write-Host "`nUnzipping $($zipfilePath) to $($appRoot)..."
-    Expand-Archive $zipfilePath -DestinationPath $appRoot
+    Write-Host "`nUnzipping $($ZipFilePath) to $($AppRoot)..."
+    Expand-Archive $ZipFilePath -DestinationPath $AppRoot
     
-    $UnZipFolder = (Get-ChildItem -Path $appRoot -Attributes Directory)[0].Name
-    $unzipFolderPath = Join-Path -Path $appRoot -ChildPath $UnZipFolder
-    $appFolderPath = Join-Path -Path $appRoot -ChildPath $appName
-    Write-Host "Renaming extracted folder $($UnZipFolder) to $($appFolderPath)"
+    $unZipFolder = (Get-ChildItem -Path $AppRoot -Attributes Directory)[0].Name
+    $unzipFolderPath = Join-Path -Path $AppRoot -ChildPath $unZipFolder
+    $appFolderPath = Join-Path -Path $AppRoot -ChildPath $AppName
+    Write-Host "Renaming extracted folder $($unZipFolder) to $($appFolderPath)"
     Rename-Item -Path "$($unzipFolderPath)" -NewName "$($appFolderPath)"
 
     # Update group ownership of application
     if ($IsLinux) {
-        chgrp -R $groupOwner (Join-Path -Path $appRoot -ChildPath $appNAme)
+        chgrp -R $GroupOwner (Join-Path -Path $AppRoot -ChildPath $AppNAme)
         
         # Give write access to database and parent folder of database
         # to group to allow database to be modified
-        chmod g+w (Join-Path -Path $appRoot -ChildPath $appName)
-        chmod g+w (Join-Path $appRoot $appName "*.sqlite3")
+        chmod g+w (Join-Path -Path $AppRoot -ChildPath $AppName)
+        chmod g+w (Join-Path $AppRoot $AppName "*.sqlite3")
     }
 }
 
 
 function Update-AllowedHosts {
     <#
-        Updates the ALLOWED_HOSTS variable in the
-        settings.py file of the web application
-
+        .SYNOPSIS
+        Updates the ALLOWED_HOSTS setting in the Django application
+        .DESCRIPTION
+        Updates the ALLOWED_HOSTS setting found in settings.py file
+        of the Django web application.
+        .INPUTS
+        AppRoot - (required) Parent folder of application
+        AppName - (required) Name of application
+        HostList - (required) List of host names to add
+        .OUTPUTS
         Returns $true if successful, $false if not
     #>
     param (
-        [string]$appRoot,
-        [string]$appName,
-        [string[]]$hostList
+        # AppRoot - Parent folder of application
+        [Parameter(Mandatory=$true)]
+        [string]$AppRoot,
+        # AppName - Name of application
+        [Parameter(Mandatory=$true)]
+        [string]$AppName,
+        # HostList - list of hostnames to add
+        [Parameter(Mandatory=$true)]
+        [string[]]$HostList
     )
 
     $success = $true  # assume success
 
     # Make backup of settings.py file
-    $settingsPath = Join-Path $appRoot $appName $appName "settings.py"
+    # Full path of settings.py file is <AppRoot>/<AppName>/<AppName>/settings.py
+    $settingsPath = Join-Path $AppRoot $AppName $AppName "settings.py"
     $backupFile = Backup-File $settingsPath
 
     if ($backupFile -eq "") {
@@ -305,7 +371,7 @@ function Update-AllowedHosts {
     # Updated ALLOWED_HOSTS list with hostList
     try {
         (Get-Content -Path $settingsPath -Raw) `
-        -replace "ALLOWED_HOSTS = []", "ALLOWED_HOSTS = [" + "'$($hostList -join "','")'" + "]" | `
+        -replace "ALLOWED_HOSTS = []", "ALLOWED_HOSTS = [" + "'$($HostList -join "','")'" + "]" | `
         Set-Content -Path $settingsPath
         $success = $true
     }
@@ -319,8 +385,21 @@ function Update-AllowedHosts {
 
 
 function Get-StaticFiles {
+    <#
+        .SYNOPSIS
+        Copies static files in Django application to serveable location
+        .DESCRIPTION
+        Copies static files (images, JavaScript files, etc) to a fixed
+        location from which the files can be properly served.
+        .INPUTS
+        PythonPath - (required) File path to the Python executable
+        .OUTPUTS
+        Returns $true if succesful, $false if not
+    #>
     param (
-        [string]$pythonPath  # full path to Python executable
+        # PythonPath - File path to Python executable
+        [Parameter(Mandatory=$true)]
+        [string]$pythonPath  
     )
 
     # - run python3 manage.py collectstatic a (files may be put in /srv/webapps/appname/srv/webapps/appname/static...)
@@ -338,10 +417,16 @@ function Get-StaticFiles {
 
 function main {
     <#
+        .SYNOPSIS
         Main Function
+        .DESCRIPTION
+        This is where it all happens.
+        .INPUTS
+        ConfigFile - (required) File path to configuration file
     #>
 
     param (
+        # ConfigFile - File path to configuration file
         [Parameter(Mandatory=$true)]
         [string]$ConfigFile
     )
@@ -366,25 +451,14 @@ function main {
     
     Deploy-Code $appZipfilePath $config.settings.appRoot $config.settings.appName $config.settings.groupOwner
 
-    # ---- Python Tasks ----
+    # ------------------------ Python Tasks ------------------------
+
     # Create Python virtual environment
     Write-Host "`nSet up Python Virtual Environment"
 
     # Get base Python executable and check if version meets requirements
     $pythonExePath = Get-PythonExe
-    Write-Host "Found Python exe at $($pythonExePath)."
-    $userPythonPath = Read-Host "Press <ENTER> to use Python exe, or enter alternative location"
-    if ($userPythonPath.Length -gt 0) {
-        if (Test-Path -Path $userPythonPath) {
-            $pythonExePath = $userPythonPath
-        }
-        else {
-            Write-Host "***ERR*** Invalid path to Python executable. ABORTING."
-            Exit
-        }
-    }
-    $isValid = Get-IsPythonVersionValid $pythonExePath
-    if ($isValid -ne $true) {
+    if ((Get-IsPythonVersionValid $pythonExePath) -ne $true) {
         Write-Host "Python version does not meet minimum version requirement of $($config.settings.python.minVersion)"
         Exit
     }
@@ -403,7 +477,20 @@ function main {
     $requirementsPath = Join-Path $config.settings.appRoot $config.settings.appName "requirements.txt" 
     Invoke-Expression "$($pythonVenvPythonExe) -m pip install -r $($requirementsPath)"
 
-    # --- Web Server Tasks ---
+    # Collect static items
+    if ((Get-StaticFiles $pythonExePath) -eq $false) {
+        Write-Host "Collect static files FAILED. ABORTING"
+        Exit
+    }
+
+    # - update <app>\settings.py ALLOWED_HOSTS setting to include '<server_name>'
+    if (Update-AllowedHosts -eq $false) {
+        Write-Host "Update Allowed Hosts FAILED. ABORTING"
+        Exit
+    }
+    
+    # ------------------------- Web Server Tasks -------------------------
+
     # Check OS 
     if ($IsLinux -or $DEBUG) {
         # TODO: check if Apache is running
@@ -416,18 +503,6 @@ function main {
         }
     }
 
-    # - update <app>\settings.py ALLOWED_HOSTS setting to include '<server_name>'
-    if (Update-AllowedHosts -eq $false) {
-        Write-Host "Update Allowed Hosts FAILED. ABORTING"
-        Exit
-    }
-
-    # Collect static items
-    if ((Get-StaticFiles $pythonExePath) -eq $false) {
-        Write-Host "Collect static files FAILED. ABORTING"
-        Exit
-    }
-
     # Other things that need to be added to script
     # - *may* have to update names of images in media/images to match what application _thinks_ they are, otherwise
     #   there will be broken images
@@ -436,8 +511,7 @@ function main {
 }
 
 
-
 <#
- ---- MAIN ----
+ ------------------------- MAIN -------------------------
 #>
 main $ConfigFile
