@@ -9,16 +9,19 @@
     install_mp.ps1 <config_file>
 #>
 
+#Requires -RunAsAdministrator
+
 # Script Parameters
 param (
     # ConfigFile - (required) full path to configuration JSON file defining deployment
     [Parameter(Mandatory=$true)]
-    [string]$ConfigFile
+    [string]$ConfigFile,
+    [switch]$DebugMode
 )
 
 # Script Variables
 $Script:DefaultApacheConfFile="/etc/apache2/sites-available/000-default.conf"
-$Script:DEBUG = $true
+$Script:DEBUG = $false
 
 
 function Backup-File {
@@ -111,7 +114,13 @@ function Get-PythonExe {
         }
     }
 
-    Write-Host "Found Python exe at $($pythonPath)."
+    If ($VenvPath.Length -eq 0) {
+        Write-Host "Found BASE Python exe at $($pythonPath)."
+
+    } else {
+        Write-Host "Found VIRTUAL ENV Python exe at $($pythonPath)."
+    }
+
     $userPythonPath = Read-Host "Press <ENTER> to use Python exe, or enter alternative location"
     if ($userPythonPath.Length -gt 0) {
         if (Test-Path -Path $userPythonPath) {
@@ -266,11 +275,11 @@ function Get-SourceCode {
         [string]$OutFile
     )
 
-    Write-Output "Enter credentials for URL $($GitHubURL)"
-    $credentials = Get-Credential
+    #$credentials = Get-Credential -Message "Enter credentials for URL $($GitHubURL)"
     
     Write-Host ="`nDownloading Meal Planner repo from $($config.settings.appRepoZipfile)..."    
-    Invoke-WebRequest $githubURL -Credential $credentials -Outfile $outFile
+    #Invoke-WebRequest $githubURL -Credential $credentials -Outfile $outFile
+    Invoke-WebRequest $githubURL -Outfile $outFile
 
 }
 
@@ -310,23 +319,49 @@ function Deploy-Code {
     Write-Host "`nUnzipping $($ZipFilePath) to $($AppRoot)..."
     Expand-Archive $ZipFilePath -DestinationPath $AppRoot
     
-    $unZipFolder = (Get-ChildItem -Path $AppRoot -Attributes Directory)[0].Name
-    $unzipFolderPath = Join-Path -Path $AppRoot -ChildPath $unZipFolder
-    $appFolderPath = Join-Path -Path $AppRoot -ChildPath $AppName
-    Write-Host "Renaming extracted folder $($unZipFolder) to $($appFolderPath)"
-    Rename-Item -Path "$($unzipFolderPath)" -NewName "$($appFolderPath)"
+    # Loop through folders in the DestionationPath (AppRoot) and
+    # find the most recent folder which will be what was just unzipped
+    $unZipFolder = $null
+    $mostRecent = Get-Date -Year 1970 -Month 1 -Day 1
+    Get-ChildItem -Path $AppRoot -Attribute Directory | ForEach-Object `
+        -Process {
+            if ($_.LastWriteTime -gt $mostRecent) {
+                $mostREcent = $_.LastWriteTime
+                $unZipFolder = $_.Name
+            }
+        }
+
+    if ($null -ne $unZipFolder) {
+        $unzipFolderPath = Join-Path -Path $AppRoot -ChildPath $unZipFolder
+        $appFolderPath = Join-Path -Path $AppRoot -ChildPath $AppName
+        Write-Host "Renaming extracted folder $($unZipFolder) to $($appFolderPath)"
+        Rename-Item -Path "$($unzipFolderPath)" -NewName "$($appFolderPath)"
+    } else {
+        Write-Host "***ERROR*** Could not find extracted source code"
+        Exit
+    }
 
     # Update group ownership of application
     if ($IsLinux) {
+        Write-Host "Updating group ownership of files to $($GroupOwner)..."
+
         chgrp -R $GroupOwner (Join-Path -Path $AppRoot -ChildPath $AppNAme)
         
         # Give write access to database and parent folder of database
         # to group to allow database to be modified
         chmod g+w (Join-Path -Path $AppRoot -ChildPath $AppName)
-        chmod g+w (Join-Path $AppRoot $AppName "*.sqlite3")
+        if (Test-Path (Join-Path $AppRoot $AppName "*.sqlite3")) {
+            chmod g+w (Join-Path $AppRoot $AppName "*.sqlite3")
+        } else {
+            Write-Host "***WARNING*** No .sqlite3 database file found."
+        }
+        
     }
-}
 
+    # Clean up - remove temp zip file
+    Write-Host "Cleaning up - deleting $($ZipFilePath)"
+    Remove-Item -Path $ZipFilePath
+}
 
 function Update-AllowedHosts {
     <#
@@ -354,16 +389,18 @@ function Update-AllowedHosts {
         [string[]]$HostList
     )
 
+    Write-Host "`nUpdating ALLOWED_HOSTS in settings.py"
+
     $success = $true  # assume success
 
     # Make backup of settings.py file
-    # Full path of settings.py file is <AppRoot>/<AppName>/<AppName>/settings.py
-    $settingsPath = Join-Path $AppRoot $AppName $AppName "settings.py"
+    # Full path of settings.py file is <AppRoot>/<AppName>/meal_planner/settings.py
+    $settingsPath = Join-Path $AppRoot $AppName "meal_planner" "settings.py"
     $backupFile = Backup-File $settingsPath
 
     if ($backupFile -eq "") {
-        Write-Host "Backup failed. ABORTING"
-        Exit
+        Write-Host "***ERROR*** Backup of settings.py failed"
+        return $false
     }
 
     # Open settings file 
@@ -371,12 +408,12 @@ function Update-AllowedHosts {
     # Updated ALLOWED_HOSTS list with hostList
     try {
         (Get-Content -Path $settingsPath -Raw) `
-        -replace "ALLOWED_HOSTS = []", "ALLOWED_HOSTS = [" + "'$($HostList -join "','")'" + "]" | `
+        -replace [Regex]::Escape("ALLOWED_HOSTS = []"), ("ALLOWED_HOSTS = [" + "'$($HostList -join "','")'" + "]")  | `
         Set-Content -Path $settingsPath
         $success = $true
     }
     catch {
-        Write-Host "Error updating settings.py"
+        Write-Host "***Error*** Unable to update settings.py"
         $success = $false
     }
 
@@ -399,17 +436,23 @@ function Get-StaticFiles {
     param (
         # PythonPath - File path to Python executable
         [Parameter(Mandatory=$true)]
-        [string]$pythonPath  
+        [string]$pythonPath,
+        [string]$fullAppPath  
     )
 
     # - run python3 manage.py collectstatic a (files may be put in /srv/webapps/appname/srv/webapps/appname/static...)
     #   copy it to /srv/webapps/appname/home/static/... (see Trello for details)
-    $result = (Invoke-Expression "$($pythonPath) manage.py collectstatic --clear --noinput")
+    Write-Host "`nCollect Static Files $($fullAppPath)/manage.py"
+    $result = (Invoke-Expression "$($pythonPath) $($fullAppPath)/manage.py collectstatic --clear --noinput")
 
-    $last_line = $result[-1]
-    $file_count = $last_lines.split()[0]
-
-    $success = ($last_line.lower().Contains('static files copied')) -and ($file_count -gt 0)
+    if (-not $null -eq $result) {
+        $last_line = $result[-1]
+        $file_count = $last_line.split()[0]
+    
+        $success = ($last_line.ToLower().Contains('static files copied')) -and ($file_count -gt 0)
+    } else {
+        $success = $false
+    }
 
     return $success
 }
@@ -423,18 +466,30 @@ function main {
         This is where it all happens.
         .INPUTS
         ConfigFile - (required) File path to configuration file
+        DebugMode - flag to indicate running in Debug mode
     #>
 
     param (
         # ConfigFile - File path to configuration file
         [Parameter(Mandatory=$true)]
-        [string]$ConfigFile
+        [string]$ConfigFile,
+        [System.Boolean]$DebugMode
     )
 
     # Validate arguments
     if ($ConfigFile.Length -eq 0) {
         Write-Host "Config file not specified"
         Exit 1
+    }
+
+    $Debug = $DebugMode
+
+    # Check if running as root (if using Linux)
+    if ($IsLinux) {
+        if ($(whoami) -ne "root") {
+            Write-Host "***ERROR*** Script must be run as root"
+            Exit
+        }
     }
 
     # Read in configuration file
@@ -464,6 +519,7 @@ function main {
     }
 
     $pythonVenvFullPath = Join-Path $config.settings.appRoot $config.settings.appName $config.settings.python.venvHome
+    Write-Host "`nCreating Python Virtual Env in $($pythonVenvFullPath)"
     Invoke-Expression "$($pythonExePath) -m venv $($pythonVenvFullPath)"
 
     # All further work now done in virtual environment
@@ -478,14 +534,17 @@ function main {
     Invoke-Expression "$($pythonVenvPythonExe) -m pip install -r $($requirementsPath)"
 
     # Collect static items
-    if ((Get-StaticFiles $pythonExePath) -eq $false) {
-        Write-Host "Collect static files FAILED. ABORTING"
+    if ((Get-StaticFiles $pythonVenvPythonExe (Join-Path $config.settings.appRoot $config.settings.appName)) -eq $false) {
+        Write-Host "***ERROR*** Collect static files FAILED. ABORTING"
         Exit
     }
 
     # - update <app>\settings.py ALLOWED_HOSTS setting to include '<server_name>'
-    if (Update-AllowedHosts -eq $false) {
-        Write-Host "Update Allowed Hosts FAILED. ABORTING"
+    if ((Update-AllowedHosts `
+            $config.settings.appRoot `
+            $config.settings.appName `
+            $config.settings.allowedHosts ) -eq $false) {
+        Write-Host "***ERROR*** Update Allowed Hosts FAILED. ABORTING"
         Exit
     }
     
@@ -496,7 +555,7 @@ function main {
         # TODO: check if Apache is running
         $apachePath = Get-Apache
         if ($apachePath.Length -gt 0) {
-            Write-Host "Apache web server found running. Will modify for web app deployment."
+            Write-Host "`nApache web server found running. Will modify for web app deployment."
             # Modify Web Server (Apache)
             Set-Apache
 
@@ -514,4 +573,4 @@ function main {
 <#
  ------------------------- MAIN -------------------------
 #>
-main $ConfigFile
+main $ConfigFile $DebugMode.IsPresent
