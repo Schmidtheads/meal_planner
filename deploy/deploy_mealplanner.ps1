@@ -563,6 +563,7 @@ function main {
     }
 
     # Other things that need to be added to script
+    # - use manage.py to create empty sqlite database?
     # - *may* have to update names of images in media/images to match what application _thinks_ they are, otherwise
     #   there will be broken images
     
