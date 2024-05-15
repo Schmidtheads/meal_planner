@@ -564,6 +564,8 @@ function main {
 
     # Other things that need to be added to script
     # - use manage.py to create empty sqlite database?
+    # - revisit collect static and how it handles admin files (see Trello for details)
+    # - may need to update settings.py so that URL variables factor in application name or update WSGI Alias (See Trello)
     # - *may* have to update names of images in media/images to match what application _thinks_ they are, otherwise
     #   there will be broken images
     
