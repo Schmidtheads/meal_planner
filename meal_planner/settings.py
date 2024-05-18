@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 
 import os
 import posixpath
+import sys
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -118,6 +119,11 @@ MEDIA_ROOT = posixpath.join(*(BASE_DIR.split(os.path.sep) + ['media']))
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 STATIC_URL = '/static/'
 STATIC_ROOT = posixpath.join(*(BASE_DIR.split(os.path.sep) + ['static']))
+
+# For Linux, add leading /
+if 'linux' in sys.platform:
+    MEDIA_ROOT = os.path.sep + MEDIA_ROOT
+    STATIC_ROOT = os.path.sep + STATIC_ROOT
 
 # Use the most recent ID field type BigAutoField (as of Django 3.2
 # ) (instead of Integer)

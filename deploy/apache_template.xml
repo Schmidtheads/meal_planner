@@ -1,0 +1,26 @@
+<VirtualHost *:80>
+    ServerName [servername]
+    ServerAlias [serveralias]
+
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+    Alias /media [approot]/[appname]/media
+    Alias /static [approot]/[appname]/home/static
+    <Directory [approot]/[appname]/home/static>
+        Require all granted
+    </Directory>
+
+    <Directory [approot]/[appname]/meal_planner>
+        <Files wsgi.py>
+            Require all granted
+        </Files>
+    </Directory>
+
+    WSGIDaemonProcess [processname] python-path=[approot]/[appname] python-home=[approot]/[appname]/[venv]
+    WSGIProcessGroup [processname]
+
+    WSGIScriptAlias /[appname] [approot]/[appname]/meal_planner/wsgi.py process-group=[processname]
+    # Below added to address issue at this link https://tinyurl.com/yc4drrrb 
+    WSGIApplicationGroup %{GLOBAL}
+</VirtualHost>
