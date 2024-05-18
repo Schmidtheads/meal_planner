@@ -558,17 +558,18 @@ function main {
             Write-Host "`nApache web server found running. Will modify for web app deployment."
             # Modify Web Server (Apache)
             Set-Apache
-
         }
     }
 
     # Other things that need to be added to script
     # - use manage.py to create empty sqlite database?
     # - revisit collect static and how it handles admin files (see Trello for details)
+    # - update folder <app_name>/media/images so group can write to it 
     # - may need to update settings.py so that URL variables factor in application name or update WSGI Alias (See Trello)
     # - *may* have to update names of images in media/images to match what application _thinks_ they are, otherwise
     #   there will be broken images
     
+    Write-Host "`nBe sure to add `n$($config.settings.wsgiSettings.serverAlias) `nto your local hosts file for IP address of this machine"
     Write-Host "---Done---"
 }
 
