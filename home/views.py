@@ -7,8 +7,9 @@ from django.shortcuts import render, redirect
 from django.http import HttpRequest
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.models import Group
+from django.contrib import messages
 
-from .forms import SignUpForm
+from .forms import SignUpForm, BootstrapAuthenticationForm
 
 DEFAULT_USER_GROUP = 'Diner'
 
@@ -53,6 +54,33 @@ def about(request):
             'message':'Overview of the Meal Planner application.',
             'company': 'Schmidtheads',
             'year':datetime.now().year,
+        }
+    )
+
+
+def login_view(request):
+    if request.method == 'POST':
+        form = BootstrapAuthenticationForm(None, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get("username")
+            raw_password = form.cleaned_data.get("password")
+            # Automatically log user in
+            user = authenticate(request, username=username, password=raw_password)
+
+            if user is not None:
+                login(request, user)
+                return redirect("home")
+            else:
+                messages.error(request, "Invalid username or password")
+                return redirect("login")            
+    else:
+        form = BootstrapAuthenticationForm()            
+    return render(request, 
+        'home/login.html', 
+        {
+            'year': datetime.now().year,
+            'company': 'Schmidtheads Inc.',
+            'form': form
         }
     )
 

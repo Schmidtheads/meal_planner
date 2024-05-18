@@ -16,20 +16,21 @@ urlpatterns = [
     path('contact/', views.contact, name='contact'),
     path('about/', views.about, name='about'),
     path('signup/', views.signup, name='signup'),
-    path('login/',
-         LoginView.as_view
-         (
-             template_name='home/login.html',
-             authentication_form=forms.BootstrapAuthenticationForm,
-             extra_context=
-             {
-                 'title': 'Log in',
-                 'company': 'Schmidtheads',
-                 'year' : datetime.now().year,
-             }
-         ),
-         name='login'),
-    path('logout/', LogoutView.as_view(next_page='/'), name='logout'),
+    path('login/', views.login_view, name='login'),
+    # path('login/',
+    #      LoginView.as_view
+    #      (
+    #          template_name='home/login.html',
+    #          authentication_form=forms.BootstrapAuthenticationForm,
+    #          extra_context=
+    #          {
+    #              'title': 'Log in',
+    #              'company': 'Schmidtheads',
+    #              'year' : datetime.now().year,
+    #          },
+    #      ),
+    #      name='login'),
+    path('logout/', LogoutView.as_view(next_page=settings.LOGOUT_REDIRECT_URL), name='logout'),
     path('admin/', admin.site.urls),
     path('cookbook/', include('cookbook.urls')),
     path('recipe/', include('recipe.urls')),

@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
+from django.urls import reverse_lazy
 import os
 import posixpath
 import sys
@@ -59,7 +60,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'meal_planner.urls'
 
 # Template configuration
-# https://docs.djangoproject.com/en/2.1/topics/templates/
+# https://docs.djangoproject.com/en/4.2/topics/templates/
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -130,4 +131,7 @@ if 'linux' in sys.platform:
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # User LOGIN URL
-LOGIN_URL = '/login'
+#LOGIN_URL = reverse_lazy('login') --> to delete?
+LOGOUT_URL = reverse_lazy('logout')
+LOGOUT_REDIRECT_URL = reverse_lazy('home')
+#LOGIN_REDIRECT_URL = reverse_lazy('home') --> to delete?
