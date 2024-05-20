@@ -20,6 +20,10 @@
             "minVersion": "3.10.9",
             "venvHome": "venv"
         },
+        "database": {
+            "mode": "MIGRATE",
+            "sourcePath": "<full path to django database>"
+        },
         "apache": {
             "configFilePath": "C:\\Users\\mrk_s\\Documents\\test_mp_deploy\\staging\\webconfig\\000-default.conf"
         },
@@ -27,6 +31,7 @@
             "servername": "web.acme.ca",
             "serveralias": "web",
             "approot": "/srv/web/apps",
+            "appalias": "mealplanner-dev",
             "processname": "myappproc"
         }
     }

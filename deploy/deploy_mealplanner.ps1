@@ -224,9 +224,7 @@ function Set-Apache {
     }
 
     # Make changes to 000-default.conf
-
-    #Exit # TODO: Remove
-     
+    
     # Read template conf xml
     $confXML = Get-Content -Path ./apache_template.xml
 
@@ -297,7 +295,6 @@ function Deploy-Code {
         ZipFilePath (required) - File path to the zipfile
         AppRoot (reuquired) - Parent folder of application
         AppName (required) - Name of application
-        GroupOwner (Required) - Name of group to own files
     #>
     param (
         # ZipFilePath - File path to the zipfile
@@ -308,10 +305,7 @@ function Deploy-Code {
         [string]$AppRoot,
         # AppName - Name of application
         [Parameter(Mandatory=$true)]
-        [string]$AppName,
-        # GroupOwner - Name of group to own files
-        [Parameter(Mandatory=$true)]
-        [string]$GroupOwner
+        [string]$AppName
     )
 
     # Unzip into the applicaton root (appRoot), then rename the repo
@@ -321,7 +315,7 @@ function Deploy-Code {
     
     # Loop through folders in the DestionationPath (AppRoot) and
     # find the most recent folder which will be what was just unzipped
-    $unZipFolder = $null
+    [string]$unZipFolder = $null
     $mostRecent = Get-Date -Year 1970 -Month 1 -Day 1
     Get-ChildItem -Path $AppRoot -Attribute Directory | ForEach-Object `
         -Process {
@@ -341,27 +335,128 @@ function Deploy-Code {
         Exit
     }
 
+    # Clean up - remove temp zip file
+    Write-Host "Cleaning up - deleting $($ZipFilePath)"
+    Remove-Item -Path $ZipFilePath
+}
+
+
+function Deploy-Database {
+    <#
+        .SYNOPSIS
+        Creates new database or updates existing
+        .DESCRIPTION
+        Creates a new Django database or copies over and updates an existing one.
+        .INPUTS
+        AppRoot (reuquired) - Parent folder of application
+        AppName (required) - Name of application
+        DeployMode (required) - Mode of database deployment (CREATE, MIGRATE)
+        PythonPath (required) - File path to virtual Python executable
+        MigrationDBPath - File path to migration database (required with MIGRATE mode) 
+        .OUTPUTS
+        $true if successful, $false otherwise
+    #>
+    param (
+        # AppRoot - Parent folder of application
+        [Parameter(Mandatory=$true)]
+        [string]$AppRoot,
+        # AppName - Name of application
+        [Parameter(Mandatory=$true)]
+        [string]$AppName,
+        # DeployMode - (required) - Mode of database deployment (CREATE, MIGRATE)
+        [Parameter(Mandatory=$true)]
+        [ValidateSet('CREATED','MIGRATE')]
+        [string]$DeployMode,
+        # PythonPath - (required) - File path to virtual Python executable
+        [Parameter(Manadatory=$true)]
+        [string]$PythonPath,
+        # MigrationDBPath - File path to migration database
+        [string]$MigrationDBPath
+    )
+
+    [Boolean]$success = $false
+
+    if (($DeployMode.ToUpper() -eq "MIGRATE") -and ($null -eq $MigrationDBPath)) {
+        Write-Host '`n***ERROR*** Must specify migration database with MIGRATE option'
+        return $success
+    }
+    
+    # Change into the folder /AppName/AppRoot to execute manage.py commands
+    Push-Location -Path (Join-Path -Path $AppRoot -ChildPath $AppName) 
+
+    if ($DeployMode.ToUpper() -eq "CREATE") {
+        $result1 = (Invoke-Expression "$($PythonPath) manage.py makemigrations")        
+        $result2 = (Invoke-Expression "$($PythonPath) manage.py migrate --run-synchdb")
+
+        # TODO: find robust way to verify success of migration
+        # For now - assume success
+        $success = $true
+    } elseif ($DeployMode.ToUpper() -eq "MIGRATE") {
+        # Attempt to copy migration database
+        
+        Copy-Item -Path $MigrationDBPath -Destination (Join-Path -Path $AppRoot -ChildPath $AppName)
+
+        $result1 = (Invoke-Expression "$($PythonPath) manage.py makemigrations")
+        $result2 = (Invoke-Expression "$($PythonPath) manage.py migrate")
+
+        # TODO: find robust way to verify success of migration
+        # For now - assume success
+        $success = $true
+    } else {
+        Write-Host "`n***ERROR*** Invalid Database DeployMode value: $(DeployMode). ABORTING"
+        Exit
+    }
+
+    Pop-Location
+
+    return $success
+}
+
+
+function Set-FolderPermissions {
+    <#
+        .SYNOPSIS
+        Sets folder and file permissions on deployed application
+        .DESCRIPTION
+        For Linux OS only. Sets group ownership of application files.
+        Also sets read/write permissions on database and database's 
+        parent folder.
+        .INPUTS
+        AppRoot (required) - Parent folder of application
+        AppName (required) - Name of application
+        GroupOwner (required) - Name of group to own files 
+    #>
+    param (
+        [Parameter(Mandatory=$true)]
+        [string]$AppRoot,
+        # AppName - Name of application
+        [Parameter(Mandatory=$true)]
+        [string]$AppName,
+        # GroupOwner - Name of group to own files
+        [Parameter(Mandatory=$true)]
+        [string]$GroupOwner
+    )
+    
     # Update group ownership of application
     if ($IsLinux) {
         Write-Host "Updating group ownership of files to $($GroupOwner)..."
 
-        chgrp -R $GroupOwner (Join-Path -Path $AppRoot -ChildPath $AppNAme)
+        chgrp -R $GroupOwner (Join-Path -Path $AppRoot -ChildPath $AppName)
         
         # Give write access to database and parent folder of database
         # to group to allow database to be modified
+        # and media/images to allow uploading of cookbook images
         chmod g+w (Join-Path -Path $AppRoot -ChildPath $AppName)
         if (Test-Path (Join-Path $AppRoot $AppName "*.sqlite3")) {
             chmod g+w (Join-Path $AppRoot $AppName "*.sqlite3")
         } else {
             Write-Host "***WARNING*** No .sqlite3 database file found."
         }
-        
+        # Note: may be better to get location from settings.py(?)
+        chmod g+w (Join-Path $AppRoot $AppName "media" "images")
     }
-
-    # Clean up - remove temp zip file
-    Write-Host "Cleaning up - deleting $($ZipFilePath)"
-    Remove-Item -Path $ZipFilePath
 }
+
 
 function Update-AllowedHosts {
     <#
@@ -413,7 +508,7 @@ function Update-AllowedHosts {
         $success = $true
     }
     catch {
-        Write-Host "***Error*** Unable to update settings.py"
+        Write-Host "***ERROR*** Unable to update settings.py"
         $success = $false
     }
 
@@ -440,8 +535,8 @@ function Get-StaticFiles {
         [string]$fullAppPath  
     )
 
-    # - run python3 manage.py collectstatic a (files may be put in /srv/webapps/appname/srv/webapps/appname/static...)
-    #   copy it to /srv/webapps/appname/home/static/... (see Trello for details)
+    # - run python3 manage.py collectstatic
+    #   files output to /srv/webapps/appname/home/static/... (see Trello for details)
     Write-Host "`nCollect Static Files $($fullAppPath)/manage.py"
     $result = (Invoke-Expression "$($pythonPath) $($fullAppPath)/manage.py collectstatic --clear --noinput")
 
@@ -453,6 +548,8 @@ function Get-StaticFiles {
     } else {
         $success = $false
     }
+
+    # TODO: copy /[approot]/[appname]/static/admin folder to /[approot]/[appname]/home/static
 
     return $success
 }
@@ -495,6 +592,8 @@ function main {
     # Read in configuration file
     $Script:config = Get-Content -Raw $ConfigFile | ConvertFrom-Json
 
+    # ------------------------ Code Deployment ------------------------
+
     # Download and upack zipped source code from repo
     $appZipfile = Split-Path -Path $config.settings.appRepoZipfile -Leaf
     $appZipfilePath = Join-Path -Path (Get-TempFolder) -ChildPath $appZipfile
@@ -504,7 +603,7 @@ function main {
     # Unzip into the applicaton root (appRoot), then rename the repo
     # to actual application name
     
-    Deploy-Code $appZipfilePath $config.settings.appRoot $config.settings.appName $config.settings.groupOwner
+    Deploy-Code $appZipfilePath $config.settings.appRoot $config.settings.appName
 
     # ------------------------ Python Tasks ------------------------
 
@@ -548,6 +647,28 @@ function main {
         Exit
     }
     
+    # ------------------------- Database Tasks -------------------------
+
+    # Create or Migrate database
+
+    if ($config.settings.database.ContainsKey("sourcePath")) {
+        $sourceDatabase = $config.settings.database.sourcePath
+    } else {
+        $sourceDatabase = $null
+    }
+
+    if ((Deploy-Database $config.settings.appRoot $config.settings.appName `
+        $pythonVenvPythonExe `
+        $config.settings.database.mode `
+        $sourceDatabase) -eq $false) {
+            Write-Host "`n***ERROR*** Database Deployment failed. ABORTING"
+            Exit
+    }
+        
+    # Set folder/file permissions, as needed)
+
+    Set-FolderPermissions $config.settings.appRoot $config.settings.appName $config.settings.groupOwner
+
     # ------------------------- Web Server Tasks -------------------------
 
     # Check OS 
@@ -562,12 +683,11 @@ function main {
     }
 
     # Other things that need to be added to script
-    # - use manage.py to create empty sqlite database?
-    # - revisit collect static and how it handles admin files (see Trello for details)
-    # - update folder <app_name>/media/images so group can write to it 
-    # - may need to update settings.py so that URL variables factor in application name or update WSGI Alias (See Trello)
+    # - use manage.py to create empty sqlite database? AND/OR in config provide option to copy over
+    #   existing db from another folder (then would have to manage.py makemigrations/migrate to update)
     # - *may* have to update names of images in media/images to match what application _thinks_ they are, otherwise
     #   there will be broken images
+    # - run manage.py user_manger --config user_permission.json to create security groups (if required?)
     
     Write-Host "`nBe sure to add `n$($config.settings.wsgiSettings.serverAlias) `nto your local hosts file for IP address of this machine"
     Write-Host "---Done---"
