@@ -131,7 +131,7 @@ if 'linux' in sys.platform:
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # User LOGIN URL
-#LOGIN_URL = reverse_lazy('login') --> to delete?
+LOGIN_URL = reverse_lazy('login')
 LOGOUT_URL = reverse_lazy('logout')
 LOGOUT_REDIRECT_URL = reverse_lazy('home')
 #LOGIN_REDIRECT_URL = reverse_lazy('home') --> to delete?
