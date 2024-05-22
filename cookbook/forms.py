@@ -13,6 +13,7 @@ class CookbookForm(forms.ModelForm):
             for field in self.fields:
                 self.fields[field].disabled = True
 
+
 class AuthorForm(forms.ModelForm):
     class Meta:
         model = Author

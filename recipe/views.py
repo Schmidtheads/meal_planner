@@ -50,7 +50,7 @@ def new(request):
     View used to create a new Recipe
     '''
     if request.method == "POST":
-        form = RecipeForm(request.POST, request.FILES)
+        form = RecipeForm(data=request.POST, files=request.FILES, readonly_form=False)
         if form.is_valid():
             form.save()
             return redirect("recipes")
@@ -61,7 +61,7 @@ def new(request):
         {
             "title": "New Recipe",
             "recipe_id": 0,
-            "recipe_rating": 0,
+            "recipe_rating": "-",
             "year": datetime.now().year,
             "company": "Schmidtheads Inc.",
             "form": form,

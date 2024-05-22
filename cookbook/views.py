@@ -43,18 +43,28 @@ def detail(request, id):
 @permission_required('cookbook.add_cookbook')
 def new(request):
     if request.method == "POST":
-        form = CookbookForm(request.POST, request.FILES)
+        form = CookbookForm(data=request.POST, files=request.FILES, readonly_form=False)
         if form.is_valid():
             form.save()
             return redirect("cookbooks")
+        
+        return render(request, 'cookbook/detail.html', 
+            {
+                "title": "New Cookbook",
+                "year": datetime.now().year,
+                "company": "Schmidtheads Inc.",
+                "form": form
+            }) 
     else:
         form = CookbookForm()
 
     return render(request, "cookbook/detail.html", 
-                 {"title": "New Cookbook",
-                  "year": datetime.now().year,
-                  "company": "Schmidtheads Inc.",
-                  "form": form})
+        {
+            "title": "New Cookbook",
+            "year": datetime.now().year,
+            "company": "Schmidtheads Inc.",
+            "form": form
+        })
 
 
 def cookbooks(request):

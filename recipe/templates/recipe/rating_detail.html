@@ -12,14 +12,20 @@
                 <legend>Recipe Rating for {{ recipe_name }}</legend>
                 <table class="inputTable">
                     <tr><th></th>
-                        <td>{{ form.recipe.as_hidden }}</td>
+                        <td>
+                            {{ form.recipe.as_hidden }}
+                        </td>
                     </tr>
                     <tr class="inputRow"><th><label for="id_rating">Rating:</label></th>
-                        <td> {{ form.rating }}</td>
+                        <td>
+                            {{ form.rating }}
+                        </td>
                     </tr>
                     <tr>
                         <th></th>
-                        <td> {{ form.errors.rating }}</td>
+                        <td>
+                            {{ form.errors.rating }}
+                        </td>
                     </tr>
                     <tr class="inputRow"><th>
                         {% if not form.diner.is_hidden %}
