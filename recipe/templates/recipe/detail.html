@@ -12,13 +12,22 @@
                 <legend>Recipe</legend>
                 <table class="inputTable">
                     <tr class="inputRow"><th><label for="id_name">Name:</label></th>
-                        <td>{{ form.name }}</td>
+                        <td>
+                            {{ form.name }}
+                            {{ form.name.errors }}
+                        </td>
                     </tr>
                     <tr class="inputRow"><th><label for="id_cook_book">Cookbook:</label></th>
-                        <td> {{ form.cook_book }}</td>
+                        <td>
+                            {{ form.cook_book }}
+                            {{ form.cook_book.errors }}
+                        </td>
                     </tr>
                     <tr class="inputRow"><th><label for="id_page_number">Page Number:</label></th>
-                        <td>{{ form.page_number }}</td>
+                        <td>
+                            {{ form.page_number }}
+                            {{ form.page_number.errors }}
+                        </td>
                     </tr>
                     <tr class="inputRow"><th><label for="id_notes">Notes:</label></th>
                         <td>{{ form.notes }}</td>
@@ -27,6 +36,7 @@
                         <td>
                             <div id="id_recipe_type_list">
                                 {{ form.recipe_types }}
+                                {{ from.recipe_types.errors }}
                             </div>
                         </td>
                         <td class="padded_table_cell">
