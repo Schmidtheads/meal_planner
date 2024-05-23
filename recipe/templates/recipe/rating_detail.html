@@ -12,16 +12,26 @@
                 <legend>Recipe Rating for {{ recipe_name }}</legend>
                 <table class="inputTable">
                     <tr><th></th>
-                        <td>{{ form.recipe.as_hidden }}</td>
+                        <td>
+                            {{ form.recipe.as_hidden }}
+                        </td>
                     </tr>
                     <tr class="inputRow"><th><label for="id_rating">Rating:</label></th>
-                        <td> {{ form.rating }}</td>
+                        <td>
+                            {{ form.rating }}
+                        </td>
                     </tr>
                     <tr>
                         <th></th>
-                        <td> {{ form.errors.rating }}</td>
+                        <td>
+                            {{ form.errors.rating }}
+                        </td>
                     </tr>
-                    <tr class="inputRow"><th><label for="id_diner">Diner:</label></th>
+                    <tr class="inputRow"><th>
+                        {% if not form.diner.is_hidden %}
+                        <label for="id_diner">Diner:</label>
+                        {% endif %}
+                    </th>
                         <td> {{ form.diner }}</td>
                     </tr>
                     <tr>
@@ -29,15 +39,22 @@
                         <td> {{ form.errors.diner }}</td>
                     </tr>
                 </table>
+                {% if perms.recipe.add_reciperating %}
                 <p class="buttonContainer">
                     {% csrf_token %}
                     <button class="btn btn-default" type="submit">{{button_label}}</button>
                 </p>
+                {% endif %}
             </fieldset>
         </form>
     </div>
 </div>
-<p><a class="btn btn-default" href="{% url 'recipes' %}">Back to Recipe list &raquo;</a></p>
+<p>{% if redirect_page == 'recipe_rating_list' %}
+   <a class="btn btn-default" href="{% url redirect_page recipe_id %}">
+   {% else %}
+   <a class="btn btn-default" href="{% url redirect_page %}">
+   {% endif %}
+    {{ button_exit_label }} &raquo;</a></p>
 {% endblock %}
 {% block scripts %}
 <script src="{% static 'home/scripts/popup.js' %}"></script>

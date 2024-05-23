@@ -1,13 +1,19 @@
 '''
-Name: views.py
-Description: Django views for Recipe object
-Author: M. Schmidt
+Name:           views.py
+Description:    Web Request Handler for Meal object
+Date:           
+Author:         M. Schmidt
 '''
 
 import calendar
 from datetime import datetime, date
+from django.contrib.auth.decorators import login_required, permission_required
 from django.http import HttpResponse, FileResponse
 from django.shortcuts import render, get_object_or_404, redirect
+from django.http import JsonResponse
+import io
+
+from .calendar_report import MonthlyMealPlan
 from django.http import JsonResponse
 import io
 
@@ -15,8 +21,11 @@ from .calendar_report import MonthlyMealPlan
 from recipe.search import Search
 from .models import Meal
 from .forms import MealForm, PrintForm
+from .models import Meal
+from .forms import MealForm, PrintForm
 
 
+@permission_required('meal.change_meal')
 def detail(request, id):
     '''
     This view is used to view/update meal details for a date that already has a meal assigned.
@@ -43,14 +52,19 @@ def detail(request, id):
                    "year": datetime.now().year,
                    "company": "Schmidtheads Inc.",
                    "form": form})
+                  {"title": "Meal Planner",
+                   "year": datetime.now().year,
+                   "company": "Schmidtheads Inc.",
+                   "form": form})
 
 
+@permission_required('meal.add_meal')
 def new(request):
     '''
     This view is used to assign a meal to a day which does not currently have one.
     The date is passed in as a URL query string with the syntax: ?date=YYYY-MM-DD
     '''
-
+   
     if request.method == "POST":
         form = MealForm(request.POST)
         if form.is_valid():
@@ -66,25 +80,33 @@ def new(request):
         # Retrieve scheduled_date from query string value (must be YYYY-MM-DD format e.g. 2020-12-23)
         # should default be current date?
         scheduled_date = request.GET.get('date', None)
+        # should default be current date?
+        scheduled_date = request.GET.get('date', None)
         if not scheduled_date is None:
             # Check if date is valid
             try:
                 date_obj = datetime.strptime(
                     scheduled_date, "%Y-%m-%d")
+                date_obj = datetime.strptime(
+                    scheduled_date, "%Y-%m-%d")
                 try:
+                    _ = Meal.objects.get(scheduled_date=date_obj)
                     _ = Meal.objects.get(scheduled_date=date_obj)
 
                     # if meal exists - need to redirect to details page (for update)
                 except Meal.DoesNotExist:
                     print(f'Meal not found for {scheduled_date}!')
+                    print(f'Meal not found for {scheduled_date}!')
             except:
                 # Invalid date, do not pre-populate the date on the form
+                date_obj = None
                 date_obj = None
         else:
             date_obj = None
 
         # Create form for new entry
         if date_obj is None:
+            form = MealForm()  # create form without pre-populated date
             form = MealForm()  # create form without pre-populated date
         else:
             form = MealForm(initial={'scheduled_date': date_obj})
@@ -94,6 +116,10 @@ def new(request):
             scheduled_date_widget.attrs.update({'class': 'form-control'})
 
     return render(request, "meal/detail.html",
+                  {"title": "Meal Planner",
+                   "year": datetime.now().year,
+                   "company": "Schmidtheads Inc.",
+                   "form": form})
                   {"title": "Meal Planner",
                    "year": datetime.now().year,
                    "company": "Schmidtheads Inc.",
@@ -110,8 +136,8 @@ def meals(request):
     return render(request, 'meal/meals.html',
                   {'title': 'Meal Planner',
                    'year': datetime.now().year,
+                   'year': datetime.now().year,
                    'company': 'Schmidtheads Inc.'})
-
 
 
 def PrintCreatePopup(request):
@@ -141,7 +167,7 @@ def PrintCreatePopup(request):
         mmp = MonthlyMealPlan(meal_yr_mnth, meals, print_weeks, print_only_meals)
         mmp.output_filepath = f'MealPlan-{meal_yr}-{meal_mt:02}.pdf'
         mmp.output_type = 'S'
-        pdf_bytestring = io.BytesIO(mmp.print_page())
+        pdf_bytestring = io.BytesIO(mmp.print_page())  # type: ignore
    
         return FileResponse(pdf_bytestring, 
             content_type='application/pdf', 
@@ -170,6 +196,8 @@ def get_meals_for_month(request):
 
     meal_year = int(request.GET.get('year', datetime.now().year))
     meal_month = int(request.GET.get('month', datetime.now().month))
+    meal_year = int(request.GET.get('year', datetime.now().year))
+    meal_month = int(request.GET.get('month', datetime.now().month))
 
     meals_json = _get_meals_for_month(meal_year, meal_month)
 
@@ -187,8 +215,10 @@ def search_for_recipes(request):
     @param request: json representing the query; list of search tags
     '''
 
+
     search_keys = str(request.GET.get('keys'))
     results = _search_for_recipes(search_keys)
+
 
     data = {
         'recipes': results
@@ -197,6 +227,7 @@ def search_for_recipes(request):
     return JsonResponse(data)
 
 
+def _get_meals_for_month(year: int, month: int):
 def _get_meals_for_month(year: int, month: int):
     '''
     Helper function that gathers meal information for a month from database
@@ -217,11 +248,15 @@ def _get_meals_for_month(year: int, month: int):
         check_date = f'{year}-{month:02}-{day:02}'
         meal = meals_for_month.filter(
             scheduled_date=date(year, month, day)).first()
+        check_date = f'{year}-{month:02}-{day:02}'
+        meal = meals_for_month.filter(
+            scheduled_date=date(year, month, day)).first()
 
         meal_info = {'scheduled_date': check_date}
         meal_info.update(_get_recipe_info_for_meal(meal))
 
         meals_info.append(meal_info)
+
 
     return meals_info
 
@@ -238,11 +273,16 @@ def _get_recipe_info_for_meal(meal):
         meal_id = meal.id
         recipe = getattr(meal, 'recipe')
         # Get the recipe information
+        recipe_id = getattr(recipe, 'id')
         name = getattr(recipe, 'name')
         page = getattr(recipe, 'page_number')
         cookbook = getattr(recipe, 'cook_book')
 
         # Get cookbook name and author
+        if cookbook is not None:
+            cookbook_title = getattr(cookbook, 'title')
+            cookbook_author = str(getattr(cookbook, 'author'))
+            cookbook_id = cookbook.id
         if cookbook is not None:
             cookbook_title = getattr(cookbook, 'title')
             cookbook_author = str(getattr(cookbook, 'author'))
@@ -264,6 +304,7 @@ def _get_recipe_info_for_meal(meal):
         recipe_info = {
             'meal_id': meal_id,
             'recipe_name': name,
+            'recipe_id': recipe_id,
             'page': page,
             'cookbook_id': cookbook_id,
             'cookbook': cookbook_title,
@@ -276,7 +317,7 @@ def _get_recipe_info_for_meal(meal):
     return recipe_info
 
 
-def _search_for_recipes(search_keys):
+def _search_for_recipes(search_keys: str) -> list:
 
     # Call serach object
     # TEST SEARCH
@@ -284,27 +325,28 @@ def _search_for_recipes(search_keys):
     recipe_result = srch.find()
 
     result_list = []
-    for recipe in recipe_result:
+    if not recipe_result is None:
+        for recipe in recipe_result:  # type: ignore
 
-        # get last time recipe was made
-        last_made_date = _date_recipe_last_made(recipe)
-        times_made = _number_of_times_recipe_made(recipe)
+            # get last time recipe was made
+            last_made_date = _date_recipe_last_made(recipe)
+            times_made = _number_of_times_recipe_made(recipe)
 
-        cb = recipe.cook_book
-        cb_title = '' if cb is None else cb.title
-        author = None if cb is None else cb.author
-        author_fn = '' if author is None else author.first_name
-        author_ln = '' if author is None else author.last_name
-        candidate = {
-            'id': recipe.id,
-            'name': recipe.name,
-            'cookbook': cb_title,
-            'author': f'{author_fn} {author_ln}',
-            'last made': last_made_date,
-            'rating': recipe.rating(),
-            'times made': times_made
-        }
-        result_list.append(candidate)
+            cb = recipe.cook_book
+            cb_title = '' if cb is None else cb.title
+            author = None if cb is None else cb.author
+            author_fn = '' if author is None else author.first_name
+            author_ln = '' if author is None else author.last_name
+            candidate = {
+                'id': recipe.id,  # type: ignore
+                'name': recipe.name,
+                'cookbook': cb_title,
+                'author': f'{author_fn} {author_ln}',
+                'last made': last_made_date,
+                'rating': recipe.rating_as_string,
+                'times made': times_made
+            }
+            result_list.append(candidate)
 
     return result_list
 
@@ -320,7 +362,7 @@ def _date_recipe_last_made(recipe):
     recent_meal = meals_w_recipe.first()
 
     if recent_meal is not None:
-        date_last_made = recent_meal.scheduled_date.strftime('%d-%b-%Y')
+        date_last_made = recent_meal.scheduled_date.strftime('%d-%b-%Y') if recent_meal.was_made else 'Never made'
     else:
         date_last_made = 'Never made'
 

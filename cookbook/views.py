@@ -1,47 +1,70 @@
+'''
+Name:           views.py
+Description:    Web Request Handler for Cookbook object
+Date:           
+Author:         M. Schmidt
+'''
+
+from django.contrib.auth.decorators import login_required, permission_required
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
-from django.forms import modelform_factory
 from datetime import datetime
 
 from .models import Cookbook, Author
-from .forms import AuthorForm
+from .forms import AuthorForm, CookbookForm
 
-CookbookForm = modelform_factory(Cookbook, exclude=[])
 
 def detail(request, id):
     cookbook = get_object_or_404(Cookbook, pk=id)
 
-    if request.method == "POST":
-        form = CookbookForm(request.POST, request.FILES, instance=cookbook)
+    current_user = request.user
+    if request.method == "POST":  # may need to check user permissions
+        form = CookbookForm(data=request.POST, files=request.FILES, instance=cookbook)
         if form.is_valid():
             form.save()
             return redirect("cookbooks")
     else:
-        form = CookbookForm(instance=cookbook)
+        if current_user.has_perm('cookbook.change_cookbook'):
+            form = CookbookForm(instance=cookbook)
+        else:
+            form = CookbookForm(instance=cookbook, readonly_form=True)
 
     return render(request, "cookbook/detail.html",
-                 {"title": "Cookbook",
-                  "year": datetime.now().year,
-                  "company": "Schmidtheads Inc.",
-                  "form": form,
-                  "cookbook": cookbook})
+        {
+            "title": "Cookbook",
+            "year": datetime.now().year,
+            "company": "Schmidtheads Inc.",
+            "form": form,
+            "cookbook": cookbook
+        })
 
 
+@permission_required('cookbook.add_cookbook')
 def new(request):
     if request.method == "POST":
-        form = CookbookForm(request.POST, request.FILES)
+        form = CookbookForm(data=request.POST, files=request.FILES, readonly_form=False)
         if form.is_valid():
             form.save()
             return redirect("cookbooks")
+        
+        return render(request, 'cookbook/detail.html', 
+            {
+                "title": "New Cookbook",
+                "year": datetime.now().year,
+                "company": "Schmidtheads Inc.",
+                "form": form
+            }) 
     else:
         form = CookbookForm()
 
     return render(request, "cookbook/detail.html", 
-                 {"title": "New Cookbook",
-                  "year": datetime.now().year,
-                  "company": "Schmidtheads Inc.",
-                  "form": form})
+        {
+            "title": "New Cookbook",
+            "year": datetime.now().year,
+            "company": "Schmidtheads Inc.",
+            "form": form
+        })
 
 
 def cookbooks(request):

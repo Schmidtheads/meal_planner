@@ -39,6 +39,7 @@ import datetime
 
 from django.db.models import Q
 
+
 from .models import Recipe
 
 KEYWORD_TOKENS = [
@@ -59,8 +60,11 @@ class Search:
     '''
     Class that manages searching for recipes
     '''
+    '''
+    Class that manages searching for recipes
+    '''
 
-    def __init__(self, search_string):
+    def __init__(self, search_string: str):
 
         # Tokens: elements used for searching, separated by spaces in search_string
         # Keyword tokens: special tokens used to focus search on specific properties
@@ -77,10 +81,16 @@ class Search:
         '''
         Return list of search tokens
         '''
+        '''
+        Return list of search tokens
+        '''
         return [t.upper() for t in self._tokens]
 
     @property
     def free_tokens(self):
+        '''
+        Return list of free search tokens
+        '''
         '''
         Return list of free search tokens
         '''
@@ -128,8 +138,12 @@ class Search:
         '''
         Return list of time filtering keywords
         '''
+        '''
+        Return list of time filtering keywords
+        '''
 
         return self._time_keywords[keyword]
+
 
 
     def find(self):
@@ -155,7 +169,7 @@ class Search:
             # if token is a keyword, then extract the search values
             if token in self.keywords:
                 search_values = self.keyword_search_values(token)
-                keyword_searches[token] = search_values
+                keyword_searches[token] = search_values  # type: ignore
 
             # Else if token is a free token, add it to all keyword searches
             else:
@@ -167,6 +181,7 @@ class Search:
         # Build queries and search for matches, based on
         # contents of keyword_searches dictionary
 
+        #TODO: Would it be better to initialize as an empty Django result set?
         #TODO: Would it be better to initialize as an empty Django result set?
         recipe_result = None
 
@@ -184,6 +199,9 @@ class Search:
                 elif keyword == "RECIPE:":
                     recipe_qs = Recipe.objects.filter(
                         name__icontains=value)
+                else:
+                    # create empty query set by default
+                    recipe_qs = Recipe.objects.none
                 # [end] if keyword
 
                 # Combine individual recipe type querysets into one big queryset
@@ -191,8 +209,7 @@ class Search:
                     recipe_result = recipe_qs
                 else:
                     recipe_result = recipe_result.union(recipe_qs)
-                    #recipe_result = recipe_result | recipe_qs
-                    # recipe_result = recipe_result.distinct()  # remove duplicates
+                # [end] if recipe_result
             # [end] for value
         # [end] for keyword            
 
@@ -204,6 +221,7 @@ class Search:
 
         # Get recipe related information
         return recipe_result
+
 
 
     def _parse_keywords(self, tokens):
@@ -248,25 +266,6 @@ class Search:
 
         return tokens_not_processed
 
-
-    def _parse_time_keywords(self, tokens):
-        '''
-        *** DEPRECATED ***
-        Parse the time keywords in the search text to extract dates
-
-        @param tokens: list of tokens to parse for time searching
-        @return: list of tokens not used for time searching
-        '''
-
-        for k in self.time_keywords:
-            # check if datetime is valid
-            date = self._parse_date(self.time_filter_date(k))
-
-            # if date invalid, remove time keyword
-            if date is None:
-                del self._time_keywords[k]
-            else:
-                self._time_keywords[k] = date
 
     def _parse_date(self, date_string):
         for fmt in ('%Y-%m-%d', '%d.%m.%Y', '%d/%m/%Y', '%d-%b-%Y'):

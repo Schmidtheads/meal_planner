@@ -13,16 +13,28 @@
                     <legend>Meal</legend>
                     <table class="inputTable">
                         <tr class="inputRow"><th><label for="id_scheduled_date">Date:</label></th>
-                            <td class="left_padded_table_cell">{{ form.scheduled_date }}</td>
+                            <td class="left_padded_table_cell">
+                                {{ form.scheduled_date }}
+                                {{ form.scheduled_date.errors }}
+                            </td>
                         </tr>
                         <tr class="inputRow"><th><label for="id_was_made">Was Made:</label></th>
-                            <td class="left_padded_table_cell">{{ form.was_made }}</td>
+                            <td class="left_padded_table_cell">
+                                {{ form.was_made }}
+                                {{ form.was_made.errors }}
+                            </td>
                         </tr>
                         <tr class="inputRow"><th><label for="id_recipe">Recipe:</label></th>
-                            <td id="id_recipe_input" class="left_padded_table_cell">{{ form.recipe }}{{ form.recipe.errors }}</td>
+                            <td id="id_recipe_input" class="left_padded_table_cell">
+                                {{ form.recipe }}
+                                {{ form.recipe.errors }}
+                            </td>
                         </tr>
                         <tr class="inputRow"><th><label for="id_note">Notes:</label></th>
-                            <td id="id_notes_input" class="left_padded_table_cell">{{ form.notes }}</td>
+                            <td id="id_notes_input" class="left_padded_table_cell">
+                                {{ form.notes }}
+                                {{ form.notes.errors }}
+                            </td>
                         </tr>
                     </table>
                     <p class="buttonContainer">

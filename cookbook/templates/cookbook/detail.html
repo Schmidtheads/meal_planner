@@ -17,40 +17,71 @@
                 <legend>Cookbook</legend>
                 <table class="inputTable">
                     <tr class="inputRow"><th><label for="id_title">Title:</label></th>
-                        <td>{{ form.title }}</td>
+                        <td>
+                            {{ form.title }}
+                            {{ form.title.errors }}
+                        </td>
                     </tr>
                     <tr class="inputRow"><th><label for="id_description">Description:</label></th>
-                        <td>{{ form.description }}</td>
+                        <td>
+                            {{ form.description }}
+                            {{ form.description.errors }}
+                        </td>
                     </tr>
                     <tr class="inputRow"><th><label for="id_author">Author:</label></th>
                         <td>
                             <div>
                                 {{ form.author }}
+                                {% comment %}
+                                Hide creation and changing of author, if user
+                                does not have permission to do so.
+                                {% endcomment %}
+                                {% if perms.cookbook.add_author %}
                                 <a href="{% url 'author_create' %}" id="add_author" style="cursor: pointer; cursor: hand;"
                                     onclick="return showAddPopup(this);">
-                                    <img src="{% static 'home/images/plus24.png' %}"></a>
+                                    <img src="{% static 'home/images/plus24.png' %}">
+                                </a>
+                                {% endif %}
+                                {% if perms.cookbook.change_author %}
                                 <a id="edit_author" style="cursor: pointer; cursor: hand;">
-                                    <img src="{% static 'home/images/edit24.png' %}"></a>
+                                    <img src="{% static 'home/images/edit24.png' %}">
+                                </a>
+                                {% endif %}
+                                {{ form.author.errors }}
                             </div>
                         </td>
                     </tr>
                     <tr class="inputRow"><th><label for="id_publish_date">Publish Date:</label></th>
-                        <td>{{ form.publish_date }}</td>
+                        <td>
+                            {{ form.publish_date }}
+                            {{ form.publish_date.errors }}
+                        </td>
                     </tr>
                     <tr class="inputRow"><th><label for="id_edition">Edition:</label></th>
-                        <td>{{ form.edition }}</td>
+                        <td>
+                            {{ form.edition }}
+                            {{ form.edition.errors }}
+                        </td>
                     </tr>
                     <tr class="inputRow"><th><label for="id_url">URL:</label></th>
-                        <td>{{ form.url }}</td>
+                        <td>
+                            {{ form.url }}
+                            {{ form.url.errors }}
+                        </td>
                     </tr>
                     <tr class="inputRow"><th><label for="id_image">Image:</label></th>
-                        <td>{{ form.image }}</td>
+                        <td>
+                            {{ form.image }}
+                            {{ form.image.errors }}
+                        </td>
                     </tr>
                 </table>
+                {% if perms.cookbook.change_cookbook %}
                 <p class="buttonContainer">
                     {% csrf_token %}
                     <button class="btn btn-default" type="submit">Update</button>
                 </p>
+                {% endif %}
             </fieldset>
         </form>
     </div>

@@ -38,11 +38,13 @@ function next() {
     get_meals_for_month(currentMonth, currentYear);
 }
 
+
 function jumpToToday() {
     currentYear = today.getFullYear();
     currentMonth = today.getMonth();
     get_meals_for_month(currentMonth, currentYear);
 }
+
 
 function previous() {
     currentYear = (currentMonth === 0) ? currentYear - 1 : currentYear;
@@ -50,12 +52,14 @@ function previous() {
     get_meals_for_month(currentMonth, currentYear);
 }
 
+
 function jump() {
     currentYear = parseInt(selectYear.value);
     currentMonth = parseInt(selectMonth.value);
     get_meals_for_month(currentMonth, currentYear);
 
 }
+
 
 /**
  * Creates HTML for a calendar month, given the month, year and meals
@@ -116,6 +120,7 @@ function showCalendar(month, year, meals) {
 
 }
 
+
 /**
  * Creates the html for a calendar day, populating with Meal information
  * if there is any.
@@ -128,6 +133,7 @@ function showCalendar(month, year, meals) {
 function createDayElement(date, meal, month, year) {
     // Get the recipe for the current day (meals indexed from zero, so need to subtract 1 from day)
     let recipe_name = meal.recipe_name;
+    let recipe_id = meal.recipe_id;
     let cookbook_abbr = meal.abbr;
     let page_number = meal.page;
     let meal_id = meal.meal_id;
@@ -155,7 +161,7 @@ function createDayElement(date, meal, month, year) {
         let dayText = document.createTextNode(date);
         dayMealLink.append(dayText);
         dayMealLink.title = 'Edit meal for ' + date + ' of month';
-        dayMealLink.href = '/meal/' + meal_id;
+        dayMealLink.href = meal_id;
         daySpan.appendChild(dayMealLink);
 
         // Create span to hold recipe name so we can control font size
@@ -165,8 +171,8 @@ function createDayElement(date, meal, month, year) {
         let recipeMealLink = document.createElement('a');
         let recipeText = document.createTextNode(recipe_name);
         recipeMealLink.append(recipeText);
-        recipeMealLink.title = 'Edit meal for ' + date + ' of month';
-        recipeMealLink.href = '/meal/' + meal_id;
+        recipeMealLink.title = 'Recipe details';
+        recipeMealLink.href = '../recipe/' + recipe_id;
         recipeSpan.appendChild(recipeMealLink);
 
         // Create div to hold cookbook abbreviation and page number
@@ -183,7 +189,7 @@ function createDayElement(date, meal, month, year) {
         let cookbookTitleLink = document.createElement('a');
         let cookbookTooltipText1 = document.createTextNode(cookbook_title);
         cookbookTitleLink.title = 'Cookbook details';
-        cookbookTitleLink.href = '/cookbook/' + cookbook_id;
+        cookbookTitleLink.href = '../cookbook/' + cookbook_id;
         cookbookTitleLink.append(cookbookTooltipText1);
 
         let tooltipBreak = document.createElement('br');
@@ -221,22 +227,10 @@ function createDayElement(date, meal, month, year) {
         let dayText = document.createTextNode(date);
         dayMealLink.append(dayText);
         dayMealLink.title = 'Set meal for ' + date  + ' of month';
-        dayMealLink.href = '/meal/new?date=' + year + '-' + (month+1) + '-' + date;
+        dayMealLink.href = 'new?date=' + year + '-' + (month+1) + '-' + date;
         daySpan.appendChild(dayMealLink);
     }
-    else {
-        // For days with no recipe, the clicking on the date will link to a 
-        // new meal form.
-
-        // Create a link from the date to the new meal page
-        let dayMealLink = document.createElement('a');
-        let dayText = document.createTextNode(date);
-        dayMealLink.append(dayText);
-        dayMealLink.title = 'Set meal for ' + date  + ' of month';
-        dayMealLink.href = '/meal/new?date=' + year + '-' + (month+1) + '-' + date;
-        daySpan.appendChild(dayMealLink);
-    }
-
+    
     return dayDiv;
 }
 
@@ -251,7 +245,7 @@ function get_meals_for_month(month, year) {
     // When submitting the month, add one because for some
     // stupid reason, JavaScript has January = 0,.. December = 11
     $.ajax({
-        url: '/meal/meals_by_month',
+        url: 'meals_by_month',
         data: {
             'year': year,
             'month': month + 1
@@ -293,6 +287,7 @@ function fetch_calendar() {
     get_meals_for_month(currentMonth, currentYear);
 }
 
+
 function setCookie(cname, cvalue, exhours) {
     /*
      * Helper function to set a cookie
@@ -307,6 +302,7 @@ function setCookie(cname, cvalue, exhours) {
     var expires = "expires=" + d.toUTCString();
     document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
 }
+
 
 function getCookie(cname) {
     var name = cname + "=";

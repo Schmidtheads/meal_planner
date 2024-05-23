@@ -4,7 +4,7 @@ import os
 
 parent_path = os.path.abspath("..") + "\\meal_planner"
 sys.path.append(parent_path)
-print(sys.path)
+
 from cookbook.models import Author, Cookbook
 from recipe.models import Diner, Recipe, RecipeRating, RecipeType
 from meal.models import Meal

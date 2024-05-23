@@ -10,8 +10,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
+from django.urls import reverse_lazy
 import os
 import posixpath
+import sys
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -58,7 +60,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'meal_planner.urls'
 
 # Template configuration
-# https://docs.djangoproject.com/en/2.1/topics/templates/
+# https://docs.djangoproject.com/en/4.2/topics/templates/
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -119,6 +121,17 @@ MEDIA_ROOT = posixpath.join(*(BASE_DIR.split(os.path.sep) + ['media']))
 STATIC_URL = '/static/'
 STATIC_ROOT = posixpath.join(*(BASE_DIR.split(os.path.sep) + ['static']))
 
+# For Linux, add leading /
+if 'linux' in sys.platform:
+    MEDIA_ROOT = os.path.sep + MEDIA_ROOT
+    STATIC_ROOT = os.path.sep + STATIC_ROOT
+
 # Use the most recent ID field type BigAutoField (as of Django 3.2
 # ) (instead of Integer)
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# User LOGIN URL
+LOGIN_URL = reverse_lazy('login')
+LOGOUT_URL = reverse_lazy('logout')
+LOGOUT_REDIRECT_URL = reverse_lazy('home')
+#LOGIN_REDIRECT_URL = reverse_lazy('home') --> to delete?

@@ -85,12 +85,13 @@ class MonthlyMealPlan(FPDF):
         self.out_type = value
 
 
-    def calendar_days(self, month=None) -> list:
+    def calendar_days(self, month=None, year=None) -> list:
         '''
         Returns array of meal plan calendar days
         '''
         month = self.month if month is None else month
-        calendar_days = calendar.monthcalendar(self.year, month)
+        year = self.year if year is None else year
+        calendar_days = calendar.monthcalendar(year, month)
         return calendar_days
 
 
@@ -103,16 +104,18 @@ class MonthlyMealPlan(FPDF):
         grid_days = self.calendar_days()
         for idx, w in enumerate(grid_days):
             grid_days[idx] = [f'{self.month}:{d}' if d != 0 else d for d in w]
-        previous_month = self.calendar_days(self.month -1)
-        next_month = self.calendar_days(self.month +1)
+        p_month_no, p_month_yr = self._get_previous_month(self.month)
+        previous_month = self.calendar_days(p_month_no, p_month_yr)
+        n_month_no, n_month_yr = self._get_next_month(self.month)
+        next_month = self.calendar_days(n_month_no, n_month_yr)
 
         for d in range(7):
             if grid_days[0][d] == 0:
-                grid_days[0][d] = f'{self.month -1}:{previous_month[-1][d]}'
+                grid_days[0][d] = f'{p_month_no}:{previous_month[-1][d]}'
 
         for d in range(7):
             if grid_days[-1][d] == 0:
-                grid_days[-1][d] = f'{self.month +1}:{next_month[0][d]}'
+                grid_days[-1][d] = f'{n_month_no}:{next_month[0][d]}'
 
         return grid_days
 
@@ -385,3 +388,36 @@ class MonthlyMealPlan(FPDF):
             border = c_border,
             ln=ln
         )
+
+    def _get_next_month(self, month: int) -> tuple:
+        '''
+        Determines next month from specified month and year it occurs
+        
+        @param month: integer from 1-12 for month
+        @returns: tuple next month as an integer 1 - 12 and year 
+        '''
+
+        next_month_int = month + 1
+        next_month_yr = self.year
+        if next_month_int == 13:
+            next_month_int = 1
+            next_month_yr = self.year + 1
+
+        return (next_month_int, next_month_yr)
+    
+    
+    def _get_previous_month(self, month: int) -> tuple:
+        '''
+        Determines previous month from specified month and year it occurs
+        
+        @param month: integer from 1-12 for month
+        @returns: tuple next month as an integer 1 - 12 and year 
+        '''
+
+        prev_month_int = month - 1
+        prev_month_yr = self.year
+        if prev_month_int == 0:
+            prev_month_int = 12
+            prev_month_yr = self.year - 1
+
+        return (prev_month_int, prev_month_yr)
