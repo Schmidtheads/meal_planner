@@ -127,7 +127,7 @@ function Get-PythonExe {
             $pythonPath = $userPythonPath
         }
         else {
-            Write-Host "***ERR*** Invalid path to Python executable. ABORTING."
+            Write-Host "***ERROR*** Invalid path to Python executable. ABORTING."
             Exit
         }
     }
@@ -207,7 +207,7 @@ function Set-Apache {
 
     # Check if config file exists
     if ((Test-Path -Path $apacheConfFile) -eq $false) {
-        Write-Host "***ERR*** Invalid path for Apache conf file ($($apacheConfFile)). ABORTING."
+        Write-Host "***ERROR*** Invalid path for Apache conf file ($($apacheConfFile)). ABORTING."
         Exit
     }
 
@@ -216,7 +216,7 @@ function Set-Apache {
 
     # If backup failed, abort
     if (($backupFile) -eq "") {
-        Write-Host "***WRN*** Backup of conf file failed. ABORTING."
+        Write-Host "***ERROR*** Backup of conf file failed. ABORTING."
         Exit
     }
     else {
@@ -248,9 +248,11 @@ function Set-Apache {
         $outputXML += $line
     }
     Out-File -InputObject $outputXML -Append -FilePath "$($apacheConfFile)"
-    # Locate any existing WSGI settings
-    # ScriptAlias; Alias [media, static]
-    # DaemonProcess; ProcessGroup
+
+    # Re-start Apache Server (assume service in /etc/init.d/apache2)
+    Write-Host "Attempting to restart Apache Server..."
+    Invoke-Expression "/etc/init.d/apache2 restart"
+
 }
 
 
@@ -365,10 +367,10 @@ function Deploy-Database {
         [string]$AppName,
         # DeployMode - (required) - Mode of database deployment (CREATE, MIGRATE)
         [Parameter(Mandatory=$true)]
-        [ValidateSet('CREATED','MIGRATE')]
+        [ValidateSet('CREATE','MIGRATE')]
         [string]$DeployMode,
         # PythonPath - (required) - File path to virtual Python executable
-        [Parameter(Manadatory=$true)]
+        [Parameter(Mandatory=$true)]
         [string]$PythonPath,
         # MigrationDBPath - File path to migration database
         [string]$MigrationDBPath
@@ -386,7 +388,7 @@ function Deploy-Database {
 
     if ($DeployMode.ToUpper() -eq "CREATE") {
         $result1 = (Invoke-Expression "$($PythonPath) manage.py makemigrations")        
-        $result2 = (Invoke-Expression "$($PythonPath) manage.py migrate --run-synchdb")
+        $result2 = (Invoke-Expression "$($PythonPath) manage.py migrate --run-syncdb")
 
         # TODO: find robust way to verify success of migration
         # For now - assume success
@@ -394,10 +396,15 @@ function Deploy-Database {
     } elseif ($DeployMode.ToUpper() -eq "MIGRATE") {
         # Attempt to copy migration database
         
-        Copy-Item -Path $MigrationDBPath -Destination (Join-Path -Path $AppRoot -ChildPath $AppName)
+        if ($null -ne $MigrationDBPath -and (Test-Path $MigrationDBPath -PathType Leaf)) {
+            Copy-Item -Path $MigrationDBPath -Destination (Join-Path -Path $AppRoot -ChildPath $AppName)
 
-        $result1 = (Invoke-Expression "$($PythonPath) manage.py makemigrations")
-        $result2 = (Invoke-Expression "$($PythonPath) manage.py migrate")
+            $result1 = (Invoke-Expression "$($PythonPath) manage.py makemigrations")
+            $result2 = (Invoke-Expression "$($PythonPath) manage.py migrate")
+        } else {
+            Write-Host "`n***WARNING*** Unable to Migrate database"
+        }
+    
 
         # TODO: find robust way to verify success of migration
         # For now - assume success
@@ -626,11 +633,13 @@ function main {
     $pythonVenvPythonExe = Get-PythonExe $pythonVenvFullPath
 
     # Upgrade pip
-    Invoke-Expression "$($pythonVenvPythonExe) -m pip install --upgrade pip"
+    Write-Host "Upgrading pip..."
+    Invoke-Expression "$($pythonVenvPythonExe) -m pip install --upgrade pip --quiet"
 
     # Deploy Python packages & other dependencies
     $requirementsPath = Join-Path $config.settings.appRoot $config.settings.appName "requirements.txt" 
-    Invoke-Expression "$($pythonVenvPythonExe) -m pip install -r $($requirementsPath)"
+    Write-Host "Installint Python requirements from $($requirementsPath)..."
+    Invoke-Expression "$($pythonVenvPythonExe) -m pip install -r $($requirementsPath)  --quiet"
 
     # Collect static items
     if ((Get-StaticFiles $pythonVenvPythonExe (Join-Path $config.settings.appRoot $config.settings.appName)) -eq $false) {
@@ -651,15 +660,20 @@ function main {
 
     # Create or Migrate database
 
-    if ($config.settings.database.ContainsKey("sourcePath")) {
-        $sourceDatabase = $config.settings.database.sourcePath
+    $sourceDatabase = $config.settings.database
+    if ($null -eq $sourceDatabase) {
+        Write-Host "`nCreating new database"
+        $mode = "CREATE"        
     } else {
-        $sourceDatabase = $null
+        Write-Host "`nMigrating database from $($sourceDatabase)"
+        $mode = "MIGRATE"
     }
 
-    if ((Deploy-Database $config.settings.appRoot $config.settings.appName `
+    if ((Deploy-Database `
+        $config.settings.appRoot `
+        $config.settings.appName `
+        $mode `
         $pythonVenvPythonExe `
-        $config.settings.database.mode `
         $sourceDatabase) -eq $false) {
             Write-Host "`n***ERROR*** Database Deployment failed. ABORTING"
             Exit
