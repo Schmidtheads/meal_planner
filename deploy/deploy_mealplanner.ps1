@@ -638,7 +638,7 @@ function main {
 
     # Deploy Python packages & other dependencies
     $requirementsPath = Join-Path $config.settings.appRoot $config.settings.appName "requirements.txt" 
-    Write-Host "Installint Python requirements from $($requirementsPath)..."
+    Write-Host "Installing Python requirements from $($requirementsPath)..."
     Invoke-Expression "$($pythonVenvPythonExe) -m pip install -r $($requirementsPath)  --quiet"
 
     # Collect static items
