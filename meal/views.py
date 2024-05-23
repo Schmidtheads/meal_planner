@@ -116,10 +116,6 @@ def new(request):
                    "year": datetime.now().year,
                    "company": "Schmidtheads Inc.",
                    "form": form})
-                  {"title": "Meal Planner",
-                   "year": datetime.now().year,
-                   "company": "Schmidtheads Inc.",
-                   "form": form})
 
 
 def meals(request):
