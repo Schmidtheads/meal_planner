@@ -220,7 +220,6 @@ def search_for_recipes(request):
 
 
 def _get_meals_for_month(year: int, month: int):
-def _get_meals_for_month(year: int, month: int):
     '''
     Helper function that gathers meal information for a month from database
 
@@ -271,10 +270,6 @@ def _get_recipe_info_for_meal(meal):
         cookbook = getattr(recipe, 'cook_book')
 
         # Get cookbook name and author
-        if cookbook is not None:
-            cookbook_title = getattr(cookbook, 'title')
-            cookbook_author = str(getattr(cookbook, 'author'))
-            cookbook_id = cookbook.id
         if cookbook is not None:
             cookbook_title = getattr(cookbook, 'title')
             cookbook_author = str(getattr(cookbook, 'author'))
