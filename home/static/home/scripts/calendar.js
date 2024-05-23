@@ -167,7 +167,7 @@ function createDayElement(date, meal, month, year) {
         // Create span to hold recipe name so we can control font size
         let recipeSpan = document.createElement('span');
         recipeSpan.classList.add('recipe_text');
-        // Link recipe name to recipe details
+        // Link recipe name to meal details as well
         let recipeMealLink = document.createElement('a');
         let recipeText = document.createTextNode(recipe_name);
         recipeMealLink.append(recipeText);

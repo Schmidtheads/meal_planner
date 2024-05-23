@@ -3,15 +3,24 @@ Name: models.py
 Description: Defines the schema and behaviour for Recipe model
 '''
 
+'''
+Name: models.py
+Description: Defines the schema and behaviour for Recipe model
+'''
+
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 
 from cookbook.models import Cookbook
 
 
+
 # Create your models here.
 
 class RecipeType(models.Model):
+    '''
+    Defines the RecipeType schema
+    '''
     '''
     Defines the RecipeType schema
     '''
@@ -21,7 +30,11 @@ class RecipeType(models.Model):
         return f"{self.name}"
 
 
+
     class Meta:
+        '''
+        Metadata of the RecipeType
+        '''
         '''
         Metadata of the RecipeType
         '''
@@ -33,7 +46,11 @@ class Recipe(models.Model):
     '''
     Defines the Recipe schema
     '''
+    '''
+    Defines the Recipe schema
+    '''
     name = models.CharField(max_length=50)
+    cook_book = models.ForeignKey(Cookbook, on_delete=models.CASCADE, blank=True, null=True)
     cook_book = models.ForeignKey(Cookbook, on_delete=models.CASCADE, blank=True, null=True)
     page_number = models.PositiveSmallIntegerField()
     notes = models.CharField(max_length=750, blank=True)
@@ -74,12 +91,18 @@ class Diner(models.Model):
     '''
     Defines the Diner schema
     '''
+    '''
+    Defines the Diner schema
+    '''
     first_name = models.CharField(max_length=25)
     last_name = models.CharField(max_length=25)
     user_name = models.CharField(max_length=25, default='-nouser-')  # store username used for authentication
 
 
     def last_name_first(self):
+        '''
+        Returns the Diner's name, last name first
+        '''
         '''
         Returns the Diner's name, last name first
         '''

@@ -18,6 +18,9 @@ def detail(request, id):
     '''
     View to edit or view a Recipe
     '''
+    '''
+    View to edit or view a Recipe
+    '''
     recipe = get_object_or_404(Recipe, pk=id)
 
     current_user = request.user
@@ -49,6 +52,9 @@ def new(request):
     '''
     View used to create a new Recipe
     '''
+    '''
+    View used to create a new Recipe
+    '''
     if request.method == "POST":
         form = RecipeForm(data=request.POST, files=request.FILES, readonly_form=False)
         if form.is_valid():
@@ -71,6 +77,9 @@ def new(request):
 
 
 def diner_detail(request):
+    '''
+    View to edit or view a Diner
+    '''
     '''
     View to edit or view a Diner
     '''
@@ -98,6 +107,9 @@ def ratings_list(request, recipe_id):
     '''
     View to see all the ratings for a recipe
     '''
+    '''
+    View to see all the ratings for a recipe
+    '''
     recipe = Recipe.objects.get(id=recipe_id)
     recipe_ratings = recipe.reciperating_set.all()  #type: ignore
 
@@ -122,6 +134,9 @@ def ratings_list(request, recipe_id):
 
 
 def recipes(request):
+    '''
+    View to list all recipes
+    '''
     '''
     View to list all recipes
     '''
@@ -289,9 +304,16 @@ def RecipeTypeCreatePopup(request):
     form = RecipeTypeForm(request.POST or None)
     if form.is_valid():
         instance = form.save()
+    '''
+    Creates a popup to create a new recipe type
+    '''
+    form = RecipeTypeForm(request.POST or None)
+    if form.is_valid():
+        instance = form.save()
 
 		## Add the new value to "#id_recipe_types". This is the element id in the form
 
+        return HttpResponse('<script>opener.closePopup(window, "%s", "%s", "#id_recipe_types", "checkbox");</script>' % (instance.pk, instance))
         return HttpResponse('<script>opener.closePopup(window, "%s", "%s", "#id_recipe_types", "checkbox");</script>' % (instance.pk, instance))
 
     return render(request, "recipe/recipe_type.html",
@@ -306,6 +328,9 @@ def RecipeTypeCreatePopup(request):
 
 # Calcule Recipe Rating
 def calculate_recipe_rating(recipe_id):
+    '''
+    Calculate a recipe rating
+    '''
     '''
     Calculate a recipe rating
     '''

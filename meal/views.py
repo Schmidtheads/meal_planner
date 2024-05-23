@@ -14,7 +14,13 @@ from django.http import JsonResponse
 import io
 
 from .calendar_report import MonthlyMealPlan
+from django.http import JsonResponse
+import io
+
+from .calendar_report import MonthlyMealPlan
 from recipe.search import Search
+from .models import Meal
+from .forms import MealForm, PrintForm
 from .models import Meal
 from .forms import MealForm, PrintForm
 
@@ -46,6 +52,10 @@ def detail(request, id):
                    "year": datetime.now().year,
                    "company": "Schmidtheads Inc.",
                    "form": form})
+                  {"title": "Meal Planner",
+                   "year": datetime.now().year,
+                   "company": "Schmidtheads Inc.",
+                   "form": form})
 
 
 @permission_required('meal.add_meal')
@@ -70,25 +80,33 @@ def new(request):
         # Retrieve scheduled_date from query string value (must be YYYY-MM-DD format e.g. 2020-12-23)
         # should default be current date?
         scheduled_date = request.GET.get('date', None)
+        # should default be current date?
+        scheduled_date = request.GET.get('date', None)
         if not scheduled_date is None:
             # Check if date is valid
             try:
                 date_obj = datetime.strptime(
                     scheduled_date, "%Y-%m-%d")
+                date_obj = datetime.strptime(
+                    scheduled_date, "%Y-%m-%d")
                 try:
+                    _ = Meal.objects.get(scheduled_date=date_obj)
                     _ = Meal.objects.get(scheduled_date=date_obj)
 
                     # if meal exists - need to redirect to details page (for update)
                 except Meal.DoesNotExist:
                     print(f'Meal not found for {scheduled_date}!')
+                    print(f'Meal not found for {scheduled_date}!')
             except:
                 # Invalid date, do not pre-populate the date on the form
+                date_obj = None
                 date_obj = None
         else:
             date_obj = None
 
         # Create form for new entry
         if date_obj is None:
+            form = MealForm()  # create form without pre-populated date
             form = MealForm()  # create form without pre-populated date
         else:
             form = MealForm(initial={'scheduled_date': date_obj})
@@ -98,6 +116,10 @@ def new(request):
             scheduled_date_widget.attrs.update({'class': 'form-control'})
 
     return render(request, "meal/detail.html",
+                  {"title": "Meal Planner",
+                   "year": datetime.now().year,
+                   "company": "Schmidtheads Inc.",
+                   "form": form})
                   {"title": "Meal Planner",
                    "year": datetime.now().year,
                    "company": "Schmidtheads Inc.",
@@ -113,6 +135,7 @@ def meals(request):
     # loads, it will send an Ajax request to retrieve the meals
     return render(request, 'meal/meals.html',
                   {'title': 'Meal Planner',
+                   'year': datetime.now().year,
                    'year': datetime.now().year,
                    'company': 'Schmidtheads Inc.'})
 
@@ -173,6 +196,8 @@ def get_meals_for_month(request):
 
     meal_year = int(request.GET.get('year', datetime.now().year))
     meal_month = int(request.GET.get('month', datetime.now().month))
+    meal_year = int(request.GET.get('year', datetime.now().year))
+    meal_month = int(request.GET.get('month', datetime.now().month))
 
     meals_json = _get_meals_for_month(meal_year, meal_month)
 
@@ -190,8 +215,10 @@ def search_for_recipes(request):
     @param request: json representing the query; list of search tags
     '''
 
+
     search_keys = str(request.GET.get('keys'))
     results = _search_for_recipes(search_keys)
+
 
     data = {
         'recipes': results
@@ -200,6 +227,7 @@ def search_for_recipes(request):
     return JsonResponse(data)
 
 
+def _get_meals_for_month(year: int, month: int):
 def _get_meals_for_month(year: int, month: int):
     '''
     Helper function that gathers meal information for a month from database
@@ -220,11 +248,15 @@ def _get_meals_for_month(year: int, month: int):
         check_date = f'{year}-{month:02}-{day:02}'
         meal = meals_for_month.filter(
             scheduled_date=date(year, month, day)).first()
+        check_date = f'{year}-{month:02}-{day:02}'
+        meal = meals_for_month.filter(
+            scheduled_date=date(year, month, day)).first()
 
         meal_info = {'scheduled_date': check_date}
         meal_info.update(_get_recipe_info_for_meal(meal))
 
         meals_info.append(meal_info)
+
 
     return meals_info
 
@@ -247,6 +279,10 @@ def _get_recipe_info_for_meal(meal):
         cookbook = getattr(recipe, 'cook_book')
 
         # Get cookbook name and author
+        if cookbook is not None:
+            cookbook_title = getattr(cookbook, 'title')
+            cookbook_author = str(getattr(cookbook, 'author'))
+            cookbook_id = cookbook.id
         if cookbook is not None:
             cookbook_title = getattr(cookbook, 'title')
             cookbook_author = str(getattr(cookbook, 'author'))

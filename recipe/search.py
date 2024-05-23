@@ -39,6 +39,7 @@ import datetime
 
 from django.db.models import Q
 
+
 from .models import Recipe
 
 KEYWORD_TOKENS = [
@@ -56,6 +57,9 @@ TIME_KEYWORD_TOKENS = [
 
 
 class Search:
+    '''
+    Class that manages searching for recipes
+    '''
     '''
     Class that manages searching for recipes
     '''
@@ -77,10 +81,16 @@ class Search:
         '''
         Return list of search tokens
         '''
+        '''
+        Return list of search tokens
+        '''
         return [t.upper() for t in self._tokens]
 
     @property
     def free_tokens(self):
+        '''
+        Return list of free search tokens
+        '''
         '''
         Return list of free search tokens
         '''
@@ -128,8 +138,12 @@ class Search:
         '''
         Return list of time filtering keywords
         '''
+        '''
+        Return list of time filtering keywords
+        '''
 
         return self._time_keywords[keyword]
+
 
 
     def find(self):
@@ -167,6 +181,7 @@ class Search:
         # Build queries and search for matches, based on
         # contents of keyword_searches dictionary
 
+        #TODO: Would it be better to initialize as an empty Django result set?
         #TODO: Would it be better to initialize as an empty Django result set?
         recipe_result = None
 
@@ -206,6 +221,7 @@ class Search:
 
         # Get recipe related information
         return recipe_result
+
 
 
     def _parse_keywords(self, tokens):
