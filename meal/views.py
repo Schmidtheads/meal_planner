@@ -52,10 +52,6 @@ def detail(request, id):
                    "year": datetime.now().year,
                    "company": "Schmidtheads Inc.",
                    "form": form})
-                  {"title": "Meal Planner",
-                   "year": datetime.now().year,
-                   "company": "Schmidtheads Inc.",
-                   "form": form})
 
 
 @permission_required('meal.add_meal')
