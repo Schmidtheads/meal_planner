@@ -405,6 +405,10 @@ function Deploy-Database {
             Write-Host "`n***WARNING*** Unable to Migrate database"
         }
     
+        $result3 = (Invoke-Expression "($($PythonPath) manage.py user_manager)")
+        if ($result3[-1] -ne "Done") {
+            Write-Host "***WARNING*** Unable to create database user groups"    
+        }
 
         # TODO: find robust way to verify success of migration
         # For now - assume success
@@ -556,7 +560,9 @@ function Get-StaticFiles {
         $success = $false
     }
 
-    # TODO: copy /[approot]/[appname]/static/admin folder to /[approot]/[appname]/home/static
+    # Copy admin files to correct location
+    Write-Host "Copying admin files..."
+    Copy-Item (Join-Path $fullAppPath "static" "admin") -Destination (Join-Path $fullAppPath "home" "static" "admin")
 
     return $success
 }
