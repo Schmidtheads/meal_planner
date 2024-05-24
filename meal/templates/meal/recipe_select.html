@@ -3,12 +3,8 @@
 
   Note that the methods in recipequery.js are available to this html snippet
   because it is sourced by the parent html file meals/detail.html
-
-  Note that the methods in recipequery.js are available to this html snippet
-  because it is sourced by the parent html file meals/detail.html
 -->
 <div class="row align-items-end">
-    <div class="form-group col-md-8">
     <div class="form-group col-md-8">
         <input type="text" class="form-control"
                 id="id_recipe_name_display"
@@ -18,7 +14,6 @@
                 {% endif %} readonly/>
     </div>
     <div class="form-group col-md-1">
-      <button type="button" class="btn btn-default" onclick="launch()">
       <button type="button" class="btn btn-default" onclick="launch()">
             Search
       </button>
@@ -44,7 +39,6 @@
           </div>
           <div class="modal-body">
             <table class="table" id="id_recipe_search">
-            <table class="table" id="id_recipe_search">
               <tr>
                 <td id="id_recipe_search_container">
                   <input id="id_recipe_search_keys" class="form-control" onkeyup="stoppedTyping()" type="text" />
@@ -53,13 +47,6 @@
                   <button id="id_recipe_search_button" type="button" class="btn btn-primary" title="Alt-S" accesskey="s" onclick="recipeSearch()">Search</button>                  
                 </td>
               </tr>
-            </table>
-            <div id="id_table_scroll">
-              <table id="id_recipe_search_results" class="table tableRowHover">
-                <thead></thead>
-                <tbody></tbody>
-              </table>
-            </div>
             </table>
             <div id="id_table_scroll">
               <table id="id_recipe_search_results" class="table tableRowHover">
@@ -79,4 +66,3 @@
   // Set global variable to Django widget name for use in imported .js files
   var widgetName = "{{ widget.name }}";
 </script>
-
