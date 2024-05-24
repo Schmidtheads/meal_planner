@@ -562,7 +562,9 @@ function Get-StaticFiles {
 
     # Copy admin files to correct location
     Write-Host "Copying admin files..."
-    Copy-Item (Join-Path $fullAppPath "static" "admin") -Destination (Join-Path $fullAppPath "home" "static" "admin")
+    Copy-Item (Join-Path $fullAppPath "static" "admin") `
+        -Destination (Join-Path $fullAppPath "home" "static" "admin") `
+        -Recurse
 
     return $success
 }
