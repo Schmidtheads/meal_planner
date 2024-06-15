@@ -1,4 +1,4 @@
-# Meal Planner
+# Meal Planner version 2
 Web application for meal plan management.
 
 This web-based application provides a user interface to assist in the planning of weekly meal plans. It provides the ability to search from a database of recipes based on recipe name, cookbook, author or custom tags assoicated with the recipe. It will produce a monthly calendar in PDF format that can then be printed. It allows for one week of meals to be printed at a time and can be printed over an existing calendar.
