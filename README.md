@@ -27,4 +27,14 @@ The data loader (data_manager.py) is used to perform an intial load of the Djang
 
 The MS Access database is then converted to SQL Lite using the Python Script found [here](https://gist.github.com/snorfalorpagus/8578272).  SQL Lite is used because loading MS Access database when a 32-bit version of Office 365 is installed is problematic when using 64-bit Python.
 
-
+## Classic Git Workflow
+```git checkout -b feature_branch
+git add file.ext
+git commit -m "a commit msg"
+git push origin feature_branch
+git checkout dev_test
+git merge feature_branch
+git push origin dev_test
+git checkout master
+git merge dev_test
+git push origin master```
