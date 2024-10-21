@@ -1,40 +1,36 @@
-# Meal Planner version 2
-Web application for meal plan management.
+# meal_planner
+Web application for meal plan management
 
-This web-based application provides a user interface to assist in the planning of weekly meal plans. It provides the ability to search from a database of recipes based on recipe name, cookbook, author or custom tags assoicated with the recipe. It will produce a monthly calendar in PDF format that can then be printed. It allows for one week of meals to be printed at a time and can be printed over an existing calendar.
-
-This is a data driven application. It's usefulness increases as more recipes, cookboks and meals are entered into the system. This application does not come with any data pre-loaded.
-
-The Meal Planner Web application conists of three compnents:
-- Meals app: view meals, when they took place, and what recipe was used; plan future meals
-- Coobooks app: view cookbooks and their authors
-- Recipes app: view recipes, their type and rating, and from which cookbook they are from
-
-## Requirements
-The Meal Planner a
-pplication is written in Python 3.10.9 and requires the following packages:
-- Django 3.2.16
-- Fpdf 1.7.2
-- Pillow 9.4.0
-- pytz 2022.7
-- sqlparse 0.4.3
-- asgiref 3.6.0
+Conists of three apps:
+- coobook app: view cookbooks and their authors
+- recipe app: view recipes, their type and rating, and from which cookbook they are from
+- meal app: view meals, when they took place, and what recipe was used; plan future meals
 
 
-## Data Loader
+## Managment Commands
 
-The data loader (data_manager.py) is used to perform an intial load of the Django database from an SQL Lite database, but the data capture is completed in an MS Access database. 
+A couple of management commands are provided for convenience of setting up the Meal Planner application. The Data Loader provides a tool to bulk load the Meal Planner database. The User Manager command provides the ability to add user accounts to the Meal Planner database.
 
-The MS Access database is then converted to SQL Lite using the Python Script found [here](https://gist.github.com/snorfalorpagus/8578272).  SQL Lite is used because loading MS Access database when a 32-bit version of Office 365 is installed is problematic when using 64-bit Python.
+### Data Loader
 
-## Classic Git Workflow
-```git checkout -b feature_branch
-git add file.ext
-git commit -m "a commit msg"
-git push origin feature_branch
-git checkout dev_test
-git merge feature_branch
-git push origin dev_test
-git checkout master
-git merge dev_test
-git push origin master```
+The data loader (`data_manager.py`) is used to perform an intial bulk load of the Django database from an SQL Lite database. This is provide an alternative to using the Meal Planner web application to do data entry, which would have a high level of effort for a large amount of data.
+
+**A third party application is required for data entry** such as [SQLliteStudio](https://sqlitestudio.pl/+
+398). The data module used in the SQLlite database must match that of the database used for the Meal Planner application. 
+
+#### Usage
+
+```
+manage.py data_manager [-h] [--version] [-v {0,1,2,3}] [--settings SETTINGS] [--pythonpath PYTHONPATH]
+                       [--traceback] [--no-color] [--force-color] [--skip-checks]
+                       db_path
+```
+
+From a terminal prompt run the Data Loader using Django's `manage.py` script
+
+```batch
+C:> python manage.py data_manager C:\
+```
+
+
+### User Manager
