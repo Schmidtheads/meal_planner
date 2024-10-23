@@ -1,4 +1,4 @@
-# meal_planner
+# Meal Planner
 Web application for meal plan management
 
 Conists of three apps:
@@ -34,3 +34,67 @@ C:> python manage.py data_manager C:\
 
 
 ### User Manager
+
+The User Manager command module is used to create Groups in the Django security module in order to manage user access to the database. A configuration file in JSON format defines the names of the groups, the permissions granted to each group.
+
+#### Usage
+
+```
+manage.py user_manager [-h] [--version] [-v {0,1,2,3}] [--settings SETTINGS] [--pythonpath PYTHONPATH]
+                       [--traceback] [--no-color] [--force-color] [--skip-checks]
+                       [--config CONFIGFILE] 
+```
+
+#### Configuration File
+The generic format for the configuration file is shown below.
+
+```json
+{
+    "metadata" : {
+        "description": [
+            "Everything in meta data section is ignored by the application",
+            "and is meant for documentation purposes"
+        ]
+    },
+    "settings": {
+        "groups": [
+            {
+                "name": "<Group1_Name>",
+                "permissions": [
+                    "<permission_1>",
+                    "<permission_2>",
+                    ...
+                    "<permission_N>"
+                ]
+            },
+            {
+                "name": "<Group2_Name>",
+                "permissions":  [
+                    "<permission_1>",
+                    "<permission_2>",
+                    ...
+                    "<permission_N>"
+                ]
+            },
+            ...
+            {
+                "name": "<GroupN_Name>",
+                "permissions":  [
+                    "<permission_1>",
+                    "<permission_2>",
+                    ...
+                    "<permission_N>"
+                ]
+            }                
+        ]
+    }
+}
+```
+
+Where:
+- **metadata**: element whose contents are ignored by the application; it can contain anything and is meant for documentation
+- **description**: sample element within metadata element, other ideas: version, last_updated, author
+- **settings**: element containing the configuration settings MANDATORY
+- **groups**: element containing Group definitions MANDATORY
+- **name**: name to be given the permission Group
+- **permissions**: list of strings where each string is the name of a valid Django table permission
