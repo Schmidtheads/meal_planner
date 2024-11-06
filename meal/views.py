@@ -335,14 +335,15 @@ def _date_recipe_last_made(recipe):
     Returns when the recipe was last made
     '''
 
-    meals_w_recipe = Meal.objects.filter(recipe = recipe).order_by("-scheduled_date")
+    meals_w_recipe = Meal.objects.filter(recipe = recipe, was_made = True).order_by("-scheduled_date")
 
-    # meals sorted by date made (descending), so first is most recent
+    # meals sorted by scheduled date (descending), so first is most recent
     recent_meal = meals_w_recipe.first()
 
     if recent_meal is not None:
-        date_last_made = recent_meal.scheduled_date.strftime('%d-%b-%Y') if recent_meal.was_made else 'Never made'
+        date_last_made = recent_meal.scheduled_date.strftime('%d-%b-%Y')
     else:
+        # recipe scheduled, but never made
         date_last_made = 'Never made'
 
     return date_last_made
@@ -353,7 +354,7 @@ def _number_of_times_recipe_made(recipe):
     Returns the number of times a recipe was made
     '''
 
-    meals_w_recipe = Meal.objects.filter(recipe = recipe).order_by("-scheduled_date")
+    meals_w_recipe = Meal.objects.filter(recipe = recipe, was_made = True).order_by("-scheduled_date")
 
     # meals sorted by date made (descending), so first is most recent
     count = meals_w_recipe.count()
