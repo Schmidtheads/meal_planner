@@ -132,6 +132,7 @@ function showCalendar(month, year, meals) {
  */
 function createDayElement(date, meal, month, year) {
     // Get the recipe for the current day (meals indexed from zero, so need to subtract 1 from day)
+    let meal_notes = meal.notes;
     let recipe_name = meal.recipe_name;
     let recipe_id = meal.recipe_id;
     let cookbook_abbr = meal.abbr;
@@ -155,6 +156,15 @@ function createDayElement(date, meal, month, year) {
 
     // If recipe_name is non-zero length, then there was a meal planned for the day
     if (recipe_name.length > 0) {
+        
+        // Create div for meal notes
+        if (meal_notes.length > 0) { 
+            let mealNotesImg = document.createElement('img');
+            mealNotesImg.src = '/static/home/images/notes24.png';
+            mealNotesImg.style = 'float:left';
+            mealNotesImg.title = meal_notes;
+            dayDiv.appendChild(mealNotesImg);
+        }
 
         // Create a link from the date to the meal details
         let dayMealLink = document.createElement('a');

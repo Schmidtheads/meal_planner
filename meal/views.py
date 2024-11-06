@@ -254,6 +254,7 @@ def _get_recipe_info_for_meal(meal):
 
     if not meal is None:
         meal_id = meal.id
+        notes = getattr(meal, 'notes')
         recipe = getattr(meal, 'recipe')
         # Get the recipe information
         recipe_id = getattr(recipe, 'id')
@@ -282,6 +283,7 @@ def _get_recipe_info_for_meal(meal):
 
         recipe_info = {
             'meal_id': meal_id,
+            'notes': notes,
             'recipe_name': name,
             'recipe_id': recipe_id,
             'page': page,
