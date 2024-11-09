@@ -258,6 +258,8 @@ class MonthlyMealPlan(FPDF):
 
         for r in range(4):
 
+            week_cur_y = self.get_y()  # y position for current week and day-row element
+
             for d in range(self.DAYS):
                 month, day_of_month = week_of_month[d].split(':')
                 meal = self._get_meal_for_day(month, day_of_month)
@@ -274,7 +276,7 @@ class MonthlyMealPlan(FPDF):
 
                 ln = 1 if d == self.DAYS - 1 else 0
 
-                # Each calendar day is made of four sections
+                # Each calendar day is made of four sections/rows
                 # r=0: day of month
                 # r=1: recipe name
                 # r=2: meal notes (if any)
@@ -294,9 +296,11 @@ class MonthlyMealPlan(FPDF):
 
                     # get number of lines for recipe
                     rcl = self._wrap_text_for_cell('recipe', recipe)
-                    cur_y = self.get_y() + len(rcl) * self.FONTS['recipe']['size']
 
-                    self._print_meal_notes(cur_x, cur_y, meal_notes, d, ln)
+                    # determine start height for notes text, based on space recipe name takes
+                    cur_y = week_cur_y + len(rcl) * self.FONTS['recipe']['size']
+
+                    self._print_meal_notes(cell_top, cur_x, cur_y, meal_notes, d, ln)
                 else:
                     #cookbook and page no
                     self._print_cookbook(cell_top, cookbook_abbr, page, d, ln)
@@ -383,9 +387,10 @@ class MonthlyMealPlan(FPDF):
             self.write(30, value)
 
 
-    def _print_meal_notes(self, x: float, y: float, meal_notes: str, d: int, ln: int):
+    def _print_meal_notes(self, cell_top: float, x: float, y: float, meal_notes: str, d: int, ln: int):
         '''
         Output meal notes, wrapping text if required
+        @param cell_top: ordinate value of cell top
         @param x: curent abscissa location
         @param y: current ordinate location
         @param meal_notes: name of recipe to print        
@@ -403,6 +408,11 @@ class MonthlyMealPlan(FPDF):
 
         rcl = self._wrap_text_for_cell('notes', meal_notes)
 
+        # Determine if number of rows of meal notes need to be truncated
+        # based on available space to print. Adjust font size by factor of 1.25
+        max_lines = int(((cell_top + (self.CALENDAR_HEIGHT / self.WEEKS) * self.r1p) - y) / float(meal_font['size'] * 1.25))
+        rcl = rcl[0:max_lines]
+
         self.set_y(y)
         self.set_x(x)
         self.cell(
@@ -415,6 +425,7 @@ class MonthlyMealPlan(FPDF):
 
         for c, value in enumerate(rcl):
             y_offset = c * float(meal_font['size'])
+
             #self.set_xy(x, y + y_offset)
             self.set_y(y + y_offset)
             self.set_x(x)
@@ -513,9 +524,15 @@ class MonthlyMealPlan(FPDF):
         )
 
         sw = self.get_string_width(text)
-        cw = self.CALENDAR_WIDTH / self.DAYS
-         
-        rcl = [''] if len(text) == 0 else wrap(text, int(len(text) * (cw / sw)))
+        cw = self.CALENDAR_WIDTH / self.DAYS * .95   # reduce cell width with fudge factor
+
+        # if text has line breaks, split by those first
+        text_lines = text.split('\r\n')
+        rcl = []
+        for tline in text_lines:
+            wline = '' if len(tline) == 0 else wrap(tline, int(len(text) * (cw / sw))) 
+            rcl.extend(wline)
+        #rcl = [''] if len(text) == 0 else wrap(text, int(len(text) * (cw / sw)))
 
         # restore original font
         self.set_font(cur_font_family, cur_font_style, cur_font_size)
