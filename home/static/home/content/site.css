@@ -170,6 +170,11 @@ input:disabled+label {
     position: relative;
 }
 
+/* Parameters for Meal Note icon */
+
+.mealNoteIcon {
+    padding-bottom: 0px;
+}
 
 /* Set the colour of the current day */
 
