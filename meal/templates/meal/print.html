@@ -33,7 +33,11 @@
         </div>
         <div>
             {{ form.print_only_meals }}
-            <label for="{{ form.print_only_meals.id_for_label}}">Print only meals</label>
+            <label for="{{ form.print_only_meals.id_for_label }}">Print only meals</label>
+        </div>
+        <div>
+            {{ form.print_notes }}
+            <label for="{{ form.print_notes.id_for_label }}">Print meal notes</label>
         </div>
         <input type="submit" value="Print" />
         <input type="button" value="Close" onclick="closePrintPopup(window)" />

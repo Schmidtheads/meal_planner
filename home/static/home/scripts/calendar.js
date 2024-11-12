@@ -18,6 +18,8 @@
  *  https://www.w3schools.com/js/js_cookies.asp
  */
 
+const MAX_TOOLTIP_WIDTH = 35;  // maximum character width allowed for meal notes tooltips
+
 let today = new Date();
 let selectYear = document.getElementById("year");
 let selectMonth = document.getElementById("month");
@@ -132,6 +134,7 @@ function showCalendar(month, year, meals) {
  */
 function createDayElement(date, meal, month, year) {
     // Get the recipe for the current day (meals indexed from zero, so need to subtract 1 from day)
+    let meal_notes = meal.notes;
     let recipe_name = meal.recipe_name;
     let recipe_id = meal.recipe_id;
     let cookbook_abbr = meal.abbr;
@@ -155,6 +158,16 @@ function createDayElement(date, meal, month, year) {
 
     // If recipe_name is non-zero length, then there was a meal planned for the day
     if (recipe_name.length > 0) {
+        
+        // Create div for meal notes
+        if (meal_notes.length > 0) { 
+            let mealNotesImg = document.createElement('img');
+            mealNotesImg.src = '/static/home/images/notes20.png';
+            mealNotesImg.classList.add('left');
+            mealNotesImg.classList.add('mealNoteIcon');
+            mealNotesImg.title = wrap_text(meal_notes);
+            dayDiv.appendChild(mealNotesImg);
+        }
 
         // Create a link from the date to the meal details
         let dayMealLink = document.createElement('a');
@@ -236,10 +249,50 @@ function createDayElement(date, meal, month, year) {
 
 
 /**
+ * Inserts newlines in string of text. For use with elements with "title"
+ * property to force new lines after specified number of characters.
+ * 
+ * @param {string} text       string of text to wrap
+ * @param {int}    max_length maximum length in characters for a line
+ * 
+ * @returns {string} input string with newlines inserted
+ */
+function wrap_text(text, max_length = MAX_TOOLTIP_WIDTH) {
+    let return_text = '';
+    if (text.length > max_length) {
+        // first split text by new lines
+        let segments = text.split('\r\n');
+
+        return_text = '';
+        for (let j=0; j < segments.length; j++) {
+            if (segments[j].length > max_length) {
+                let line_segments = segments[j].split(' ');  // split long lines by words
+                let new_line = '';
+                for (let k=0; k < line_segments.length; k++) {
+                    if ((new_line.length + line_segments[k].length) > max_length) {
+                        return_text = return_text + new_line + '\r\n';
+                        new_line = '';
+                    } 
+                    new_line = new_line + line_segments[k] + ' ';
+                }
+                return_text = return_text + new_line + '\r\n';
+            } else {
+                return_text = return_text + segments[j] + '\r\n';
+            }
+        }
+    } else {
+        return_text = text;
+    }
+
+    return return_text;
+}
+
+
+/**
  * Performs AJAX query to retrieve recipes for a month given the month and year.
  * 
- * @param {int} month 
- * @param {int} year 
+ * @param {int} month month of year 1-12
+ * @param {int} year  year as four digit number
  */
 function get_meals_for_month(month, year) {
     // When submitting the month, add one because for some
@@ -288,14 +341,14 @@ function fetch_calendar() {
 }
 
 
+/**
+ * Helper function to set a cookie
+ * 
+ * @param {string} cname   name of cookie
+ * @param {string} cvalue  value of cookie
+ * @param {string} exhours number of hours in which cookie will expire
+*/
 function setCookie(cname, cvalue, exhours) {
-    /*
-     * Helper function to set a cookie
-     * 
-     * @param cname: name of cookie
-     * @param cvalue: value of cookie
-     * @param exhours: number of hours in which cookie will expire
-    */
 
     var d = new Date();
     d.setTime(d.getTime() + (exhours * 60 * 60 * 1000));
@@ -304,6 +357,13 @@ function setCookie(cname, cvalue, exhours) {
 }
 
 
+/**
+ * Helper function to get a cookie
+ * 
+ * @param {string} cname name of cookie
+ *  
+ * @returns {string} empty string
+ */
 function getCookie(cname) {
     var name = cname + "=";
     var ca = document.cookie.split(';');
