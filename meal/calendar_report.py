@@ -30,13 +30,14 @@ class MonthlyMealPlan(FPDF):
         'cookbook': {'family': 'Arial', 'style': 'I', 'size': 8}
     }
 
-    def __init__(self, month, meals, weeks_to_print: list=[], print_meals_only: bool=False):
+    def __init__(self, month, meals, weeks_to_print: list=[], print_meals_only: bool=False, print_notes: bool=True):
         '''
         Constructor
         @param month: (string) year and month of calendar (YYYY-MM)
         @param meals: (dict) meal data to use in calendar
         @param weeks_to_print: (list) list of week numbers (0 based) to print
         @param print_meals_only: (bool) Flag to indicate if only meal information to be printed
+        @param print_notes: (bool) Flag to indicate if meal notes are printed
         '''
         super().__init__('L', 'pt', 'Letter')
         self.WIDTH = 792
@@ -62,6 +63,7 @@ class MonthlyMealPlan(FPDF):
         self.weeks_to_print = [0,1,2,3,4,5] if weeks_to_print == [] else weeks_to_print
 
         self.only_meals = print_meals_only
+        self.meal_notes = print_notes
 
         self.out_filepath = None
         self.out_type = 'F'
@@ -290,7 +292,7 @@ class MonthlyMealPlan(FPDF):
                     #recipe
                     cur_x = 28.35 + (self.CALENDAR_WIDTH / self.DAYS) * d
                     self._print_recipe_name(cur_x, cur_y, recipe, d, ln)
-                elif r == 2:
+                elif r == 2 and self.meal_notes:
                     # meal notes
                     cur_x = 28.35 + (self.CALENDAR_WIDTH / self.DAYS) * d
 

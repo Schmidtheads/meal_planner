@@ -133,6 +133,7 @@ def PrintCreatePopup(request):
         print_flag = form['print_weeks'].data
         print_wks = form['weeks'].data
         print_only_meals = form['print_only_meals'].data
+        print_notes = form['print_notes'].data
 
         meal_yr_mnth = f'{meal_yr}-{meal_mt:02}'
         if print_flag == 'ALL':
@@ -148,7 +149,7 @@ def PrintCreatePopup(request):
         next_month_meals = _get_meals_for_month(next_year, next_month)
         meals = prev_month_meals + month_meals + next_month_meals
 
-        mmp = MonthlyMealPlan(meal_yr_mnth, meals, print_weeks, print_only_meals)
+        mmp = MonthlyMealPlan(meal_yr_mnth, meals, print_weeks, print_only_meals, print_notes)
         mmp.output_filepath = f'MealPlan-{meal_yr}-{meal_mt:02}.pdf'
         mmp.output_type = 'S'
         pdf_bytestring = io.BytesIO(mmp.print_page())  # type: ignore

@@ -98,3 +98,8 @@ class PrintForm(forms.Form):
         initial=False,
         required=False
     )
+    print_notes = forms.BooleanField(
+        label='Print meal notes',
+        initial=True,
+        required=False
+    )
