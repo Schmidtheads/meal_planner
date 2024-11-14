@@ -32,7 +32,7 @@ class RecipeTypeForm(forms.ModelForm):
 
         for instance in RecipeType.objects.all():
             if str(instance.name).lower() == str(name).lower():
-                raise forms.ValidationError(f'There is already a Recipe Tag of "{name}"')
+                raise forms.ValidationError(f'There is already a Recipe Tag of "{string.capwords(str(name))}"')
 
         # Format recipe type to capital case
         return string.capwords(str(name))
