@@ -53,14 +53,34 @@ function showAddPopup(triggeringLink) {
     return false;
 }
 
+/**
+ * Closes popup window and optionally updates parent page
+ * 
+ * @param {*} win               reference to popup window 
+ * @param {int} newID           primary id key of new value
+ * @param {*} newRepr           reference to new value object
+ * @param {string} id           name of HTML element to be updated
+ * @param {string} element_type name of type of HTML element
+ */
 function closePopup(win, newID, newRepr, id, element_type="option") {
     switch(element_type) {
         case "checkbox":
+            // add new recipe type to checkbox list on recipe form
             element_id = "id_recipe_types" + newID;
-            $(id).append('<li><label for="' + element_id + '"><input type="checkbox" name="recipe_types" value="' + 
+            $(id).append('<div><label for="' + element_id + '"><input type="checkbox" name="recipe_types" value="' + 
                 newID + 
                 '" id="' + element_id + '" checked> ' + 
-                newRepr + '</label>');
+                newRepr + '</label></div>');
+  
+            // re-sort all recipe tags alphabetically
+            let all_tags = $(id)[0].childNodes;
+            var tags_array = [];
+            for(var i = 0, n; n = all_tags[i]; ++i) tags_array.push(n);
+            let alphabeticallyOrderedTags = tags_array.sort(function(a,b){
+                return $(a).find("label").outerText > $(b).find("label").outerText;
+            });
+            $(id).html(alphabeticallyOrderedTags);
+
             break;
         default:
             $(id).append('<option value=' + newID + ' selected >' + newRepr + '</option>');
