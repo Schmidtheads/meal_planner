@@ -76,9 +76,19 @@ function closePopup(win, newID, newRepr, id, element_type="option") {
             let all_tags = $(id)[0].childNodes;
             var tags_array = [];
             for(var i = 0, n; n = all_tags[i]; ++i) tags_array.push(n);
-            let alphabeticallyOrderedTags = tags_array.sort(function(a,b){
-                return $(a).find("label").outerText > $(b).find("label").outerText;
-            });
+            let alphabeticallyOrderedTags = tags_array.sort(
+                function(a,b){
+                    let a_text = $(a).find("label").text().trim();
+                    let b_text = $(b).find("label").text().trim();
+                    let ret_val = 0;
+                    if (a_text > b_text) {
+                        ret_val = 1;
+                    } else if (a_text < b_text) {
+                        ret_val = -1;
+                    }
+                    return ret_val;
+                }
+            );
             $(id).html(alphabeticallyOrderedTags);
 
             break;
