@@ -77,7 +77,7 @@ function closePopup(win, newID, newRepr, id, element_type="option") {
             var tags_array = [];
             for(var i = 0, n; n = all_tags[i]; ++i) tags_array.push(n);
             let alphabeticallyOrderedTags = tags_array.sort(
-                function(a,b){
+                function(a,b) {
                     let a_text = $(a).find("label").text().trim();
                     let b_text = $(b).find("label").text().trim();
                     let ret_val = 0;
@@ -98,3 +98,50 @@ function closePopup(win, newID, newRepr, id, element_type="option") {
     win.close();
 }
 
+/**
+ * Toggles display of unchecked checkbox elements within a checkbox list.
+ * Assumes checkbox list and elements are divs.
+ * 
+ * @param {string} parent_div_id id of parent div containing divs
+ * 
+ * @returns {bool} always returns false so form will not be closed
+ */
+function checkBoxToggleVisibility(parent_div_id, button_id) {
+    // Get reference to child nodes of parent div
+    let child_nodes = $(parent_div_id + ' input');
+
+    // Get reference to button
+    let button_node = '';
+    let img_src = '';
+    if (button_id != '') {
+        button_node = $(button_id).first()[0];
+        img_src = button_node.src;
+    } 
+
+    // Loop through child divs and hide/unhide
+    for(var i = 0, n; n = child_nodes[i]; ++i) {
+        // only process node if it is unchecked
+        if (n.checked == false) {
+            let checkbox_div = n.parentElement.parentElement;
+            if (checkbox_div.classList.contains('hidden_checkbox_item')) {
+                // element is hidden - unhide it
+                checkbox_div.classList.remove('hidden_checkbox_item');
+                checkbox_div.style.display = '';
+                if (button_node != '') {
+                    button_node.src = img_src.replace('visible', 'invisible');
+                    button_node.title = 'Hide unselected recipe tags';
+                }
+            } else {
+                // element is visible - hide it
+                checkbox_div.classList.add('hidden_checkbox_item');
+                checkbox_div.style.display = 'none';
+                if (button_node != '') {
+                    button_node.src = img_src.replace('in', '');
+                    button_node.title = 'Show unselected recipe tags';
+                }
+            }
+        }
+    }
+    
+    return false;
+}
