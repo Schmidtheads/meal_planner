@@ -45,8 +45,11 @@
                                 <a href="{% url 'recipe_type_create' %}" id="add_recipe_type" style="cursor: pointer; cursor: hand;"
                                 onclick="return showAddPopup(this);">
                                 <img src="{% static 'home/images/plus24.png' %}" title="Add new Recipe Tag"></a>
-                            </div>    
+                             </div>    
                             {% endif %}
+                            <div>
+                                <img id="toggle_unselected" src="{% static 'home/images/invisible24.png' %}" title="Hide unselected Recipe Tags" style="cursor: pointer; cursor: hand;" onclick="checkBoxToggleVisibility('#id_recipe_types', '#toggle_unselected');">
+                            </div>
                         </td>
                     </tr>
                     <tr><th><label for="id_rating">Rating:</label></th>
