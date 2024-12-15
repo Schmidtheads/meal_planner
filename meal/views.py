@@ -6,21 +6,16 @@ Author:         M. Schmidt
 '''
 
 import calendar
-from datetime import datetime, date
-from django.contrib.auth.decorators import login_required, permission_required
-from django.http import HttpResponse, FileResponse
-from django.shortcuts import render, get_object_or_404, redirect
-from django.http import JsonResponse
 import io
 
-from .calendar_report import MonthlyMealPlan
+from datetime import datetime, date
+from django.contrib.auth.decorators import login_required, permission_required
+from django.http import HttpResponse, FileResponse, JsonResponse
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
-import io
 
 from .calendar_report import MonthlyMealPlan
 from recipe.search import Search
-from .models import Meal
-from .forms import MealForm, PrintForm
 from .models import Meal
 from .forms import MealForm, PrintForm
 
@@ -34,9 +29,13 @@ def detail(request, id):
     meal = get_object_or_404(Meal, pk=id)
 
     if request.method == "POST":
-        form = MealForm(request.POST, instance=meal)
-        if form.is_valid():
-            form.save()
+        if 'meal_update' in request.POST:
+            form = MealForm(request.POST, instance=meal)
+            if form.is_valid():
+                form.save()
+                return redirect("meals")
+        if 'meal_delete' in request.POST:
+            meal.delete()
             return redirect("meals")
     else:
         # Create form for new or update entry - scheduled_date is uneditable
@@ -47,10 +46,15 @@ def detail(request, id):
     # For consistent styling purposes assign form-control class to date widget to match readonly custom widget
     scheduled_date_widget.attrs.update({'class': 'form-control'})
 
+    # Only allow deleting of meals that occur today or in the future
+    can_delete = meal.scheduled_date >= datetime.now().date()
+
     return render(request, "meal/detail.html",
                   {"title": "Meal Planner",
                    "year": datetime.now().year,
                    "company": "Schmidtheads Inc.",
+                   "can_clear": False,
+                   "can_delete": can_delete,
                    "form": form})
 
 
@@ -107,6 +111,8 @@ def new(request):
                   {"title": "Meal Planner",
                    "year": datetime.now().year,
                    "company": "Schmidtheads Inc.",
+                   "can_clear": True,
+                   "can_delete": False,
                    "form": form})
 
 
@@ -119,7 +125,6 @@ def meals(request):
     # loads, it will send an Ajax request to retrieve the meals
     return render(request, 'meal/meals.html',
                   {'title': 'Meal Planner',
-                   'year': datetime.now().year,
                    'year': datetime.now().year,
                    'company': 'Schmidtheads Inc.'})
 
@@ -179,10 +184,8 @@ def get_meals_for_month(request):
     @return json response string
     '''
 
-    meal_year = int(request.GET.get('year', datetime.now().year))
-    meal_month = int(request.GET.get('month', datetime.now().month))
-    meal_year = int(request.GET.get('year', datetime.now().year))
-    meal_month = int(request.GET.get('month', datetime.now().month))
+    meal_year = int(request.GET.get('year', default=datetime.now().year))
+    meal_month = int(request.GET.get('month', default=datetime.now().month))
 
     meals_json = _get_meals_for_month(meal_year, meal_month)
 
@@ -200,10 +203,8 @@ def search_for_recipes(request):
     @param request: json representing the query; list of search tags
     '''
 
-
     search_keys = str(request.GET.get('keys'))
     results = _search_for_recipes(search_keys)
-
 
     data = {
         'recipes': results
@@ -232,15 +233,11 @@ def _get_meals_for_month(year: int, month: int):
         check_date = f'{year}-{month:02}-{day:02}'
         meal = meals_for_month.filter(
             scheduled_date=date(year, month, day)).first()
-        check_date = f'{year}-{month:02}-{day:02}'
-        meal = meals_for_month.filter(
-            scheduled_date=date(year, month, day)).first()
-
+ 
         meal_info = {'scheduled_date': check_date}
         meal_info.update(_get_recipe_info_for_meal(meal))
 
         meals_info.append(meal_info)
-
 
     return meals_info
 
@@ -363,6 +360,7 @@ def _number_of_times_recipe_made(recipe):
     count = meals_w_recipe.count()
 
     return count
+
 
 def _get_previous_month_and_year(year, month):
     '''
