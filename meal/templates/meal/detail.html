@@ -39,7 +39,13 @@
                     </table>
                     <p class="buttonContainer">
                         {% csrf_token %}
-                        <button class="btn btn-default" type="submit">Update</button>
+                        <button class="btn btn-default" name="meal_update" type="submit">Update</button>
+                        {%if can_delete %}
+                        <button class="btn btn-default" name="meal_delete" type="submit">Delete</button>
+                        {% endif %}
+                        {% if can_clear %}
+                        <button class="btn" type="reset">Clear</button>
+                        {% endif %}
                     </p>
                 </fieldset>
             </form>
