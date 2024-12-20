@@ -52,7 +52,8 @@ class Recipe(models.Model):
     name = models.CharField(max_length=50)
     cook_book = models.ForeignKey(Cookbook, on_delete=models.CASCADE, blank=True, null=True)
     cook_book = models.ForeignKey(Cookbook, on_delete=models.CASCADE, blank=True, null=True)
-    page_number = models.PositiveSmallIntegerField()
+    url_ref = models.URLField(max_length=350, blank=True)
+    page_number = models.PositiveSmallIntegerField(blank=True, null=True)
     notes = models.CharField(max_length=750, blank=True)
     recipe_types = models.ManyToManyField(RecipeType)
 
