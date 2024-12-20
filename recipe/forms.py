@@ -14,9 +14,19 @@ class RecipeForm(forms.ModelForm):
     class Meta:
         model = Recipe
         fields = '__all__'
+        widgets = {
+            'notes': forms.Textarea(attrs={'rows':'5', 'cols': '60'})
+            }
         
     def __init__(self, readonly_form=False, *args, **kwargs):
         super(RecipeForm, self).__init__(*args, **kwargs)
+
+        # Adjust width of URL field
+        self.fields['url_ref'].widget.attrs.update(
+            {'size': '60'}
+        )
+
+        # Set read only state of form
         if readonly_form:
             for field in self.fields:
                 self.fields[field].disabled = True

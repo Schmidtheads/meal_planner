@@ -67,6 +67,10 @@
                         <td>
                             {{ form.url }}
                             {{ form.url.errors }}
+                            {{ form.url_ref.errors }}
+                            {% if form.url.value|length > 0 %}
+                            <a href="{{ form.url.value }}" target="_blank">Cookbook Link</a>
+                            {% endif %}
                         </td>
                     </tr>
                     <tr class="inputRow"><th><label for="id_image">Image:</label></th>

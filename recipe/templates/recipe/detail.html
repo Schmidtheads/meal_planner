@@ -29,6 +29,15 @@
                             {{ form.page_number.errors }}
                         </td>
                     </tr>
+                    <tr class="inputRow"><th><label for="id_url_ref">URL:</label></th>
+                        <td>
+                            {{ form.url_ref }}
+                            {{ form.url_ref.errors }}
+                            {% if form.url_ref.value|length > 0 %}
+                            <a href="{{ form.url_ref.value }}" target="_blank">Recipe Link</a>
+                            {% endif %}
+                        </td>
+                    </tr>
                     <tr class="inputRow"><th><label for="id_notes">Notes:</label></th>
                         <td>{{ form.notes }}</td>
                     </tr>
