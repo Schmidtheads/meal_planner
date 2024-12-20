@@ -4,6 +4,7 @@ Description: Defines forms for Meal objects
 '''
 
 from django import forms
+from django.utils.functional import cached_property
 from django.utils.safestring import mark_safe
 from django.template import loader
 
@@ -43,6 +44,17 @@ class RecipeWidget(forms.widgets.Select):
         '''
         self._recipe_name = value
 
+    @cached_property
+    def media(self):
+        '''
+        Sets up CSS file imports
+        Based on example found here: https://tinyurl.com/pn7ytmpx
+        '''
+        widget_media = super().media
+        return forms.Media(
+            css={"all": ("home/content/site.css",)},
+        ) # D:\meal_planner\home\static\home\content\site.css
+    
 
 class MealForm(forms.ModelForm):
     '''

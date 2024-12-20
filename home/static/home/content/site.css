@@ -87,6 +87,16 @@ input:disabled+label {
     margin: 15px;
 }
 
+/* 
+   On form help text styling
+   Meant for custom recipe widget, but doesn't currently
+   work as need to figure how to get css file imported by widget.
+*/
+.helpText {
+    font-size: 11px;
+    left: 20px;
+}
+
 /* styles for Cookbook pages*/
 
 .columnleft {
@@ -406,6 +416,22 @@ input:disabled+label {
     */
     position: sticky;
 }
+
+/* 
+    Style to keep modal close button on same line as header
+*/
+.modal-header {
+    display: flex;
+    justify-content: left;
+    position: relative;
+}
+
+.modal-close-button {
+    position: absolute;
+    right: 20;
+    
+}
+
 
 /*
     Keep the footer in a modal dialog at the bottom
