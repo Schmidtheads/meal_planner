@@ -47,10 +47,14 @@
 
 {% endblock %}
 
-
 {% block scripts %}
 
-    {% load static %}
+{% load static %}
 <script src="{% static 'home/scripts/jquery.validate.min.js' %}"></script>
-
+<script>
+    // Focus on username input on form load
+    // Since id of input element is generated from Django template language,
+    // had to inspect element when form was running to get id used below.
+    document.getElementById('id_username').focus();
+</script>
 {% endblock %}
