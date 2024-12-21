@@ -295,6 +295,9 @@ function wrap_text(text, max_length = MAX_TOOLTIP_WIDTH) {
  * @param {int} year  year as four digit number
  */
 function get_meals_for_month(month, year) {
+    // Set busy cusrsor for page while loading
+    $("body").css("cursor", "progress");
+
     // When submitting the month, add one because for some
     // stupid reason, JavaScript has January = 0,.. December = 11
     $.ajax({
@@ -305,7 +308,9 @@ function get_meals_for_month(month, year) {
         },
         dataType: 'json',
         success: function (data) {
-            showCalendar(month, year, data)
+            showCalendar(month, year, data);
+            // set cursor to normal after load complete
+            $("body").css("cursor", "default");
         }
     });
 
