@@ -7,6 +7,12 @@
  * Notes:
  */
 
+/**
+ * Sorts the rows in an HTML table 
+ *  
+ * @param {*} tableName - name of the table element
+ * @param {*} n         - column number to sort by
+ */
 function sortTable(tableName, n) {
     var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
     table = document.getElementById(tableName);

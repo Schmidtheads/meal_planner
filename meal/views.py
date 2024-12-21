@@ -327,6 +327,8 @@ def _search_for_recipes(search_keys: str) -> list:
             }
             result_list.append(candidate)
 
+        # Sort result list by recipe name
+        result_list = sorted(result_list, key=lambda d: d['name'], reverse = True)
     return result_list
 
 
