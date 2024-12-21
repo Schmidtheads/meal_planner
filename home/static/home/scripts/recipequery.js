@@ -62,11 +62,11 @@ function recipeSearch() {
  *  If a match score has been calculated then that would be good to show.
  */
 function showResults(recipeList) {
-    // This will simulate a search by populating the
-    // custom recipe search widget with "results"
+
+    let table_id = "id_recipe_search_results" // id for search result table
 
     // Find a <table> element with id="myTable":
-    var table = document.getElementById("id_recipe_search_results");
+    var table = document.getElementById(table_id);
 
     // Clear any previous results
     clearResults();
@@ -98,6 +98,14 @@ function showResults(recipeList) {
             // Make the first column (for the ID) hidden
             if (col_idx == 0) {
                 hcell.classList.add("hidden-xs", "hidden-sm", "hidden-md", "hidden-lg");
+            }
+
+            // Add onclick event to sort by column
+            // Use list so columns can be easily included/exculded - just update list
+            // 1-Recipe Name, 2-Cookbook, 3-Author, 4-Last Made Date, 5-Rating, 6-Times Made
+            if ([1,2,3,4,5,6].includes(col_idx)) {
+                hcell.setAttribute("onclick", "sortTable('" + table_id + "'," + col_idx + ")");
+                hcell.classList.add('sortableHeader');
             }
 
             // capitalize first character
@@ -209,8 +217,8 @@ function launch() {
 
     $recipe_search.find('.modal-content')
     .css({
-      width: 625,
-      height: 425,
+      width: 850,
+      height: 500,
     })
     .resizable({
       minWidth: 625,
