@@ -51,7 +51,10 @@ class RecipeWidget(forms.widgets.Select):
         Based on example found here: https://tinyurl.com/pn7ytmpx
         '''
         widget_media = super().media
+        # Not sure if js argument does anything as including table.js as part of meals/details.html
+        # appears to actually provide access to javascript
         return forms.Media(
+            js=widget_media._js + ["home/scripts/table.js"],
             css={"all": ("home/content/site.css",)},
         ) # D:\meal_planner\home\static\home\content\site.css
     
