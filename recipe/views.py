@@ -127,7 +127,7 @@ def recipes(request):
     '''
 
     # Get all recipes, then sort alphabetically
-    all_recipes = Recipe.objects.all().order_by('name').values()
+    all_recipes = Recipe.objects.all().order_by('name')
 
     return render(request, "recipe/list.html",
         {
