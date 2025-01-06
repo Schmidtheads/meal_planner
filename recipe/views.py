@@ -125,9 +125,13 @@ def recipes(request):
     '''
     View to list all recipes
     '''
+
+    # Get all recipes, then sort alphabetically
+    all_recipes = Recipe.objects.all().order_by('name')
+
     return render(request, "recipe/list.html",
         {
-            "recipes": Recipe.objects.all(),
+            "recipes": all_recipes,
             "table_name": "recipes",
             "year": datetime.now().year,
             "company": "Schmidtheads Inc.",
