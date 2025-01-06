@@ -76,6 +76,19 @@ input:disabled+label {
     padding: 15px;
 }
 
+/* cell with clipped text display */
+.viewCellLimit50 {
+    padding: 15px;
+    text-overflow: ellipsis;
+    width: 10%;
+}
+
+/* notes cell */
+.viewCellNotes {
+    padding: 15px;
+    width: 15%;
+}
+
 /* misc styles */
 
 .sortableHeader {

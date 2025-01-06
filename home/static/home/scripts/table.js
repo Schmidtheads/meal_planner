@@ -67,3 +67,25 @@ function sortTable(tableName, n) {
         }
     }
 }
+
+
+/**
+ * Make form busy and sort table column. Used when not making
+ * a callback to the server.
+ * 
+ * @param {str} table_name - name of table to sort
+ * @param {int} col - column number to sort on
+ */
+function sortTableColumn(table_name, col) {
+    let DELAY_FOR_REFRESH = 1000; // 1000ms, minimum setting
+    
+    // Set busy cusrsor for page while sorting
+    $("body").css("cursor", "progress");
+
+    // Change default header cursor to progess
+    setTimeout( () => {
+        sortTable(table_name, col);
+        // set cursor to normal after sort complete
+        $("body").css("cursor", "default");
+    }, DELAY_FOR_REFRESH)     
+}
