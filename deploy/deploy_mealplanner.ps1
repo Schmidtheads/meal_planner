@@ -6,7 +6,7 @@
 
     Usage:
 
-    install_mp.ps1 <config_file>
+    deploy_mealplanner.ps1 <config_file>
 #>
 
 #Requires -RunAsAdministrator
