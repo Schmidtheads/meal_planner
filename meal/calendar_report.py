@@ -102,6 +102,13 @@ class MonthlyMealPlan(FPDF):
         month = self.month if month is None else month
         year = self.year if year is None else year
         calendar_days = calendar.monthcalendar(year, month)
+
+        # edge case: February in non-leap year with first day of month on Sunday
+        # results in only 4 rows in calendar (where 5 is expected)
+        # In this case add extra row of zeros
+        if len(calendar_days) == 4:
+            calendar_days.append([0,0,0,0,0,0,0])
+            
         return calendar_days
 
 
