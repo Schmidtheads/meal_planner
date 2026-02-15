@@ -11,11 +11,30 @@ Notes:
 
 import calendar
 from datetime import datetime
+from dataclasses import dataclass
 from fpdf import FPDF
-from textwrap import wrap
 
 
 DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+
+@dataclass(frozen=True)
+class FontConfig:
+    family: str
+    style: str
+    size: int
+
+    @property
+    def line_height(self) -> float:
+        """Returns the 1.2x line height in inches."""
+        return (self.size / 72) * 1.2
+
+
+@dataclass(frozen=True)
+class AppFonts:
+    day: FontConfig
+    recipe: FontConfig
+    notes: FontConfig
+    cookbook: FontConfig
 
 
 class MonthlyMealPlan(FPDF):
@@ -23,12 +42,12 @@ class MonthlyMealPlan(FPDF):
     Class to Create a Monthly Meal Plan
     '''
 
-    FONTS = {
-        'day': {'family': 'Times', 'style': 'I', 'size': 8},
-        'recipe': {'family': 'Arial', 'style': '', 'size': 10},
-        'notes': {'family': 'Times', 'style': '', 'size': 6},
-        'cookbook': {'family': 'Arial', 'style': 'I', 'size': 8}
-    }
+    FONTS = AppFonts(
+        day=FontConfig(family='Times', style='BI', size=8),
+        recipe=FontConfig(family='Arial', style='', size=10),
+        notes=FontConfig(family='Times', style='', size=6),
+        cookbook=FontConfig(family='Arial', style='I', size=8)
+    )
 
     def __init__(self, month, meals, weeks_to_print: list=[], print_meals_only: bool=False, print_notes: bool=True):
         '''
@@ -342,11 +361,11 @@ class MonthlyMealPlan(FPDF):
         @param month: month of year as integer   
         '''
 
-        day_font = self.FONTS['day']
+        day_font = self.FONTS.day
         self.set_font(
-            day_font['family'],
-            day_font['style'],
-            day_font['size']
+            day_font.family,
+            day_font.style,
+            day_font.size
         )
         self.set_text_color(17, 120, 125)
         # month abbr if not current month
@@ -384,13 +403,13 @@ class MonthlyMealPlan(FPDF):
         @param c_border: border style
         '''
 
-        recipe_font = self.FONTS['recipe']         
+        recipe_font = self.FONTS.recipe        
         self.set_font(
-            recipe_font['family'],
-            recipe_font['style'],
-            recipe_font['size']
+            recipe_font.family,
+            recipe_font.style,
+            recipe_font.size
         )
-        #c_border = 0 if self.only_meals else 'LR'
+
         self.set_text_color(0, 0, 0)
 
         self.multi_cell(
@@ -411,24 +430,24 @@ class MonthlyMealPlan(FPDF):
         @param meal_notes: name of recipe to print        
         '''
 
-        cookbook_font = self.FONTS['cookbook']
-        notes_font = self.FONTS['notes']         
+        cookbook_font = self.FONTS.cookbook
+        notes_font = self.FONTS.notes         
         self.set_font(
-            notes_font['family'], 
-            notes_font['style'], 
-            notes_font['size']
+            notes_font.family, 
+            notes_font.style, 
+            notes_font.size
         )
 
-        fsize = notes_font['size'] / 72 * 1.2
+        fsize = notes_font.line_height
 
         # Determine if number of rows of meal notes need to be truncated
         # based on available space to print. Adjust font size by factor of 1.25
         used_space = y - cell_top
-        max_lines = self._get_max_lines(self.DAY_CELL_HEIGHT, used_space, cookbook_font['size'], notes_font['size'])
+        max_lines = self._get_max_lines(self.DAY_CELL_HEIGHT, used_space, cookbook_font.size, notes_font.size)
         lines = self.multi_cell(w=self.DAY_CELL_WIDTH, h=fsize, txt=meal_notes, split_only=True)
 
         if len(lines) > max_lines:
-            display_text = "\n".join(lines[:max_lines-1]) + "\n" + lines[max_lines-1][:10] + "..."
+            display_text = "\n".join(lines[:max_lines-1]) + "\n" + lines[max_lines-1][:-3] + "..."
         else:
             display_text = "\n".join(lines)
     
@@ -453,14 +472,15 @@ class MonthlyMealPlan(FPDF):
         #if cell_bottom > self.HEIGHT - self.margin_y:
         #    cell_bottom = self.HEIGHT - self.margin_y - 0.5
 
-        cookbook_font = self.FONTS['cookbook']
+        cookbook_font = self.FONTS.cookbook
         self.set_font(
-            cookbook_font['family'],
-            cookbook_font['style'],
-            cookbook_font['size']
+            cookbook_font.family,
+            cookbook_font.style,
+            cookbook_font.size
         )
+        self.set_text_color(33, 130, 63)
 
-        fsize = (cookbook_font['size'] / 72) * 1.2
+        fsize = cookbook_font.line_height
         start_y = cell_bottom - fsize
         self.set_xy(start_x, start_y)
         
@@ -519,49 +539,23 @@ class MonthlyMealPlan(FPDF):
 
 
     @staticmethod
-    def _get_max_lines(total_box_h, used_h, reserved_font_size, content_line_h):
+    def _get_max_lines(total_box_h, used_h, reserved_font_size, content_font_size):
+        '''
+        Get maximum number of lines supported for multi cell given constraints
+        
+        :param total_box_h: total height of grid cell
+        :param used_h: height already used in cell
+        :param reserved_font_size: size of font for reserved section after multi cell
+        :param content_font_size: size of font for content section (multi cell)
+        '''
         # Calculate how much vertical space the reserved font needs (in inches)
         reserved_h = (reserved_font_size / 72) * 1.2
-        
+
+        # Calculate acutal content height based on font
+        content_line_h = (content_font_size / 72) * 1.2
+
         # Calculate remaining space for the multi_cell
         available_h = total_box_h - used_h - reserved_h
         
         # Return the floor integer (you can't print half a line)
         return int(available_h // content_line_h)
-
-
-    def _wrap_text_for_cell(self, font_type: str, text: str):
-        '''
-        Determines if text needs to be wrapped
-
-        @param font_type: name of font type from self.FONTS
-        @param text: text to be wrapped
-        @returns: tuple of strings, one element per line
-        '''
-
-        # get current font (to revert back to after)
-        cur_font_family = self.font_family
-        cur_font_style = self.font_style
-        cur_font_size = self.font_size_pt
-
-        self.set_font(
-            self.FONTS[font_type]['family'],
-            self.FONTS[font_type]['style'],
-            self.FONTS[font_type]['size']
-        )
-
-        sw = self.get_string_width(text)
-        cw = self.CALENDAR_WIDTH / self.DAYS * .95   # reduce cell width with fudge factor
-
-        # if text has line breaks, split by those first
-        text_lines = text.split('\r\n')
-        rcl = []
-        for tline in text_lines:
-            wline = '' if len(tline) == 0 else wrap(tline, int(len(text) * (cw / sw))) 
-            rcl.extend(wline)
-        #rcl = [''] if len(text) == 0 else wrap(text, int(len(text) * (cw / sw)))
-
-        # restore original font
-        self.set_font(cur_font_family, cur_font_style, cur_font_size)
-        return rcl
-    
