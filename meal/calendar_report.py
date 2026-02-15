@@ -26,7 +26,7 @@ class MonthlyMealPlan(FPDF):
     FONTS = {
         'day': {'family': 'Times', 'style': 'I', 'size': 8},
         'recipe': {'family': 'Arial', 'style': '', 'size': 10},
-        'notes': {'family': 'Times', 'style': '', 'size': 5},
+        'notes': {'family': 'Times', 'style': '', 'size': 6},
         'cookbook': {'family': 'Arial', 'style': 'I', 'size': 8}
     }
 
@@ -212,6 +212,10 @@ class MonthlyMealPlan(FPDF):
         self.DAY_CELL_HEIGHT = usable_height / self.WEEKS
         self.DAY_CELL_START_Y = self.get_y()
 
+        # Disable automatic page breaks
+        # - prevents printing of cookbook and page triggering new page
+        self.set_auto_page_break(False)
+        
         for w in range(self.WEEKS):
             self._build_week(w)
 
@@ -258,7 +262,6 @@ class MonthlyMealPlan(FPDF):
 
         week_of_month = self.grid_days[week_no]
 
-        cell_top = -1
         cur_x = -1
         cur_y = -1
 
@@ -293,44 +296,30 @@ class MonthlyMealPlan(FPDF):
 
             # Set the cursor position for the content
             self.set_xy(x + 0.05, y + 0.05)
-
-            # Add the day number
-            
+          
             # Each calendar day is made of four sections/rows
-            # r=0: day of month
+            # r=0: (month abbreviation) day of month
             # r=1: recipe name
             # r=2: meal notes (if any)
             # r=3: cookbook and page
             # Process each section below
-            self._print_calendar_day(day_of_month, month, 2)
 
-            self.multi_cell(
-                self.DAY_CELL_WIDTH - 0.1,
-                0.15,
-                f'{recipe}\n{cookbook_abbr}   {page}',
-                0,
-                'L'
-            )
+            # Add the day number
+            self._print_calendar_day(day_of_month, month)
 
+            # Add Recipe name
+            self.set_xy(self.get_x(), self.get_y() +  0.1)  # put a little space between day and recipe
+            r_start_x = self.get_x()
+            self._print_recipe_name(recipe)
+
+            # Add meal notes (if any)
+            if len(meal_notes) > 0:
+                self.set_xy(r_start_x, self.get_y() + 0.01)  # put a little space between recipe and notes
+                self._print_meal_notes(y, self.get_x(), self.get_y(), meal_notes)
             
-            #     #recipe
-            #     cur_x = 28.35 + (self.CALENDAR_WIDTH / self.DAYS) * d
-            #     self._print_recipe_name(cur_x, cur_y, recipe, d, ln)
-            # elif r == 2 and self.meal_notes:
-            #     # meal notes
-            #     cur_x = 28.35 + (self.CALENDAR_WIDTH / self.DAYS) * d
-
-            #     # get number of lines for recipe
-            #     rcl = self._wrap_text_for_cell('recipe', recipe)
-
-            #     # determine start height for notes text, based on space recipe name takes
-            #     cur_y = week_cur_y + len(rcl) * self.FONTS['recipe']['size']
-
-            #     self._print_meal_notes(cell_top, cur_x, cur_y, meal_notes, d, ln)
-            # else:
-            #     #cookbook and page no
-            #     self._print_cookbook(cell_top, cookbook_abbr, page, d, ln)
-
+            # Add cookbook and page no
+            c_bottom_y = y + self.DAY_CELL_HEIGHT
+            self._print_cookbook(c_bottom_y, x, cookbook_abbr, page)
 
 
     def _get_meal_for_day(self, month: int, day: int):
@@ -346,12 +335,11 @@ class MonthlyMealPlan(FPDF):
         return next((meal for meal in self._meals if meal['scheduled_date'][-5:] == f'{month:02}-{day:02}'), None)
 
 
-    def _print_calendar_day(self, day_of_month: int, month: int, ln: int):
+    def _print_calendar_day(self, day_of_month: int, month: int):
         '''
         Output the day of month
         @param day_of_month: day of month as integer
-        @param month: month of year as integer
-        @param ln: line wrapping flag, 0 for stay on this line, 1 for next line        
+        @param month: month of year as integer   
         '''
 
         day_font = self.FONTS['day']
@@ -386,7 +374,7 @@ class MonthlyMealPlan(FPDF):
         )
 
 
-    def _print_recipe_name(self, x: float, y: float, recipe_name: str, ln: int=0, c_border=0):
+    def _print_recipe_name(self, recipe_name: str):
         '''
         Outputs a recipe to calendar, wrapping text if required
         @param x: curent abscissa location
@@ -402,110 +390,99 @@ class MonthlyMealPlan(FPDF):
             recipe_font['style'],
             recipe_font['size']
         )
-        c_border = 0 if self.only_meals else 'LR'
+        #c_border = 0 if self.only_meals else 'LR'
         self.set_text_color(0, 0, 0)
 
-        rcl = self._wrap_text_for_cell('recipe', recipe_name)
-
-        self.set_y(y)
-        self.set_x(x)
-        self.cell(
-            (self.CALENDAR_WIDTH / self.DAYS),
-            (self.CALENDAR_HEIGHT / self.WEEKS) * self.r1p,
-            align='L',
-            border=c_border,
-            ln=ln
+        self.multi_cell(
+            self.DAY_CELL_WIDTH - 0.1,
+            0.15,
+            recipe_name,
+            0,
+            'L'
         )
 
-        for c, value in enumerate(rcl):
-            y_offset = c * float( recipe_font['size']) 
-            #self.set_xy(x, y + y_offset)
-            self.set_y(y + y_offset)
-            self.set_x(x)
-            self.write(30, value)
 
-
-    def _print_meal_notes(self, cell_top: float, x: float, y: float, meal_notes: str, d: int, ln: int):
+    def _print_meal_notes(self, cell_top: float, x: float, y: float, meal_notes: str):
         '''
         Output meal notes, wrapping text if required
         @param cell_top: ordinate value of cell top
         @param x: curent abscissa location
         @param y: current ordinate location
         @param meal_notes: name of recipe to print        
-        @param d: day of week as integer
-        @param ln: line wrapping flag, 0 for stay on this line, 1 for next line
         '''
-        meal_font = self.FONTS['notes']         
-        self.set_font(
-            meal_font['family'], 
-            meal_font['style'], 
-            meal_font['size']
-        )
-        c_border = 0 if self.only_meals else 'LR'
-        self.set_text_color(0, 0, 0)
 
-        rcl = self._wrap_text_for_cell('notes', meal_notes)
+        cookbook_font = self.FONTS['cookbook']
+        notes_font = self.FONTS['notes']         
+        self.set_font(
+            notes_font['family'], 
+            notes_font['style'], 
+            notes_font['size']
+        )
+
+        fsize = notes_font['size'] / 72 * 1.2
 
         # Determine if number of rows of meal notes need to be truncated
         # based on available space to print. Adjust font size by factor of 1.25
-        max_lines = int(((cell_top + (self.CALENDAR_HEIGHT / self.WEEKS) * self.r1p) - y) / float(meal_font['size'] * 1.25))
-        rcl = rcl[0:max_lines]
+        used_space = y - cell_top
+        max_lines = self._get_max_lines(self.DAY_CELL_HEIGHT, used_space, cookbook_font['size'], notes_font['size'])
+        lines = self.multi_cell(w=self.DAY_CELL_WIDTH, h=fsize, txt=meal_notes, split_only=True)
 
-        self.set_y(y)
-        self.set_x(x)
-        self.cell(
-            (self.CALENDAR_WIDTH / self.DAYS),
-            (self.CALENDAR_HEIGHT / self.WEEKS) * self.r2p,
-            align='L',
-            border=c_border,
-            ln=ln
+        if len(lines) > max_lines:
+            display_text = "\n".join(lines[:max_lines-1]) + "\n" + lines[max_lines-1][:10] + "..."
+        else:
+            display_text = "\n".join(lines)
+    
+        self.multi_cell(
+            self.DAY_CELL_WIDTH,
+            fsize,
+            display_text,
+            0,
+            'L'
         )
 
-        for c, value in enumerate(rcl):
-            y_offset = c * float(meal_font['size'])
 
-            #self.set_xy(x, y + y_offset)
-            self.set_y(y + y_offset)
-            self.set_x(x)
-            self.write(30, value)
-
-
-    def _print_cookbook(self, cell_top: float, cookbook_abbr: str, page: int, d: int, ln: int):
+    def _print_cookbook(self, cell_bottom: float, start_x: float, cookbook_abbr: str, page: str):
         '''
         Output cookbook information
         @param cell_top: ordinate value of cell top
         @param cookbook_abbr: abbreviation of cookbook title
         @param page: page number of recipe
-        @param d: day of week as integer
-        @param ln: line wrapping flag, 0 for stay on this line, 1 for next line 
         '''
         
+        # hack
+        #if cell_bottom > self.HEIGHT - self.margin_y:
+        #    cell_bottom = self.HEIGHT - self.margin_y - 0.5
+
         cookbook_font = self.FONTS['cookbook']
         self.set_font(
             cookbook_font['family'],
             cookbook_font['style'],
             cookbook_font['size']
         )
-        c_border = 0 if self.only_meals else 'LB'
-        self.set_y(cell_top + (self.CALENDAR_HEIGHT / self.WEEKS) * self.r1p) 
-        self.set_x(28.35 + (self.CALENDAR_WIDTH / self.DAYS) * d)
+
+        fsize = (cookbook_font['size'] / 72) * 1.2
+        start_y = cell_bottom - fsize
+        self.set_xy(start_x, start_y)
+        
+        # print the cookbook abbreviation
         self.cell(
-            (self.CALENDAR_WIDTH / self.DAYS) / 2,
-            (self.CALENDAR_HEIGHT / self.WEEKS) * self.r3p,
-            txt = f'{cookbook_abbr}',
-            align = 'L',
-            border = c_border,
+            self.DAY_CELL_WIDTH,
+            fsize,
+            txt=cookbook_abbr,
+            align='L',
             ln=0
         )
-        c_border = 0 if self.only_meals else 'BR'
+
+        # print the page number 
+        self.set_x(start_x)
         self.cell(
-            (self.CALENDAR_WIDTH / self.DAYS) / 2,
-            (self.CALENDAR_HEIGHT / self.WEEKS) * self.r3p,
+            self.DAY_CELL_WIDTH,
+            fsize,
             txt = f'{page}',
             align = 'R',
-            border = c_border,
-            ln=ln
+            ln=0
         )
+
 
     def _get_next_month(self, month: int) -> tuple:
         '''
@@ -539,6 +516,18 @@ class MonthlyMealPlan(FPDF):
             prev_month_yr = self.year - 1
 
         return (prev_month_int, prev_month_yr)
+
+
+    @staticmethod
+    def _get_max_lines(total_box_h, used_h, reserved_font_size, content_line_h):
+        # Calculate how much vertical space the reserved font needs (in inches)
+        reserved_h = (reserved_font_size / 72) * 1.2
+        
+        # Calculate remaining space for the multi_cell
+        available_h = total_box_h - used_h - reserved_h
+        
+        # Return the floor integer (you can't print half a line)
+        return int(available_h // content_line_h)
 
 
     def _wrap_text_for_cell(self, font_type: str, text: str):
