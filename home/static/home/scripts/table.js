@@ -7,13 +7,87 @@
  * Notes:
  */
 
+function getSortableValue(val) {
+    if (!val) return "";
+    val = val.trim();
+
+    // 1. Check for Date Format: dd-MMM-yyyy
+    const dateRegex = /^(\d{2})-([a-zA-Z]{3})-(\d{4})$/;
+    const dateMatch = val.match(dateRegex);
+    if (dateMatch) {
+        const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+        const day = parseInt(dateMatch[1]);
+        const monthIndex = months.indexOf(dateMatch[2].toLowerCase());
+        const year = parseInt(dateMatch[3]);
+        
+        if (monthIndex !== -1) {
+            const d = new Date(year, monthIndex, day);
+            // Return timestamp for numeric comparison
+            if (!isNaN(d.getTime())) return d.getTime();
+        }
+    }
+
+    // 2. Check for Numeric Value
+    // We remove commas (e.g., 1,200.50) to treat them as pure numbers
+    const cleanNum = val.replace(/,/g, '');
+    if (cleanNum !== "" && !isNaN(cleanNum)) {
+        return parseFloat(cleanNum);
+    }
+
+    // 3. Default to String
+    return val.toLowerCase();
+}
+
+/**
+ * Enhanced Table Sort Function
+ * @param {string} tableName - The table id name reference
+ * @param {number} column - Index of the column
+  */
+function sortTable(tableName, column) {
+    const table = document.getElementById(tableName);
+    const tbody = table.tBodies[0];
+
+    const header = table.querySelectorAll("th")[column];
+    // Check current state: default to 'desc' so the first click becomes 'asc'
+    const currentDir = header.getAttribute("data-sort") === "asc" ? "desc" : "asc";
+    const isAsc = currentDir === "asc";
+
+    const rows = Array.from(tbody.querySelectorAll("tr:not(thead tr)"));
+
+    const sortedRows = rows.sort((a, b) => {
+        const aColText = a.querySelector(`td:nth-child(${column + 1})`).textContent;
+        const bColText = b.querySelector(`td:nth-child(${column + 1})`).textContent;
+
+        const aValue = getSortableValue(aColText);
+        const bValue = getSortableValue(bColText);
+
+        if (aValue > bValue) return isAsc ? 1 : -1;
+        if (aValue < bValue) return isAsc ? -1 : 1;
+        return 0;
+    });
+
+    // Reset sort indicators on all other headers
+    table.querySelectorAll("th").forEach(th => th.removeAttribute("data-sort"));
+    
+    // Set the new state on the active header
+    header.setAttribute("data-sort", currentDir);
+
+    // Re-append sorted rows to the tbody
+    while (tbody.firstChild) {
+        tbody.removeChild(tbody.firstChild);
+    }
+    tbody.append(...sortedRows);
+}
+
+
+
 /**
  * Sorts the rows in an HTML table 
  *  
  * @param {*} tableName - name of the table element
  * @param {*} n         - column number to sort by
  */
-function sortTable(tableName, n) {
+function sortTable_old(tableName, n) {
     var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
     table = document.getElementById(tableName);
     switching = true;

@@ -423,11 +423,16 @@ input:disabled+label {
     /*overflow-y:auto;*/
 }
 
+
+/* Table header */
 .table_header {
-    /*
-        Keep table header at top
-    */
     position: sticky;
+    top: 0;
+    background-color: #ffffff; /* Sticky headers need a solid background to hide rows sliding under */
+    z-index: 10;
+    cursor: pointer;
+    white-space: nowrap;
+    padding-right: 25px; /* Create space for the arrow so it doesn't overlap text */
 }
 
 /* 
