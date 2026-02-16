@@ -222,13 +222,16 @@ function createDayElement(date, meal, month, year) {
         dayDiv.appendChild(recipeSpan);
         dayDiv.appendChild(document.createElement('br')); // create line break
 
-        // If the page number for the recipe is 0 (zero), it is either because
-        // the recipe is not from a book (e.g. a website or recipe card) or
-        // the meal may be "Leftovers" or "Dine Out".
-        // So there is no need to add the cookbook & page number to the calendar date.
-        if (page_number != 0) {
+        // If the Cookbook for a recipe is null or emtpy OR is equal to "Unknown"
+        // there is no need to add the cookbook & page number to the calendar date.
+        if (cookbook_title.length > 0 && cookbook_title != 'Unknown') {
             dayDiv.append(cookbookDiv);
-            dayDiv.appendChild(pageSpan);
+            
+            // if page number is zero it is likely because it is from a website or
+            // binder or recipe box, so no need to include it in the calendar
+            if (page_number != 0) {
+                dayDiv.appendChild(pageSpan);
+            }
         }
     }
     else {
