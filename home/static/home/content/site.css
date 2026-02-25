@@ -425,7 +425,7 @@ input:disabled+label {
 
 
 /* Table header */
-.table_header {
+.sortableHeader {
     position: sticky;
     top: 0;
     background-color: #ffffff; /* Sticky headers need a solid background to hide rows sliding under */
@@ -433,6 +433,42 @@ input:disabled+label {
     cursor: pointer;
     white-space: nowrap;
     padding-right: 25px; /* Create space for the arrow so it doesn't overlap text */
+}
+
+
+/* Base style for your headers */
+/*
+.sortableHeader {
+  cursor: pointer;
+  position: relative;
+  padding-right: 25px !important; /* Ensures space so text doesn't overlap the arrow 
+  user-select: none; /* Prevents text highlighting on fast clicks 
+}
+*/
+
+/* Common style for the arrow container */
+.sortableHeader::after {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.8em;
+  opacity: 0.3; /* Faded when not active */
+  content: '\25B4\25BE'; /* Small up and down triangles combined */ 
+}
+
+/* Styling for Ascending (Up) */
+.sortableHeader.asc::after {
+  content: '\25B2'; /* Solid Up Triangle */
+  opacity: 1;
+  color: #007bff; /* Optional: give it a highlight color */
+}
+
+/* Styling for Descending (Down) */
+.sortableHeader.desc::after {
+  content: '\25BC'; /* Solid Down Triangle */
+  opacity: 1;
+  color: #007bff;
 }
 
 /* 

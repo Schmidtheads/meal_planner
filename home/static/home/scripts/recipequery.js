@@ -81,7 +81,6 @@ function showResults(recipeList) {
         // Add table headers
         // Create an empty <thead> element and add it to the table:
         var header = table.getElementsByTagName('thead')[0];
-        header.classList.add("table_header");  // make table header sticky
 
         // Create an empty <tr> element and add it to the first position of <thead>:
         var row = header.insertRow(0);
@@ -94,7 +93,6 @@ function showResults(recipeList) {
         var col_idx = 0;
         for (const header_title in first_row) {
             const hcell = document.createElement('th')
-            //var hcell = row.insertCell(col_idx);
 
             // Make the first column (for the ID) hidden
             if (col_idx == 0) {
