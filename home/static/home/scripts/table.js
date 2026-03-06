@@ -70,8 +70,15 @@ function sortTable(tableName, column) {
         const aCol = a.querySelector(`td:nth-child(${column + 1})`);
         const bCol = b.querySelector(`td:nth-child(${column + 1})`);
         
-        const aValue = getSortableValue(aCol ? aCol.textContent : "");
-        const bValue = getSortableValue(bCol ? bCol.textContent : "");
+        var aValue = getSortableValue(aCol ? aCol.textContent : "");
+        var bValue = getSortableValue(bCol ? bCol.textContent : "");
+
+        // special case - if one of the values is numeric and the other is string convert string to zero
+        if (Number.isFinite(aValue) && typeof bValue === "string") {
+            bValue = 0;
+        } else if (Number.isFinite(bValue) && typeof aValue === "string") {
+            aValue = 0;
+        }
 
         if (aValue > bValue) return isAsc ? 1 : -1;
         if (aValue < bValue) return isAsc ? -1 : 1;
