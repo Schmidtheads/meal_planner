@@ -7,67 +7,86 @@
  * Notes:
  */
 
-/**
- * Sorts the rows in an HTML table 
- *  
- * @param {*} tableName - name of the table element
- * @param {*} n         - column number to sort by
- */
-function sortTable(tableName, n) {
-    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-    table = document.getElementById(tableName);
-    switching = true;
-    //Set the sorting direction to ascending:
-    dir = "asc";
-    /*Make a loop that will continue until
-    no switching has been done:*/
-    while (switching) {
-        //start by saying: no switching is done:
-        switching = false;
-        rows = table.rows;
-        /*Loop through all table rows (except the
-        first, which contains table headers):*/
-        for (i = 1; i < (rows.length - 1); i++) {
-            //start by saying there should be no switching:
-            shouldSwitch = false;
-            /*Get the two elements you want to compare,
-            one from current row and one from the next:*/
-            x = rows[i].getElementsByTagName("TD")[n];
-            y = rows[i + 1].getElementsByTagName("TD")[n];
-            /*check if the two rows should switch place,
-            based on the direction, asc or desc:*/
-            if (dir == "asc") {
-                if (x.innerText.toLowerCase() > y.innerText.toLowerCase()) {
-                    //if so, mark as a switch and break the loop:
-                    shouldSwitch = true;
-                    break;
-                }
-            } else if (dir == "desc") {
-                if (x.innerText.toLowerCase() < y.innerText.toLowerCase()) {
-                    //if so, mark as a switch and break the loop:
-                    shouldSwitch = true;
-                    break;
-                }
-            }
-        }
-        if (shouldSwitch) {
-            /*If a switch has been marked, make the switch
-            and mark that a switch has been done:*/
-            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-            switching = true;
-            //Each time a switch is done, increase this count by 1:
-            switchcount++;
-        } else {
-            /*If no switching has been done AND the direction is "asc",
-            set the direction to "desc" and run the while loop again.*/
-            if (switchcount == 0 && dir == "asc") {
-                dir = "desc";
-                switching = true;
-            }
+function getSortableValue(val) {
+    if (!val) return "";
+    val = val.trim();
+
+    // 1. Check for Date Format: dd-MMM-yyyy
+    const dateRegex = /^(\d{2})-([a-zA-Z]{3})-(\d{4})$/;
+    const dateMatch = val.match(dateRegex);
+    if (dateMatch) {
+        const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+        const day = parseInt(dateMatch[1]);
+        const monthIndex = months.indexOf(dateMatch[2].toLowerCase());
+        const year = parseInt(dateMatch[3]);
+        
+        if (monthIndex !== -1) {
+            const d = new Date(year, monthIndex, day);
+            // Return timestamp for numeric comparison
+            if (!isNaN(d.getTime())) return d.getTime();
         }
     }
+
+    // 2. Check for Numeric Value
+    // We remove commas (e.g., 1,200.50) to treat them as pure numbers
+    const cleanNum = val.replace(/,/g, '');
+    if (cleanNum !== "" && !isNaN(cleanNum)) {
+        return parseFloat(cleanNum);
+    }
+
+    // 3. Default to String
+    return val.toLowerCase();
 }
 
+
+/**
+ * Enhanced Table Sort Function
+ * @param {string} tableName - The table id name reference
+ * @param {number} column - Index of the column
+ */
+function sortTable(tableName, column) {
+    const table = document.getElementById(tableName);
+    const tbody = table.tBodies[0];
+    
+    // 1. Get the specific header based on the index passed in onclick
+    // We use all 'th' because your index (1, 2, etc.) includes the hidden ID column
+    const allHeaders = table.querySelectorAll("th");
+    const header = allHeaders[column];
+
+    // 2. Toggle Classes (matching your 'sortableHeader' class)
+    const isAsc = !header.classList.contains("asc");
+    
+    // Remove 'asc' and 'desc' from ALL headers to reset icons
+    allHeaders.forEach(th => th.classList.remove("asc", "desc"));
+    
+    // Apply the new class
+    header.classList.add(isAsc ? "asc" : "desc");
+
+    const rows = Array.from(tbody.querySelectorAll("tr"));
+
+    // 3. Sorting Logic
+    const sortedRows = rows.sort((a, b) => {
+        // Use column + 1 because nth-child is 1-indexed (1 = ID, 2 = Name...)
+        const aCol = a.querySelector(`td:nth-child(${column + 1})`);
+        const bCol = b.querySelector(`td:nth-child(${column + 1})`);
+        
+        var aValue = getSortableValue(aCol ? aCol.textContent : "");
+        var bValue = getSortableValue(bCol ? bCol.textContent : "");
+
+        // special case - if one of the values is numeric and the other is string convert string to zero
+        if (Number.isFinite(aValue) && typeof bValue === "string") {
+            bValue = 0;
+        } else if (Number.isFinite(bValue) && typeof aValue === "string") {
+            aValue = 0;
+        }
+
+        if (aValue > bValue) return isAsc ? 1 : -1;
+        if (aValue < bValue) return isAsc ? -1 : 1;
+        return 0;
+    });
+
+    tbody.append(...sortedRows);
+}
 
 /**
  * Make form busy and sort table column. Used when not making

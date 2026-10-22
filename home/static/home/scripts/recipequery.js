@@ -81,7 +81,6 @@ function showResults(recipeList) {
         // Add table headers
         // Create an empty <thead> element and add it to the table:
         var header = table.getElementsByTagName('thead')[0];
-        header.classList.add("table_header");  // make table header sticky
 
         // Create an empty <tr> element and add it to the first position of <thead>:
         var row = header.insertRow(0);
@@ -93,7 +92,7 @@ function showResults(recipeList) {
         // Insert a new cell (<td>) at the first position of the "new" <tr> element:
         var col_idx = 0;
         for (const header_title in first_row) {
-            var hcell = row.insertCell(col_idx);
+            const hcell = document.createElement('th')
 
             // Make the first column (for the ID) hidden
             if (col_idx == 0) {
@@ -110,8 +109,9 @@ function showResults(recipeList) {
 
             // capitalize first character
             var header_name = header_title.charAt(0).toUpperCase() + header_title.slice(1);
+            hcell.innerHTML = "<b>" + header_name + "</b>";
+            row.appendChild(hcell);
 
-            hcell.innerHTML = "<b>" + header_name + "</b>"
             col_idx++;
         }
 
