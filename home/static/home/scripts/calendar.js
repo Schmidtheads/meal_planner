@@ -143,6 +143,7 @@ function createDayElement(date, meal, month, year) {
     let cookbook_id = meal.cookbook_id;
     let cookbook_title = meal.cookbook;
     let cookbook_author = meal.author;
+    let has_url = meal.has_url;
 
     let dayDiv = document.createElement('div');
   
@@ -190,6 +191,17 @@ function createDayElement(date, meal, month, year) {
 
         // Create div to hold cookbook abbreviation and page number
         let cookbookDiv = document.createElement('div');
+        //TODO: if recipe has_url add image to indicate that it is a web recipe
+        if (has_url) {
+            let webRecipeImg = document.createElement('img');
+            webRecipeImg.src = '/static/home/images/world-wide-web-globe20.png';
+            webRecipeImg.classList.add('left');
+            // add a little padding to the right of the image so it doesn't run into the cookbook abbreviation
+            webRecipeImg.style.paddingRight = '2px';    
+            webRecipeImg.title = 'Web Recipe';
+            //dayDiv.appendChild(webRecipeImg);
+            cookbookDiv.appendChild(webRecipeImg);
+        }
         cookbookDiv.classList.add('cookbook_text', 'left', 'calendartooltip');
         let cookbookText = document.createTextNode(cookbook_abbr);
         cookbookDiv.appendChild(cookbookText);
