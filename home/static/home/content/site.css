@@ -91,10 +91,6 @@ input:disabled+label {
 
 /* misc styles */
 
-.sortableHeader {
-    cursor: pointer;
-}
-
 .buttonContainer {
     text-align:center;
     margin: 15px;
@@ -426,15 +422,17 @@ input:disabled+label {
 
 /* Table header */
 .sortableHeader {
-    position: sticky;
-    top: 0;
-    background-color: #ffffff; /* Sticky headers need a solid background to hide rows sliding under */
-    z-index: 10;
     cursor: pointer;
     white-space: nowrap;
     padding-right: 25px; /* Create space for the arrow so it doesn't overlap text */
 }
 
+.searchHeader {
+    position: sticky;
+    top: 0;
+    background-color: #ffffff; /* Sticky headers need a solid background to hide rows sliding under */
+    z-index: 10;
+}
 
 /* Base style for your headers */
 /*
