@@ -13,6 +13,7 @@ import calendar
 from datetime import datetime
 from dataclasses import dataclass
 from fpdf import FPDF
+from pathlib import Path
 
 
 DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
@@ -204,7 +205,7 @@ class MonthlyMealPlan(FPDF):
         if not self.output_filepath is None:
             # from https://stackoverflow.com/questions/56639834/pyfpdf-returns-a-blank-pdf-after-encoding-as-a-byte-string
             if self.output_type == 'S':
-                return self.output(self.out_filepath, 'S').encode('latin-1')
+                return self.output(self.out_filepath, 'S').encode('latin-1') # type: ignore
             else:
                 return self.output(self.out_filepath, 'F')
 
@@ -269,7 +270,7 @@ class MonthlyMealPlan(FPDF):
             self.cell(
                 (self.w -2 * self.margin_x) / self.DAYS,
                 self.WEEKDAY_HEADER_HEIGHT,
-                txt = print_day,
+                txt = print_day, # type: ignore
                 align = 'C',
                 border = border_flag,
                 ln = 0,
@@ -301,11 +302,13 @@ class MonthlyMealPlan(FPDF):
 
             if meal is not None and week_no in self.weeks_to_print:
                 recipe = meal['recipe_name']
+                has_url = 'has_url' in meal and meal['has_url']
                 cookbook_abbr = meal['abbr'] if 'abbr' in meal and meal['abbr'] != 'Unk' else ''
                 meal_notes = meal['notes'] if 'notes' in meal else ''
                 page = f'p.{meal["page"]}' if 'page' in meal and meal['page'] != 0 else ''
             else:
                 recipe = ''
+                has_url = False 
                 cookbook_abbr = ''
                 meal_notes = ''
                 page = ''
@@ -336,7 +339,7 @@ class MonthlyMealPlan(FPDF):
             # Add Recipe name
             self.set_xy(self.get_x(), self.get_y() +  0.1)  # put a little space between day and recipe
             r_start_x = self.get_x()
-            self._print_recipe_name(recipe)
+            self._print_recipe_name(recipe, has_url)
 
             # Add meal notes (if any)
             if len(meal_notes) > 0:
@@ -345,10 +348,10 @@ class MonthlyMealPlan(FPDF):
             
             # Add cookbook and page no
             c_bottom_y = y + self.DAY_CELL_HEIGHT
-            self._print_cookbook(c_bottom_y, x, cookbook_abbr, page)
+            self._print_cookbook(c_bottom_y, x, cookbook_abbr, page, has_url)
 
 
-    def _get_meal_for_day(self, month: int, day: int):
+    def _get_meal_for_day(self, month: int, day: int) -> dict|None:
         '''
         Returns the meal information for a given month and day
         @param month: (int) month as a integer between 1 and 12
@@ -371,7 +374,7 @@ class MonthlyMealPlan(FPDF):
         day_font = self.FONTS.day
         self.set_font(
             day_font.family,
-            day_font.style,
+            day_font.style, # type: ignore
             day_font.size
         )
         self.set_text_color(17, 120, 125)
@@ -384,7 +387,7 @@ class MonthlyMealPlan(FPDF):
         self.cell(
             self.DAY_CELL_WIDTH,
             0.1,
-            txt = month_label,
+            txt = month_label, # type: ignore
             align = 'L',
             ln=0
         )
@@ -394,26 +397,23 @@ class MonthlyMealPlan(FPDF):
         self.cell(
             self.DAY_CELL_WIDTH,
             0.1,
-            txt = day_label,
+            txt = day_label, # type: ignore
             align = 'R',
             ln=2
         )
 
 
-    def _print_recipe_name(self, recipe_name: str):
+    def _print_recipe_name(self, recipe_name: str, has_url: bool):
         '''
         Outputs a recipe to calendar, wrapping text if required
-        @param x: curent abscissa location
-        @param y: current ordinate location
         @param recipe_name: name of recipe to print
-        @param ln: line wrapping flag, 0 for stay on this line, 1 for next line
-        @param c_border: border style
-        '''
+        @param has_url: boolean flag indicating if recipe has a web URL
+       '''
 
         recipe_font = self.FONTS.recipe        
         self.set_font(
             recipe_font.family,
-            recipe_font.style,
+            recipe_font.style, # type: ignore
             recipe_font.size
         )
 
@@ -441,7 +441,7 @@ class MonthlyMealPlan(FPDF):
         notes_font = self.FONTS.notes         
         self.set_font(
             notes_font.family, 
-            notes_font.style, 
+            notes_font.style,  # type: ignore
             notes_font.size
         )
 
@@ -451,7 +451,7 @@ class MonthlyMealPlan(FPDF):
         # based on available space to print. Adjust font size by factor of 1.25
         used_space = y - cell_top
         max_lines = self._get_max_lines(self.DAY_CELL_HEIGHT, used_space, cookbook_font.size, notes_font.size)
-        lines = self.multi_cell(w=self.DAY_CELL_WIDTH, h=fsize, txt=meal_notes, split_only=True)
+        lines = self.multi_cell(w=self.DAY_CELL_WIDTH, h=fsize, txt=meal_notes, split_only=True) # type: ignore
 
         if len(lines) > max_lines:
             display_text = "\n".join(lines[:max_lines-1]) + "\n" + lines[max_lines-1][:-3] + "..."
@@ -467,12 +467,13 @@ class MonthlyMealPlan(FPDF):
         )
 
 
-    def _print_cookbook(self, cell_bottom: float, start_x: float, cookbook_abbr: str, page: str):
+    def _print_cookbook(self, cell_bottom: float, start_x: float, cookbook_abbr: str, page: str, has_url: bool):
         '''
         Output cookbook information
         @param cell_top: ordinate value of cell top
         @param cookbook_abbr: abbreviation of cookbook title
         @param page: page number of recipe
+        @param has_url: boolean flag indicating if recipe has a web URL
         '''
         
         # hack
@@ -482,7 +483,7 @@ class MonthlyMealPlan(FPDF):
         cookbook_font = self.FONTS.cookbook
         self.set_font(
             cookbook_font.family,
-            cookbook_font.style,
+            cookbook_font.style, # type: ignore
             cookbook_font.size
         )
         self.set_text_color(33, 130, 63)
@@ -490,12 +491,25 @@ class MonthlyMealPlan(FPDF):
         fsize = cookbook_font.line_height
         start_y = cell_bottom - fsize
         self.set_xy(start_x, start_y)
-        
+
+        # if the cookbook is from a website, then set up web icon display
+        if has_url:
+            # set up web icon display
+            icon_path = str(Path(__file__).parent.parent / 'home/static/home/images/world-wide-web-globe20.png')
+            icon_size = fsize
+            gap = 0.025  # gap between icon and cookbook text
+
+            self.image(icon_path, x=start_x, y=start_y, w=icon_size, h=icon_size)
+            
+            # adjust x position for cookbook text
+            start_x = start_x + icon_size + gap
+           
+        self.set_xy(start_x, start_y) 
         # print the cookbook abbreviation
         self.cell(
             self.DAY_CELL_WIDTH,
             fsize,
-            txt=cookbook_abbr,
+            txt=cookbook_abbr, # type: ignore
             align='L',
             ln=0
         )
@@ -505,7 +519,7 @@ class MonthlyMealPlan(FPDF):
         self.cell(
             self.DAY_CELL_WIDTH,
             fsize,
-            txt = f'{page}',
+            txt = f'{page}', # type: ignore
             align = 'R',
             ln=0
         )

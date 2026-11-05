@@ -197,7 +197,9 @@ function createDayElement(date, meal, month, year) {
             webRecipeImg.src = '/static/home/images/world-wide-web-globe20.png';
             webRecipeImg.classList.add('left');
             // add a little padding to the right of the image so it doesn't run into the cookbook abbreviation
-            webRecipeImg.style.paddingRight = '2px';    
+            webRecipeImg.style.paddingRight = '2px';  
+            // tweak the size a bit, make a little smaller for visual appeal
+            webRecipeImg.style.width = '16px';
             webRecipeImg.title = 'Web Recipe';
             //dayDiv.appendChild(webRecipeImg);
             cookbookDiv.appendChild(webRecipeImg);
