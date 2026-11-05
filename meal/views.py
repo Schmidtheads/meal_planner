@@ -322,6 +322,7 @@ def _search_for_recipes(search_keys: str) -> list:
                 'id': recipe.id,  # type: ignore
                 'name': recipe.name,
                 'cookbook': cb_title,
+                'page': '' if recipe.page_number is None or recipe.page_number == 0 else str(recipe.page_number),
                 'author': f'{author_fn} {author_ln}',
                 'last made': last_made_date,
                 'rating': recipe.rating_as_string,

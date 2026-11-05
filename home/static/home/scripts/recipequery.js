@@ -101,8 +101,9 @@ function showResults(recipeList) {
 
             // Add onclick event to sort by column
             // Use list so columns can be easily included/exculded - just update list
-            // 1-Recipe Name, 2-Cookbook, 3-Author, 4-Last Made Date, 5-Rating, 6-Times Made
-            if ([1,2,3,4,5,6].includes(col_idx)) {
+            // 1-Recipe Name, 2-Cookbook, 4-Author, 5-Last Made Date, 6-Rating, 7-Times Made
+            // Columns 0-ID, 3-Page are not sortable
+            if ([1,2,4,5,6,7].includes(col_idx)) {
                 hcell.setAttribute("onclick", "sortTable('" + table_id + "'," + col_idx + ")");
                 hcell.classList.add('sortableHeader');
             }
@@ -110,6 +111,7 @@ function showResults(recipeList) {
             // capitalize first character
             var header_name = header_title.charAt(0).toUpperCase() + header_title.slice(1);
             hcell.innerHTML = "<b>" + header_name + "</b>";
+            hcell.classList.add("searchHeader"); // Add class to make header sticky
             row.appendChild(hcell);
 
             col_idx++;
