@@ -217,10 +217,20 @@ function launch() {
 
     var $recipe_search = $('#queryBuilder');
 
+    $recipe_search.find('.modal-dialog')
+    .css({
+      position: 'absolute',
+      top: '12.5%',
+      left: '12.5%',
+      width: '75%',
+      height: '75%',
+      margin: 0,
+    });
+
     $recipe_search.find('.modal-content')
     .css({
-      width: 850,
-      height: 500,
+      width: '100%',
+      height: '100%',
     })
     .resizable({
       minWidth: 625,
