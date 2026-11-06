@@ -13,9 +13,14 @@
 
 # Script Parameters
 param (
-    # ConfigFile - (required) full path to configuration JSON file defining deployment
+    <# 
+        ConfigFile - (required) full path to configuration JSON file defining deployment
+        CopyImages - (optional) flag to indicate copying of images from source to deployed location. If not set, script will not copy images
+        DebugMode - (optional) flag to indicate running in Debug mode. If set, script will not make changes to Apache configuration file
+    #>
     [Parameter(Mandatory=$true)]
     [string]$ConfigFile,
+    [switch]$CopyImages,
     [switch]$DebugMode
 )
 
@@ -578,6 +583,7 @@ function main {
         This is where it all happens.
         .INPUTS
         ConfigFile - (required) File path to configuration file
+        CopyImages - (optional) flag to indicate copying of images from source to deployed location. If not set, script will not copy images
         DebugMode - flag to indicate running in Debug mode
     #>
 
@@ -585,6 +591,7 @@ function main {
         # ConfigFile - File path to configuration file
         [Parameter(Mandatory=$true)]
         [string]$ConfigFile,
+        [System.Boolean]$CopyImages,
         [System.Boolean]$DebugMode
     )
 
@@ -619,6 +626,13 @@ function main {
     # to actual application name
     
     Deploy-Code $appZipfilePath $config.settings.appRoot $config.settings.appName
+
+    # Copy images from source to deployed location, if requested
+    #TODO: verify that paths specified below are correct and that images exist in source location
+    if ($CopyImages) {
+        Write-Host "`nCopying images from source to deployed location"
+        Copy-Images $config.settings.cookbook_image_folder $config.settings.appRoot $config.settings.appName
+    }
 
     # ------------------------ Python Tasks ------------------------
 
