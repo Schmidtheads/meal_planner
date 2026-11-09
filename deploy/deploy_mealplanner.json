@@ -4,14 +4,18 @@
         "notes": [
             "use configFilePath under apache settings to override default location",
             "of Apache configuration; remove or assign nothing to use default value",
-            "default value is /etc/apache2/sites-available/000-default.conf"
+            "default value is /etc/apache2/sites-available/000-default.conf",
+            "Setting cookbook_image_folder incorporates the appName of the previous application deployment",
+            "e.g. meal_planner/media/images becomes the source and <appRoot>/<appName>/media/images becomes the destination"
         ]
     },
     "settings": {
-        "appRepoZipfile": "https://github.com/Schmidtheads/meal_planner/archive/refs/heads/feature_deployment.zip",
+        "appRepoZipfile": "https://github.com/Schmidtheads/meal_planner/archive/refs/heads/development.zip",
         "appRoot": "C:\\Users\\mrk_s\\Documents\\test_mp_deploy\\staging\\webapps",
         "appName": "meal_planner-dev",
         "groupOwner": "www-data",
+        "previousAppName": "meal_planner",
+        "cookbook_image_folder": "media/images",
         "allowedHosts": [
             "raspberrypi4",
             "192.168.86.102"
@@ -20,7 +24,7 @@
             "minVersion": "3.10.9",
             "venvHome": "venv"
         },
-        "database": "<full path to django database>",
+        "database": "db.sqlite3",
         "apache": {
             "configFilePath": "C:\\Users\\mrk_s\\Documents\\test_mp_deploy\\staging\\webconfig\\000-default.conf"
         },
