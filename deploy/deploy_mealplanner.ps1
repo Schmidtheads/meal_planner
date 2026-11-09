@@ -348,6 +348,36 @@ function Deploy-Code {
 }
 
 
+function Copy-Images {
+    <#
+        .SYNOPSIS
+        Copies images from source to deployed location
+        .DESCRIPTION
+        Copies images from source location to deployed location.
+        .INPUTS
+        SourceImageFolder (required) - File path to source image folder
+        AppRoot (reuquired) - Parent folder of application
+        AppName (required) - Name of application
+    #>
+    param (
+        # SourceImageFolder - File path to source image folder
+        [Parameter(Mandatory=$true)]
+        [string]$SourceImageFolder,
+        # AppRoot - Parent folder of application
+        [Parameter(Mandatory=$true)]
+        [string]$AppRoot,
+        # AppName - Name of application
+        [Parameter(Mandatory=$true)]
+        [string]$AppName
+    )
+
+    $destImageFolder = Join-Path -Path $AppRoot -ChildPath $AppName | Join-Path -ChildPath "media" | Join-Path -ChildPath "images"
+    Write-Host "`nCopying images from $($SourceImageFolder) to $($destImageFolder)..."
+    Copy-Item -Path $SourceImageFolder\* -Destination $destImageFolder -Recurse
+
+}
+
+
 function Deploy-Database {
     <#
         .SYNOPSIS
@@ -628,10 +658,11 @@ function main {
     Deploy-Code $appZipfilePath $config.settings.appRoot $config.settings.appName
 
     # Copy images from source to deployed location, if requested
-    #TODO: verify that paths specified below are correct and that images exist in source location
+    #TODO: verify that images exist in source location
     if ($CopyImages) {
         Write-Host "`nCopying images from source to deployed location"
-        Copy-Images $config.settings.cookbook_image_folder $config.settings.appRoot $config.settings.appName
+        $sourceImageFolder = Join-Path -Path $config.settings.appRoot -ChildPath $config.settings.previousAppName | Join-Path -ChildPath $config.settings.cookbook_image_folder
+        Copy-Images $sourceImageFolder $config.settings.appRoot $config.settings.appName
     }
 
     # ------------------------ Python Tasks ------------------------
@@ -682,7 +713,7 @@ function main {
 
     # Create or Migrate database
 
-    $sourceDatabase = $config.settings.database
+    $sourceDatabase = Join-Path -Path $config.settings.appRoot -ChildPath $config.settings.previousAppName | Join-Path -ChildPath $config.settings.database
     if ($null -eq $sourceDatabase) {
         Write-Host "`nCreating new database"
         $mode = "CREATE"        
@@ -733,4 +764,4 @@ function main {
 <#
  ------------------------- MAIN -------------------------
 #>
-main $ConfigFile $DebugMode.IsPresent
+main $ConfigFile $CopyImages.IsPresent $DebugMode.IsPresent
