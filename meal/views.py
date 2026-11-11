@@ -259,6 +259,7 @@ def _get_recipe_info_for_meal(meal):
         name = getattr(recipe, 'name')
         page = getattr(recipe, 'page_number')
         cookbook = getattr(recipe, 'cook_book')
+        has_url: bool = getattr(recipe, 'url_ref') is not None and getattr(recipe, 'url_ref') != ''
 
         # Get cookbook name and author
         if cookbook is not None:
@@ -288,7 +289,8 @@ def _get_recipe_info_for_meal(meal):
             'cookbook_id': cookbook_id,
             'cookbook': cookbook_title,
             'author': cookbook_author,
-            'abbr': cookbook_abbr
+            'abbr': cookbook_abbr,
+            'has_url': has_url
         }
     else:
         recipe_info = {'recipe_name': ''}
@@ -320,6 +322,7 @@ def _search_for_recipes(search_keys: str) -> list:
                 'id': recipe.id,  # type: ignore
                 'name': recipe.name,
                 'cookbook': cb_title,
+                'page': '' if recipe.page_number is None or recipe.page_number == 0 else str(recipe.page_number),
                 'author': f'{author_fn} {author_ln}',
                 'last made': last_made_date,
                 'rating': recipe.rating_as_string,

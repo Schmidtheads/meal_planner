@@ -143,6 +143,7 @@ function createDayElement(date, meal, month, year) {
     let cookbook_id = meal.cookbook_id;
     let cookbook_title = meal.cookbook;
     let cookbook_author = meal.author;
+    let has_url = meal.has_url;
 
     let dayDiv = document.createElement('div');
   
@@ -190,6 +191,19 @@ function createDayElement(date, meal, month, year) {
 
         // Create div to hold cookbook abbreviation and page number
         let cookbookDiv = document.createElement('div');
+        //TODO: if recipe has_url add image to indicate that it is a web recipe
+        if (has_url) {
+            let webRecipeImg = document.createElement('img');
+            webRecipeImg.src = '/static/home/images/world-wide-web-globe20.png';
+            webRecipeImg.classList.add('left');
+            // add a little padding to the right of the image so it doesn't run into the cookbook abbreviation
+            webRecipeImg.style.paddingRight = '2px';  
+            // tweak the size a bit, make a little smaller for visual appeal
+            webRecipeImg.style.width = '16px';
+            webRecipeImg.title = 'Web Recipe';
+            //dayDiv.appendChild(webRecipeImg);
+            cookbookDiv.appendChild(webRecipeImg);
+        }
         cookbookDiv.classList.add('cookbook_text', 'left', 'calendartooltip');
         let cookbookText = document.createTextNode(cookbook_abbr);
         cookbookDiv.appendChild(cookbookText);
@@ -222,13 +236,16 @@ function createDayElement(date, meal, month, year) {
         dayDiv.appendChild(recipeSpan);
         dayDiv.appendChild(document.createElement('br')); // create line break
 
-        // If the page number for the recipe is 0 (zero), it is either because
-        // the recipe is not from a book (e.g. a website or recipe card) or
-        // the meal may be "Leftovers" or "Dine Out".
-        // So there is no need to add the cookbook & page number to the calendar date.
-        if (page_number != 0) {
+        // If the Cookbook for a recipe is null or emtpy OR is equal to "Unknown"
+        // there is no need to add the cookbook & page number to the calendar date.
+        if (cookbook_title.length > 0 && cookbook_title != 'Unknown') {
             dayDiv.append(cookbookDiv);
-            dayDiv.appendChild(pageSpan);
+            
+            // if page number is zero it is likely because it is from a website or
+            // binder or recipe box, so no need to include it in the calendar
+            if (page_number != 0) {
+                dayDiv.appendChild(pageSpan);
+            }
         }
     }
     else {

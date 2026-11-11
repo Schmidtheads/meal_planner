@@ -81,7 +81,6 @@ function showResults(recipeList) {
         // Add table headers
         // Create an empty <thead> element and add it to the table:
         var header = table.getElementsByTagName('thead')[0];
-        header.classList.add("table_header");  // make table header sticky
 
         // Create an empty <tr> element and add it to the first position of <thead>:
         var row = header.insertRow(0);
@@ -93,7 +92,7 @@ function showResults(recipeList) {
         // Insert a new cell (<td>) at the first position of the "new" <tr> element:
         var col_idx = 0;
         for (const header_title in first_row) {
-            var hcell = row.insertCell(col_idx);
+            const hcell = document.createElement('th')
 
             // Make the first column (for the ID) hidden
             if (col_idx == 0) {
@@ -102,16 +101,19 @@ function showResults(recipeList) {
 
             // Add onclick event to sort by column
             // Use list so columns can be easily included/exculded - just update list
-            // 1-Recipe Name, 2-Cookbook, 3-Author, 4-Last Made Date, 5-Rating, 6-Times Made
-            if ([1,2,3,4,5,6].includes(col_idx)) {
+            // 1-Recipe Name, 2-Cookbook, 4-Author, 5-Last Made Date, 6-Rating, 7-Times Made
+            // Columns 0-ID, 3-Page are not sortable
+            if ([1,2,4,5,6,7].includes(col_idx)) {
                 hcell.setAttribute("onclick", "sortTable('" + table_id + "'," + col_idx + ")");
                 hcell.classList.add('sortableHeader');
             }
 
             // capitalize first character
             var header_name = header_title.charAt(0).toUpperCase() + header_title.slice(1);
+            hcell.innerHTML = "<b>" + header_name + "</b>";
+            hcell.classList.add("searchHeader"); // Add class to make header sticky
+            row.appendChild(hcell);
 
-            hcell.innerHTML = "<b>" + header_name + "</b>"
             col_idx++;
         }
 
@@ -215,10 +217,20 @@ function launch() {
 
     var $recipe_search = $('#queryBuilder');
 
+    $recipe_search.find('.modal-dialog')
+    .css({
+      position: 'absolute',
+      top: '12.5%',
+      left: '12.5%',
+      width: '75%',
+      height: '75%',
+      margin: 0,
+    });
+
     $recipe_search.find('.modal-content')
     .css({
-      width: 850,
-      height: 500,
+      width: '100%',
+      height: '100%',
     })
     .resizable({
       minWidth: 625,

@@ -28,3 +28,12 @@ class Cookbook(models.Model):
 
     def __str__(self):
         return f"'{self.title}' by {self.author}"
+
+
+    class Meta:
+        '''
+        Metadata of the Cookbook
+        '''
+        # Order the output by the Cookbook title
+        ordering = ['title']
+        

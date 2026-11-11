@@ -13,9 +13,14 @@
 
 # Script Parameters
 param (
-    # ConfigFile - (required) full path to configuration JSON file defining deployment
+    <# 
+        ConfigFile - (required) full path to configuration JSON file defining deployment
+        CopyImages - (optional) flag to indicate copying of images from source to deployed location. If not set, script will not copy images
+        DebugMode - (optional) flag to indicate running in Debug mode. If set, script will not make changes to Apache configuration file
+    #>
     [Parameter(Mandatory=$true)]
     [string]$ConfigFile,
+    [switch]$CopyImages,
     [switch]$DebugMode
 )
 
@@ -343,6 +348,36 @@ function Deploy-Code {
 }
 
 
+function Copy-Images {
+    <#
+        .SYNOPSIS
+        Copies images from source to deployed location
+        .DESCRIPTION
+        Copies images from source location to deployed location.
+        .INPUTS
+        SourceImageFolder (required) - File path to source image folder
+        AppRoot (reuquired) - Parent folder of application
+        AppName (required) - Name of application
+    #>
+    param (
+        # SourceImageFolder - File path to source image folder
+        [Parameter(Mandatory=$true)]
+        [string]$SourceImageFolder,
+        # AppRoot - Parent folder of application
+        [Parameter(Mandatory=$true)]
+        [string]$AppRoot,
+        # AppName - Name of application
+        [Parameter(Mandatory=$true)]
+        [string]$AppName
+    )
+
+    $destImageFolder = Join-Path -Path $AppRoot -ChildPath $AppName | Join-Path -ChildPath "media" | Join-Path -ChildPath "images"
+    Write-Host "`nCopying images from $($SourceImageFolder) to $($destImageFolder)..."
+    Copy-Item -Path $SourceImageFolder\* -Destination $destImageFolder -Recurse
+
+}
+
+
 function Deploy-Database {
     <#
         .SYNOPSIS
@@ -578,6 +613,7 @@ function main {
         This is where it all happens.
         .INPUTS
         ConfigFile - (required) File path to configuration file
+        CopyImages - (optional) flag to indicate copying of images from source to deployed location. If not set, script will not copy images
         DebugMode - flag to indicate running in Debug mode
     #>
 
@@ -585,6 +621,7 @@ function main {
         # ConfigFile - File path to configuration file
         [Parameter(Mandatory=$true)]
         [string]$ConfigFile,
+        [System.Boolean]$CopyImages,
         [System.Boolean]$DebugMode
     )
 
@@ -619,6 +656,14 @@ function main {
     # to actual application name
     
     Deploy-Code $appZipfilePath $config.settings.appRoot $config.settings.appName
+
+    # Copy images from source to deployed location, if requested
+    #TODO: verify that images exist in source location
+    if ($CopyImages) {
+        Write-Host "`nCopying images from source to deployed location"
+        $sourceImageFolder = Join-Path -Path $config.settings.appRoot -ChildPath $config.settings.previousAppName | Join-Path -ChildPath $config.settings.cookbook_image_folder
+        Copy-Images $sourceImageFolder $config.settings.appRoot $config.settings.appName
+    }
 
     # ------------------------ Python Tasks ------------------------
 
@@ -668,7 +713,7 @@ function main {
 
     # Create or Migrate database
 
-    $sourceDatabase = $config.settings.database
+    $sourceDatabase = Join-Path -Path $config.settings.appRoot -ChildPath $config.settings.previousAppName | Join-Path -ChildPath $config.settings.database
     if ($null -eq $sourceDatabase) {
         Write-Host "`nCreating new database"
         $mode = "CREATE"        
@@ -719,4 +764,4 @@ function main {
 <#
  ------------------------- MAIN -------------------------
 #>
-main $ConfigFile $DebugMode.IsPresent
+main $ConfigFile $CopyImages.IsPresent $DebugMode.IsPresent
