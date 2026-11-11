@@ -146,6 +146,8 @@ The configuration file used with the deployment script has the following format:
         "appRoot": "<full path to web app root folder>",
         "appName": "<name of web app>",
         "groupOwner": "<linux group name owning web app>",
+        "previousAppName": "<name of previous deployed version of web app",
+        "cookbook_image_folder": "<relatvie path in web app for cookbook images, usually 'media/images'>",
         "allowedHosts": [
             "<FQDN for for web app|IP Address>",
             "<Alternate FQDN for web app|IP Address>"
@@ -154,7 +156,7 @@ The configuration file used with the deployment script has the following format:
             "minVersion": "<min version number of Python>",
             "venvHome": "<folder name with Python virtual environment>"
         },
-        "database": "<full path to django database>",
+        "database": "<name of django database, e.g. db.sqlite3>",
         "apache": {
             "configFilePath": "<full path to Apache configuration file>"
         },
@@ -180,6 +182,8 @@ Where:
     must be unique in the folder (e.g. `meal_planner_v1-2`)
 - **groupOwner**: the Linux group that owns the *appRoot* folder (and will hence own the web app); must be existing
     group; check server to confirm valid group (e.g. `www-data`)
+- **previousAppName**: name from previous deployment of web app; this will be used to locate cookbook images and database to be migrated over
+- **cookbook_image_folder**: relative path to the (previous)appName to locate cookbook images; this will be used to copy images from previous deployed version
 - **allowedHosts**: list of fully qualified server names or IP addresses that will be used client side to access
     web app (e.g. `www.web.mealplanner.local`)
 - **python**: settings used to define Python environment to be used by web app
